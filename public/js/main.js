@@ -2,6 +2,7 @@ import { api } from './core/api.js';
 import { el, qs, render } from './core/dom.js';
 import { shortDeviceId } from './core/identity.js';
 import { createRouter } from './core/router.js';
+import { registerServiceWorker, watchInstallPrompt } from './core/pwa.js';
 import { createStore } from './core/store.js';
 import { icon } from './components/icons.js';
 import { createAnalyticsScreen } from './screens/analytics.js';
@@ -62,6 +63,46 @@ async function bootstrap() {
   }
 
   router.start();
+  setupInstallBanner(shell);
 }
 
+/** A dismissible prompt to add the app to the home screen. */
+function setupInstallBanner(shell) {
+  watchInstallPrompt({
+    onAvailable(prompt) {
+      const close = () => {
+        prompt.dismiss();
+        banner.remove();
+      };
+
+      const action = prompt.manual
+        ? el('span.install-hint', { text: 'Share → Add to Home Screen' })
+        : el('button.button.button-primary.install-action', {
+            type: 'button',
+            onclick: async () => {
+              await prompt.install();
+              banner.remove();
+            }
+          }, [el('span.button-label', { text: 'Install' })]);
+
+      const banner = el('div.install-banner', { role: 'region', 'aria-label': 'Install The Wait' }, [
+        el('span.install-orb', { 'aria-hidden': 'true' }),
+        el('div.install-copy', {}, [
+          el('span.install-title', { text: 'Add to home screen' }),
+          el('span.install-sub', { text: 'Launch it like an app, works offline' })
+        ]),
+        action,
+        el('button.icon-button.install-close', {
+          type: 'button',
+          'aria-label': 'Dismiss install prompt',
+          onclick: close
+        }, [icon('close', { size: 16 })])
+      ]);
+
+      shell.append(banner);
+    }
+  });
+}
+
+registerServiceWorker();
 bootstrap();

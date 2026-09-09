@@ -17,12 +17,17 @@ const MIME_TYPES = {
   '.ico': 'image/x-icon'
 };
 
-// HTML is revalidated every load so deploys are picked up; hashed-free assets
+// HTML is revalidated every load so deploys are picked up; hash-free assets
 // get a short cache to stay snappy without going stale for long.
 const CACHE_CONTROL = {
   '.html': 'no-cache',
+  '.webmanifest': 'no-cache',
   default: 'public, max-age=300'
 };
+
+// The service worker decides what every other asset caches, so it must never
+// itself be served from cache - otherwise an update can never roll out.
+const NEVER_CACHE = new Set(['/sw.js']);
 
 /**
  * Serves files from `rootDir`. Resolution is confined to the root by comparing
@@ -46,10 +51,16 @@ export function createStaticHandler(rootDir) {
       if (!stats?.isFile()) throw notFound();
 
       const ext = path.extname(filePath).toLowerCase();
+      const cacheControl = NEVER_CACHE.has(url.pathname)
+        ? 'no-cache, no-store, must-revalidate'
+        : CACHE_CONTROL[ext] ?? CACHE_CONTROL.default;
+
       res.writeHead(200, {
         'Content-Type': MIME_TYPES[ext] ?? 'application/octet-stream',
         'Content-Length': stats.size,
-        'Cache-Control': CACHE_CONTROL[ext] ?? CACHE_CONTROL.default
+        'Cache-Control': cacheControl,
+        // Lets the worker control every page on the origin, not just /js/.
+        ...(url.pathname === '/sw.js' ? { 'Service-Worker-Allowed': '/' } : {})
       });
 
       if (req.method === 'HEAD') {

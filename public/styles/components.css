@@ -398,3 +398,75 @@
 
 .status-line[data-tone="positive"] { color: var(--mint); }
 .status-line[data-tone="negative"] { color: var(--danger); }
+
+/* --- Install banner ----------------------------------------------------- */
+
+.install-banner {
+  position: fixed;
+  left: 50%;
+  bottom: calc(var(--tab-bar-height) + var(--safe-bottom) + var(--space-3));
+  transform: translateX(-50%);
+  z-index: 40;
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  width: min(100% - var(--space-6), calc(var(--content-max) - var(--space-5)));
+  padding: var(--space-3);
+  background: rgba(13, 21, 36, 0.92);
+  border: 1px solid var(--border-bright);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-card);
+  backdrop-filter: blur(18px);
+  animation: install-in 320ms ease-out;
+}
+
+@keyframes install-in {
+  from { opacity: 0; transform: translate(-50%, 12px); }
+  to { opacity: 1; transform: translate(-50%, 0); }
+}
+
+.install-orb {
+  width: 34px;
+  height: 34px;
+  flex: none;
+  border-radius: 50%;
+  border: 1px solid var(--border-bright);
+  background: radial-gradient(circle at 35% 30%, rgba(125, 250, 255, 0.85), rgba(141, 109, 255, 0.3) 60%, transparent);
+  box-shadow: var(--glow-cyan);
+}
+
+.install-copy {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-width: 0;
+}
+
+.install-title {
+  font-size: var(--text-sm);
+  font-weight: 600;
+}
+
+.install-sub {
+  font-size: var(--text-xs);
+  color: var(--text-dim);
+}
+
+.install-action {
+  min-height: 38px;
+  padding: 0 var(--space-4);
+  flex: none;
+}
+
+.install-hint {
+  font-size: var(--text-xs);
+  color: var(--cyan);
+  text-align: right;
+  flex: none;
+}
+
+.install-close {
+  width: 28px;
+  height: 28px;
+  flex: none;
+}

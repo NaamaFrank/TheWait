@@ -5,11 +5,14 @@
   "type": "module",
   "description": "Things to Do While Claude is Running - anonymous wait tracking, analytics and a live developer globe.",
   "main": "server/index.js",
-  "engines": { "node": ">=18.17" },
+  "engines": {
+    "node": ">=18.17"
+  },
   "scripts": {
     "start": "node server/index.js",
     "dev": "node --watch server/index.js",
-    "test": "node --test test/*.test.js"
+    "test": "node --test test/*.test.js",
+    "icons": "node scripts/generate-icons.mjs"
   },
   "license": "MIT"
 }
