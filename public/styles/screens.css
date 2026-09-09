@@ -1,0 +1,393 @@
+/* Screen-specific layout: the timer face, the suggestion deck, the globe. */
+
+/* --- Timer -------------------------------------------------------------- */
+
+.timer-stage {
+  display: grid;
+  place-items: center;
+  padding: var(--space-4) 0 var(--space-2);
+}
+
+.timer-button {
+  position: relative;
+  display: grid;
+  place-items: center;
+  width: min(74vw, 264px);
+  aspect-ratio: 1;
+  border-radius: 50%;
+  background:
+    radial-gradient(circle at 50% 40%, rgba(30, 52, 92, 0.9), rgba(10, 19, 34, 0.95) 70%);
+  border: 1px solid var(--border);
+  box-shadow: inset 0 0 40px rgba(125, 250, 255, 0.06), 0 24px 60px -30px rgba(0, 0, 0, 0.95);
+  transition: transform 180ms ease;
+}
+
+.timer-button:active {
+  transform: scale(0.98);
+}
+
+/* The gradient ring. `conic-gradient` in a mask keeps the centre transparent. */
+.timer-ring {
+  position: absolute;
+  inset: -3px;
+  border-radius: 50%;
+  background: conic-gradient(
+    from 180deg,
+    var(--cyan),
+    var(--purple),
+    var(--violet),
+    var(--cyan)
+  );
+  padding: 2px;
+  mask: radial-gradient(farthest-side, transparent calc(100% - 2px), #000 calc(100% - 2px));
+  -webkit-mask: radial-gradient(farthest-side, transparent calc(100% - 2px), #000 calc(100% - 2px));
+  opacity: 0.55;
+  transition: opacity 300ms ease;
+}
+
+.timer-button.is-running .timer-ring {
+  opacity: 1;
+  animation: ring-spin 7s linear infinite;
+}
+
+@keyframes ring-spin {
+  to { transform: rotate(1turn); }
+}
+
+/* Breathing halo, only while a wait is active. */
+.timer-button.is-running::after {
+  content: "";
+  position: absolute;
+  inset: -14px;
+  border-radius: 50%;
+  border: 1px solid rgba(125, 250, 255, 0.28);
+  animation: halo 2.6s ease-out infinite;
+  pointer-events: none;
+}
+
+@keyframes halo {
+  0% { transform: scale(0.94); opacity: 0.7; }
+  100% { transform: scale(1.12); opacity: 0; }
+}
+
+.timer-inner {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-2);
+  z-index: 1;
+}
+
+.timer-face {
+  font-family: var(--font-mono);
+  font-size: clamp(38px, 13vw, 52px);
+  font-weight: 600;
+  letter-spacing: -0.02em;
+  font-variant-numeric: tabular-nums;
+  text-shadow: 0 0 26px rgba(125, 250, 255, 0.4);
+}
+
+.timer-caption {
+  font-size: var(--text-sm);
+  color: var(--text-muted);
+}
+
+.screen-timer.is-running .timer-caption {
+  color: var(--cyan);
+}
+
+.timer-actions {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--space-3);
+}
+
+.label-input {
+  width: 100%;
+  min-height: 46px;
+  padding: 0 var(--space-4);
+  color: var(--text);
+  background: var(--glass);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-pill);
+  font-size: var(--text-sm);
+}
+
+.label-input::placeholder {
+  color: var(--text-dim);
+}
+
+.label-input:focus {
+  border-color: var(--border-bright);
+  outline: none;
+}
+
+/* --- Suggestions -------------------------------------------------------- */
+
+.suggestion-bucket {
+  font-size: var(--text-xs);
+  color: var(--text-dim);
+  white-space: nowrap;
+}
+
+.suggestion-list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.suggestion {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-3);
+  padding: var(--space-3);
+  background: var(--surface-raised);
+  border: 1px solid var(--border);
+  border-left: 2px solid var(--accent, var(--cyan));
+  border-radius: var(--radius-md);
+  animation: suggestion-in 300ms ease-out backwards;
+}
+
+.suggestion:nth-child(2) { animation-delay: 60ms; }
+.suggestion:nth-child(3) { animation-delay: 120ms; }
+
+@keyframes suggestion-in {
+  from { opacity: 0; transform: translateX(-6px); }
+  to { opacity: 1; transform: none; }
+}
+
+.suggestion-mark {
+  display: grid;
+  place-items: center;
+  width: 24px;
+  height: 24px;
+  flex: none;
+  color: var(--accent, var(--cyan));
+}
+
+.suggestion-body {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+}
+
+.suggestion-text {
+  font-size: var(--text-sm);
+  line-height: 1.45;
+}
+
+.suggestion-tag {
+  font-size: var(--text-xs);
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: var(--text-dim);
+}
+
+/* --- Globe -------------------------------------------------------------- */
+
+.globe-stage {
+  position: relative;
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  background: radial-gradient(circle at 50% 45%, rgba(16, 32, 60, 0.7), rgba(6, 12, 22, 0.95));
+  border: 1px solid var(--border);
+}
+
+.globe-canvas {
+  display: block;
+  width: 100%;
+  height: min(72vw, 340px);
+  touch-action: none;
+  cursor: grab;
+}
+
+.globe-canvas:active {
+  cursor: grabbing;
+}
+
+.globe-overlay {
+  position: absolute;
+  inset: auto var(--space-3) var(--space-3);
+  pointer-events: none;
+}
+
+.globe-card {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  padding: var(--space-3) var(--space-4);
+  background: rgba(13, 21, 36, 0.72);
+  border: 1px solid var(--border-bright);
+  border-radius: var(--radius-md);
+  backdrop-filter: blur(16px);
+}
+
+.globe-card-body {
+  display: flex;
+  flex-direction: column;
+}
+
+.globe-card-value {
+  font-size: var(--text-sm);
+  font-weight: 600;
+}
+
+.globe-count {
+  color: var(--cyan);
+  font-variant-numeric: tabular-nums;
+}
+
+.globe-card-label {
+  font-size: var(--text-xs);
+  color: var(--text-dim);
+}
+
+/* --- Region detail & list ----------------------------------------------- */
+
+.region-detail {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  padding: var(--space-3) var(--space-4);
+  background: var(--surface-raised);
+  border: 1px solid var(--border-bright);
+  border-radius: var(--radius-md);
+}
+
+.region-detail-body {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  flex: 1;
+  min-width: 0;
+}
+
+.region-detail-flag {
+  font-family: var(--font-mono);
+  font-size: var(--text-xs);
+  letter-spacing: 0.08em;
+  color: var(--cyan);
+  padding: var(--space-1) var(--space-2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+}
+
+.region-detail-name {
+  display: block;
+  font-size: var(--text-sm);
+  font-weight: 600;
+}
+
+.region-detail-country {
+  font-size: var(--text-xs);
+  color: var(--text-dim);
+}
+
+.region-detail-count {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+}
+
+.region-detail-count strong {
+  font-size: var(--text-lg);
+  color: var(--cyan);
+  font-variant-numeric: tabular-nums;
+}
+
+.region-detail-count span {
+  font-size: var(--text-xs);
+  color: var(--text-dim);
+}
+
+.region-list {
+  display: flex;
+  flex-direction: column;
+}
+
+.region-row {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  width: 100%;
+  padding: var(--space-3) var(--space-2);
+  text-align: left;
+  border-top: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  transition: background 160ms ease;
+}
+
+.region-row:first-child {
+  border-top: none;
+}
+
+.region-row:hover,
+.region-row.is-selected {
+  background: rgba(125, 250, 255, 0.06);
+}
+
+.region-dot {
+  width: 8px;
+  height: 8px;
+  flex: none;
+  border-radius: 50%;
+  background: var(--cyan);
+  box-shadow: 0 0 10px rgba(125, 250, 255, 0.8);
+}
+
+.region-name {
+  flex: 1;
+  font-size: var(--text-sm);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.region-badge {
+  padding: 2px var(--space-2);
+  font-size: var(--text-xs);
+  color: #04121c;
+  background: var(--mint);
+  border-radius: var(--radius-pill);
+}
+
+.region-count {
+  font-family: var(--font-mono);
+  font-size: var(--text-sm);
+  color: var(--text-muted);
+  font-variant-numeric: tabular-nums;
+}
+
+/* --- Location controls -------------------------------------------------- */
+
+.location-controls {
+  display: grid;
+  gap: var(--space-3);
+}
+
+.region-select {
+  min-height: 46px;
+  padding: 0 var(--space-4);
+  background: var(--glass);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-pill);
+  font-size: var(--text-sm);
+  appearance: none;
+}
+
+.region-select option {
+  background: var(--surface-solid);
+}
+
+/* --- Analytics extras --------------------------------------------------- */
+
+.export-button {
+  align-self: center;
+}
+
+@media (min-width: 420px) {
+  .location-controls {
+    grid-template-columns: 1fr auto;
+    align-items: center;
+  }
+}

@@ -1,0 +1,7 @@
+node_modules/
+
+# Runtime data. Reference data (regions, suggestions) is committed; anything
+# the app writes at runtime is not.
+data/sessions.json
+data/devices.json
+data/*.tmp

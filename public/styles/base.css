@@ -1,0 +1,225 @@
+/* Reset, page chrome and the mobile app shell. */
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html {
+  -webkit-text-size-adjust: 100%;
+}
+
+body {
+  margin: 0;
+  min-height: 100dvh;
+  font-family: var(--font);
+  font-size: var(--text-md);
+  color: var(--text);
+  background:
+    radial-gradient(circle at 78% 4%, rgba(56, 37, 126, 0.5), transparent 34%),
+    radial-gradient(circle at 12% 82%, rgba(0, 156, 156, 0.16), transparent 32%),
+    var(--page-bg);
+  background-attachment: fixed;
+  -webkit-font-smoothing: antialiased;
+  overscroll-behavior-y: none;
+}
+
+/* Faint starfield, purely decorative. */
+body::before {
+  content: "";
+  position: fixed;
+  inset: -30%;
+  background-image:
+    radial-gradient(rgba(154, 221, 255, 0.05) 1px, transparent 1px),
+    radial-gradient(rgba(176, 130, 255, 0.05) 1px, transparent 1px);
+  background-size: 54px 54px, 74px 74px;
+  background-position: 0 0, 20px 30px;
+  transform: rotate(-12deg);
+  pointer-events: none;
+  mask-image: linear-gradient(180deg, rgba(0, 0, 0, 1), transparent);
+  z-index: 0;
+}
+
+h1, h2, h3, p {
+  margin: 0;
+}
+
+/*
+ * Author rules like `.screen { display: flex }` outrank the user-agent
+ * `[hidden] { display: none }`, so the router's `hidden` toggle needs this to
+ * actually hide anything.
+ */
+[hidden] {
+  display: none !important;
+}
+
+button {
+  font: inherit;
+  color: inherit;
+  border: none;
+  background: none;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+
+input,
+select {
+  font: inherit;
+  color: inherit;
+}
+
+:focus-visible {
+  outline: 2px solid var(--cyan);
+  outline-offset: 2px;
+  border-radius: var(--radius-sm);
+}
+
+.app-shell {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+  min-height: 100dvh;
+  max-width: var(--content-max);
+  margin-inline: auto;
+}
+
+/* --- App bar ------------------------------------------------------------ */
+
+.app-bar {
+  position: sticky;
+  top: 0;
+  z-index: 20;
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  padding: calc(var(--safe-top) + var(--space-3)) var(--space-4) var(--space-3);
+  background: linear-gradient(180deg, rgba(7, 17, 30, 0.94), rgba(7, 17, 30, 0.72));
+  backdrop-filter: blur(14px);
+  border-bottom: 1px solid var(--border);
+}
+
+.app-mark {
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  border: 1px solid var(--border-bright);
+  background: radial-gradient(circle at 35% 30%, rgba(125, 250, 255, 0.9), rgba(141, 109, 255, 0.25) 60%, transparent);
+  box-shadow: var(--glow-cyan);
+}
+
+.app-name {
+  font-size: var(--text-md);
+  font-weight: 600;
+  letter-spacing: 0.02em;
+}
+
+.device-tag {
+  margin-left: auto;
+  padding: var(--space-1) var(--space-3);
+  font-family: var(--font-mono);
+  font-size: var(--text-xs);
+  color: var(--text-dim);
+  background: var(--glass);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-pill);
+}
+
+/* --- Screens ------------------------------------------------------------ */
+
+.screens {
+  flex: 1;
+  padding: var(--space-4) var(--space-4) calc(var(--tab-bar-height) + var(--safe-bottom) + var(--space-6));
+}
+
+.screen {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+  animation: screen-in 260ms ease-out;
+}
+
+@keyframes screen-in {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: none; }
+}
+
+.screen-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--space-3);
+}
+
+.screen-head h1 {
+  font-size: var(--text-xl);
+  font-weight: 600;
+  letter-spacing: -0.02em;
+}
+
+.eyebrow {
+  font-size: var(--text-xs);
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  color: var(--text-dim);
+  margin-bottom: var(--space-1);
+}
+
+/* --- Tab bar ------------------------------------------------------------ */
+
+.tab-bar {
+  position: fixed;
+  bottom: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 30;
+  display: grid;
+  grid-auto-flow: column;
+  grid-auto-columns: 1fr;
+  width: min(100%, var(--content-max));
+  padding-bottom: var(--safe-bottom);
+  background: linear-gradient(180deg, rgba(9, 18, 32, 0.82), rgba(7, 13, 22, 0.98));
+  backdrop-filter: blur(18px);
+  border-top: 1px solid var(--border);
+}
+
+.tab {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 3px;
+  height: var(--tab-bar-height);
+  justify-content: center;
+  color: var(--text-dim);
+  transition: color 160ms ease;
+}
+
+.tab-label {
+  font-size: var(--text-xs);
+  letter-spacing: 0.02em;
+}
+
+.tab.is-active {
+  color: var(--cyan);
+}
+
+.tab.is-active .icon {
+  filter: drop-shadow(0 0 8px rgba(125, 250, 255, 0.55));
+}
+
+.noscript {
+  padding: var(--space-5);
+  text-align: center;
+  color: var(--text-muted);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
