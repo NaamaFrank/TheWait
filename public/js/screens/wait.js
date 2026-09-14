@@ -175,10 +175,26 @@ export function createWaitScreen({ store, onWaitLogged, onProgress, onShowLive }
   let mood = null;
 
   const moods = chipRow(MOODS.map((m) => ({ id: m.id ?? 'any', label: m.label })), 'any', (id) => {
-    mood = id === 'any' ? null : id;
+    const next = id === 'any' ? null : id;
+
+    /*
+     * A filter, not a second Next.
+     *
+     * Every click used to reload the queue, so tapping the chip that was
+     * already on - or any chip while the task on screen already suited it -
+     * dealt a different task. Clicking through the row was just a slower way
+     * of pressing Next, which is not what a filter is for.
+     */
+    if (next === mood) return;
+
+    mood = next;
     // `chipRow` does not move the pill itself - the caller owns which is on.
     moods.select(id);
-    loadQueue();
+
+    // Already the kind of thing you asked for, so it stays put and the rest of
+    // the queue is refilled behind it.
+    const current = activity();
+    loadQueue({ keep: !mood || current?.category === mood ? current : null });
   });
 
   /**
@@ -248,7 +264,11 @@ export function createWaitScreen({ store, onWaitLogged, onProgress, onShowLive }
 
   const activity = () => queue[cursor] ?? null;
 
-  async function loadQueue({ append = false } = {}) {
+  /**
+   * @param keep A task to leave on screen while the rest is replaced, for when
+   *   the filter changed but what is showing already fits it.
+   */
+  async function loadQueue({ append = false, keep = null } = {}) {
     if (loadingQueue) return;
     loadingQueue = true;
     pendingBucket = null;
@@ -270,7 +290,7 @@ export function createWaitScreen({ store, onWaitLogged, onProgress, onShowLive }
 
       if (append) queue = [...queue, ...usable];
       else {
-        queue = usable;
+        queue = keep ? [keep, ...usable.filter((item) => item.id !== keep.id)] : usable;
         cursor = 0;
       }
     } catch {
