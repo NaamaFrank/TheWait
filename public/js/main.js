@@ -40,10 +40,10 @@ async function bootstrap() {
   const railNav = qs('#railNav');
   const frame = qs('#frame');
 
-  const stats = createStatsScreen({ store });
+  const stats = createStatsScreen({ store, modalRoot: frame });
   const streaks = createStreaksScreen({ store });
   const board = createBoardScreen({ store });
-  const live = createLiveScreen({ store });
+  const live = createLiveScreen({ store, modalRoot: frame });
   // Declared before `wait` so the callback can reach it once both exist.
   let wait;
   const you = createYouScreen({

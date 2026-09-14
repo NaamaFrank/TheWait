@@ -1,14 +1,16 @@
-import { el, render } from '../core/dom.js';
+import { el } from '../core/dom.js';
 import { clockFace, formatCount, headlineDuration, hourLabel } from '../core/format.js';
-import { drawReceipt, receiptText } from './receipt.js';
 
 /**
- * Sharing the numbers.
+ * Sharing.
  *
- * The receipt is drawn to a canvas and handed over as a PNG, because a file is
- * the only thing a feed will take. Where the browser cannot share files - which
- * is most desktops - it saves the image instead, and there is a plain-text
+ * The card is drawn to a canvas and handed over as a PNG, because a file is the
+ * only thing a feed will take. Where the browser cannot share files - which is
+ * most desktops - it saves the image instead, and there is a plain-text
  * fallback for anywhere neither works.
+ *
+ * The sheet itself knows nothing about what is on the card: Stats hands it a
+ * till receipt, Live hands it a picture of the globe.
  */
 
 /** How many waits are itemised before the slip becomes a list. */
@@ -111,9 +113,9 @@ function toBlob(canvas) {
   });
 }
 
-function saveImage(blob) {
+function saveImage(blob, filename) {
   const url = URL.createObjectURL(blob);
-  const link = el('a', { href: url, download: 'the-wait-receipt.png' });
+  const link = el('a', { href: url, download: filename });
 
   document.body.append(link);
   link.click();
@@ -123,11 +125,20 @@ function saveImage(blob) {
   setTimeout(() => URL.revokeObjectURL(url), 1000);
 }
 
+/**
+ * One sheet, whatever is being shared.
+ *
+ * The export path - canvas to PNG, Web Share where there is one, a download
+ * where there is not, text as the last resort - is the same whether the card
+ * is a till receipt or a picture of the globe. Only the drawing differs, so
+ * that is what `open` takes.
+ */
 export function createShareSheet() {
-  const canvas = el('canvas.receipt-canvas', { 'aria-label': 'Your receipt' });
+  const canvas = el('canvas.receipt-canvas');
   const note = el('p.share-note');
+  const heading = el('span.label.label-wide');
 
-  let data = null;
+  let current = null;
 
   const primary = el('button.btn.btn-hero.btn-wide', { type: 'button', onclick: () => share() });
   const copy = el('button.btn.btn-outline.btn-wide', { type: 'button', onclick: () => copyText() }, ['Copy as text']);
@@ -135,7 +146,7 @@ export function createShareSheet() {
   const sheet = el('div.share-sheet', {}, [
     el('div.share-card', {}, [
       el('div.row-between', {}, [
-        el('span.label.label-wide', { text: 'Your receipt' }),
+        heading,
         el('button.share-close', {
           type: 'button',
           'aria-label': 'Close',
@@ -153,23 +164,24 @@ export function createShareSheet() {
     hidden: true,
     role: 'dialog',
     'aria-modal': 'true',
-    'aria-label': 'Share your receipt',
+    'aria-label': 'Share',
     onclick: (event) => { if (event.target === element) close(); }
   }, [sheet]);
 
   /** File sharing is the good path, and most desktops do not have it. */
-  const canShareFiles = () =>
-    Boolean(navigator.canShare && navigator.share);
+  const canShareFiles = () => Boolean(navigator.canShare && navigator.share);
+
+  const asText = () => current?.toText?.(current.data) ?? '';
 
   async function share() {
     const blob = await toBlob(canvas);
     if (!blob) return;
 
-    const file = new File([blob], 'the-wait-receipt.png', { type: 'image/png' });
+    const file = new File([blob], current.filename, { type: 'image/png' });
 
     if (canShareFiles() && navigator.canShare({ files: [file] })) {
       try {
-        await navigator.share({ files: [file], text: receiptText(data) });
+        await navigator.share({ files: [file], text: asText() });
         note.textContent = '';
         return;
       } catch {
@@ -177,13 +189,13 @@ export function createShareSheet() {
       }
     }
 
-    saveImage(blob);
+    saveImage(blob, current.filename);
     note.textContent = 'Saved to your downloads.';
   }
 
   async function copyText() {
     try {
-      await navigator.clipboard.writeText(receiptText(data));
+      await navigator.clipboard.writeText(asText());
       note.textContent = 'Copied.';
     } catch {
       note.textContent = 'Could not copy it.';
@@ -194,13 +206,33 @@ export function createShareSheet() {
     element.hidden = true;
   }
 
-  function open(next) {
-    data = next;
+  /**
+   * @param title    What the sheet calls it.
+   * @param data     Passed straight to `draw` and `toText`.
+   * @param draw     (canvas, data) - renders the card at export size.
+   * @param toText   (data) - the plain-text fallback.
+   * @param filename What the saved PNG is called.
+   */
+  function open({ title, data, draw, toText, filename = 'the-wait.png' }) {
+    current = { data, toText, filename };
+
+    heading.textContent = title;
+    canvas.setAttribute('aria-label', title);
     note.textContent = '';
     primary.textContent = canShareFiles() ? 'Share' : 'Save image';
 
-    drawReceipt(canvas, data);
+    draw(canvas, data);
     element.hidden = false;
+
+    /*
+     * Canvas takes whatever font is loaded at the moment it draws, so a card
+     * opened before the webfont arrives is rendered in the fallback and stays
+     * that way. Drawing again once the fonts settle costs a frame and fixes
+     * it; `ready` has already resolved on any later visit.
+     */
+    document.fonts?.ready?.then(() => {
+      if (current?.data === data) draw(canvas, data);
+    }).catch(() => {});
   }
 
   return { element, open, close };

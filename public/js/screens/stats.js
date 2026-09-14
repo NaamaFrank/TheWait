@@ -4,6 +4,7 @@ import { clockFace, formatCount, headlineDuration, hourLabel, relativeTime } fro
 import { calendarHeatmap, dayStrip } from '../components/charts.js';
 import { chipRow, emptyState, screenHead } from '../components/ui.js';
 import { buildReceiptData, createShareSheet } from '../components/share-sheet.js';
+import { drawReceipt, receiptText } from '../components/receipt.js';
 
 /**
  * What the waiting added up to.
@@ -38,7 +39,13 @@ const WEEKDAY_NAMES = {
   Thu: 'Thursday', Fri: 'Friday', Sat: 'Saturday'
 };
 
-export function createStatsScreen({ store }) {
+/**
+ * @param modalRoot Where the share sheet is mounted. It cannot live inside the
+ *   screen: on a phone the carousel track is six frame-widths wide and slides
+ *   sideways, so an overlay parented to it is sized to all six screens and
+ *   travels with them. The frame is the phone's viewport.
+ */
+export function createStatsScreen({ store, modalRoot = null }) {
   const element = el('section.screen', { 'data-screen': 'stats' });
 
   let range = RANGES[0];
@@ -123,10 +130,11 @@ export function createStatsScreen({ store }) {
     el('div.section', {}, [
       el('span.label.label-wide.records-head', { text: 'The last few' }),
       recent
-    ]),
-
-    shareSheet.element
+    ])
   ]);
+
+  // Outside the screen, and outside the sliding track with it.
+  (modalRoot ?? element).append(shareSheet.element);
 
   /**
    * The receipt is of whatever is on screen.
@@ -136,13 +144,19 @@ export function createStatsScreen({ store }) {
    * is nothing extra to fetch.
    */
   function openShare() {
-    shareSheet.open(buildReceiptData({
-      device: store.state.device,
-      analytics: store.state.analytics,
-      progress: store.state.progress,
-      sessions,
-      periodLabel: range.id === 'all' ? 'All time' : `Last ${range.days} days`
-    }));
+    shareSheet.open({
+      title: 'Your receipt',
+      filename: 'the-wait-receipt.png',
+      draw: drawReceipt,
+      toText: receiptText,
+      data: buildReceiptData({
+        device: store.state.device,
+        analytics: store.state.analytics,
+        progress: store.state.progress,
+        sessions,
+        periodLabel: range.id === 'all' ? 'All time' : `Last ${range.days} days`
+      })
+    });
   }
 
   /* --- The sentence at the top ------------------------------------------- */

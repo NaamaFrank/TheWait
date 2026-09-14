@@ -4,6 +4,8 @@ import { clockFace, formatCount, initials } from '../core/format.js';
 import { createGlobe } from '../components/globe.js';
 import { createPlacePicker } from '../components/place-picker.js';
 import { avatar, chipRow, emptyState, placeKind, screenHead } from '../components/ui.js';
+import { buildGlobeCardData, drawGlobeCard, globeCardText } from '../components/globe-card.js';
+import { createShareSheet } from '../components/share-sheet.js';
 
 /**
  * Who else is waiting, on a real globe.
@@ -37,7 +39,12 @@ const FILTERS = [
  */
 const ZOOM = { all: 1, country: 6 };
 
-export function createLiveScreen({ store }) {
+/**
+ * @param modalRoot Where the share sheet is mounted - the frame, not this
+ *   screen. On a phone the carousel track is six frame-widths wide and slides
+ *   sideways, so an overlay parented inside it is sized to all six.
+ */
+export function createLiveScreen({ store, modalRoot = null }) {
   const element = el('section.screen', { 'data-screen': 'live' });
 
   let people = [];
@@ -113,10 +120,41 @@ export function createLiveScreen({ store }) {
    * flat stack it always was, in the same order. The desktop shell turns them
    * into real boxes and puts the globe beside the filters and the ticker.
    */
+  const shareSheet = createShareSheet();
+
+  const shareButton = el('button.head-action', {
+    type: 'button',
+    'aria-label': 'Share the map',
+    onclick: () => openShare()
+  }, ['Share']);
+
+  /**
+   * The card is the globe exactly as it is on screen - whatever the reader
+   * has spun it to, at whatever zoom - so the thing they share is the thing
+   * they were looking at.
+   */
+  function openShare() {
+    shareSheet.open({
+      title: 'Postcard',
+      filename: 'the-wait-globe.png',
+      draw: drawGlobeCard,
+      toText: globeCardText,
+      data: buildGlobeCardData({
+        globe: globe.element,
+        device: store.state.device,
+        presence: store.state.presence,
+        place: focus?.name ?? null
+      })
+    });
+  }
+
   render(element, [
     screenHead('Around the world', "Who's waiting?", {
       sub: headCount,
-      aside: el('span.pulse-dot', { style: { width: '12px', height: '12px' } })
+      aside: el('div.head-aside', {}, [
+        el('span.pulse-dot', { style: { width: '12px', height: '12px' } }),
+        shareButton
+      ])
     }),
 
     el('div.pane.pane-filters', {}, [filters.element, jumpPicker.element]),
@@ -132,6 +170,9 @@ export function createLiveScreen({ store }) {
       sourceNote
     ])
   ]);
+
+  // Outside the screen, and outside the sliding track with it.
+  (modalRoot ?? element).append(shareSheet.element);
 
   /* --- Filtering --------------------------------------------------------- */
 

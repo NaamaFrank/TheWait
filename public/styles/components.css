@@ -1409,8 +1409,11 @@ select.input option {
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 20px;
+  padding: 16px;
   background: rgba(8, 6, 5, 0.82);
+  /* Clears the notch at the top and the home bar at the bottom. */
+  padding-top: calc(16px + var(--safe-top));
+  padding-bottom: calc(16px + var(--safe-bottom));
 }
 
 .share-backdrop[hidden] {
@@ -1437,6 +1440,8 @@ select.input option {
   border-radius: 28px;
   background: var(--frame);
   border: 2px solid var(--frame-edge);
+  /* So the preview shrinks before the buttons do. */
+  min-height: 0;
 }
 
 .share-close {
@@ -1455,8 +1460,17 @@ select.input option {
   color: var(--text);
 }
 
-/* The canvas is drawn at export size; this is only how big it is shown. */
+/*
+ * The canvas is drawn at export size; this is only how big it is shown.
+ *
+ * Bounded by height as well as width. The receipt is a tall portrait card, so
+ * on a short phone a full-width preview pushed the share button off the
+ * bottom of the sheet - the one control the whole thing exists for.
+ */
 .receipt-frame {
+  display: flex;
+  justify-content: center;
+  min-height: 0;
   border-radius: 18px;
   overflow: hidden;
   background: var(--page);
@@ -1464,7 +1478,9 @@ select.input option {
 
 .receipt-canvas {
   display: block;
-  width: 100%;
+  max-width: 100%;
+  max-height: 46dvh;
+  width: auto;
   height: auto;
 }
 
@@ -1485,4 +1501,11 @@ select.input option {
 
 [data-view="desktop"] .share-sheet {
   max-width: 420px;
+}
+
+/* The Live head carries the live dot and the share button together. */
+.head-aside {
+  display: flex;
+  align-items: center;
+  gap: 10px;
 }
