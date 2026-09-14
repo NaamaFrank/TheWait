@@ -1536,12 +1536,33 @@ select.input option {
   flex: none;
 }
 
-/* The task itself gets the room, whatever is above and below it. */
+/*
+ * The task itself gets the room, whatever is above and below it.
+ *
+ * A fixed floor, because the text is what changes and the card is what moved.
+ * Titles run from twenty characters to sixty-eight and the line underneath
+ * from thirty to eighty, so on a phone the body swung by about 74px - every
+ * "Next" resized the card and shoved the tiles and everything below it down
+ * the screen.
+ *
+ * 134px is the worst realistic case at the phone's width: three lines of
+ * title and two beneath for the catalogue, or four and one for a task
+ * somebody wrote themselves, which may run to eighty characters. Content sits
+ * at the top rather than centred, so a short task does not float about in the
+ * space either.
+ */
 .task-body {
   display: flex;
   flex-direction: column;
+  justify-content: flex-start;
   gap: 4px;
   padding: 2px 0;
+  min-height: 134px;
+}
+
+/* A desktop column is wider, so the same words need fewer lines. */
+[data-view="desktop"] .task-body {
+  min-height: 112px;
 }
 
 /*

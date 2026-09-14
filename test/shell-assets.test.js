@@ -126,3 +126,31 @@ test('both charts size their bars as a share of those columns', () => {
   assert.ok(dayBar, 'charts.js should set a height on the day bars');
   assert.match(dayBar[1], /%`?$/, 'the day bars follow the box, like the chart bars');
 });
+
+/**
+ * The task card must not resize as the task changes.
+ *
+ * Titles run from twenty characters to sixty-eight, and the line beneath from
+ * thirty to eighty. On a phone that swung the body by about 74px, so every
+ * "Next" resized the card and shoved everything below it down the screen.
+ */
+test('the task body has a floor, so the card stays the same size', () => {
+  const css = fs.readFileSync(path.join(publicDir, 'styles', 'components.css'), 'utf8');
+
+  const blockFor = (selector) => {
+    const at = css.indexOf(`${selector} {`);
+    return at === -1 ? null : css.slice(at, css.indexOf('}', at));
+  };
+
+  const body = blockFor('.task-body');
+  assert.ok(body, '.task-body should be styled');
+  assert.match(body, /min-height: \d+px/, 'without a floor the card resizes with the words');
+
+  // Centred content would move the title about between tasks, which is the
+  // same flicker by another route.
+  assert.match(body, /justify-content: flex-start/, 'short tasks sit at the top');
+
+  const desktop = blockFor('[data-view="desktop"] .task-body');
+  assert.ok(desktop, 'a desktop column is wider, so it needs its own floor');
+  assert.match(desktop, /min-height: \d+px/);
+});
