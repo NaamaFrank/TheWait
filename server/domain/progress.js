@@ -233,6 +233,13 @@ export async function buildProgress(rawDeviceId, { days = 7, tzOffsetMinutes = 0
     nextMilestone: nextMilestone(streakDays),
     week,
     putToWorkPercent: windowWaits ? Math.round((waitsPutToWork / windowWaits) * 100) : 0,
+    /*
+     * The same fact as a count. The share card printed it, and rebuilding it
+     * from the rounded percentage came out a wait short or a wait long - a
+     * derived number on a card whose whole point is being accurate.
+     */
+    waitsUsed: waitsPutToWork,
+    waitsCounted: windowWaits,
     mix: buildMix(categorySeconds, idleSeconds),
     // Left out of the mix and out of "put to work", and said so on screen.
     abandonedCount,

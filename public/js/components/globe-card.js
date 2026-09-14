@@ -10,6 +10,8 @@
  * somewhere the disclaimer cannot follow it.
  */
 
+import { spelledDuration } from '../core/format.js';
+
 export const CARD_WIDTH = 1080;
 export const CARD_HEIGHT = 1350;
 
@@ -101,47 +103,72 @@ export function drawGlobeCard(canvas, data) {
 
   ctx.textBaseline = 'alphabetic';
 
-  text(ctx, 'THE WAIT', { x: CARD_WIDTH / 2, y: 118, size: 26, weight: 800, spacing: 9, colour: TEXT_SOFT });
+  const mid = CARD_WIDTH / 2;
 
-  drawGlobe(ctx, data.globe, CARD_WIDTH / 2, 588, 362);
+  text(ctx, 'THE WAIT', { x: mid, y: 96, size: 24, weight: 800, spacing: 9, colour: TEXT_SOFT });
+  text(ctx, data.kicker, { x: mid, y: 140, size: 21, colour: TEXT_DIM, spacing: 2 });
 
-  text(ctx, data.headline, { x: CARD_WIDTH / 2, y: 1042, size: 58, weight: 800 });
-  text(ctx, data.sub, { x: CARD_WIDTH / 2, y: 1104, size: 27, colour: TEXT_SOFT });
+  drawGlobe(ctx, data.globe, mid, 610, 350);
 
-  pips(ctx, data.pips, 1168);
+  text(ctx, data.headline, { x: mid, y: 1058, size: 56, weight: 800 });
+  text(ctx, data.sub, { x: mid, y: 1118, size: 28, colour: TEXT_SOFT });
 
-  text(ctx, data.footer, { x: CARD_WIDTH / 2, y: 1268, size: 20, spacing: 4, colour: TEXT_DIM });
+  if (data.company) {
+    pips(ctx, data.pips, 1176);
+    text(ctx, data.company, { x: mid, y: 1232, size: 23, colour: TEXT_SOFT });
+  }
+
+  /*
+   * The disclosure, and it has to be here.
+   *
+   * The map is padded with sample pins so a quiet hour still shows something
+   * alive, and the globe draws them exactly like the real ones. On screen the
+   * caption underneath says so. A card goes somewhere that caption cannot
+   * follow, so it carries its own.
+   */
+  if (data.smallPrint) {
+    text(ctx, data.smallPrint, { x: mid, y: 1288, size: 18, colour: TEXT_DIM });
+  }
 
   return CARD_HEIGHT;
 }
 
 export function globeCardText(data) {
-  return `${data.headline} - ${data.sub}. the-wait.app`;
+  return [data.headline, data.sub, data.company].filter(Boolean).join(' - ') + '. the-wait.app';
 }
 
 /**
  * What the card says.
  *
- * `realWaiting` counts people, including the reader. The simulated pins that
- * keep the map alive at 4am are not in it, and must not be: this card is read
- * somewhere the "sample pin" caption cannot follow.
+ * Every line is about something the app actually knows: where you are, what
+ * your own clock reads, and how many real people are mid-wait. The pins on the
+ * map are not that number - most of them are samples - so the card says which
+ * is which rather than letting the picture make the claim.
  */
-export function buildGlobeCardData({ globe, device, presence, place }) {
+export function buildGlobeCardData({ globe, device, presence, wait, place }) {
   const real = Math.max(1, presence?.realWaiting ?? 1);
   const others = real - 1;
   const where = place ?? device?.city?.name ?? device?.country?.name ?? null;
 
-  const headline = where ? `Waiting in ${where}` : 'Waiting on a machine';
+  const phase = wait?.phase ?? 'idle';
+  const elapsed = wait?.elapsedSeconds ?? 0;
 
-  const sub = others === 0
-    ? 'Just me, somewhere on this rock'
-    : `${others} other${others === 1 ? '' : 's'} out there, waiting on the same machines`;
+  const sub = phase === 'running'
+    ? `${spelledDuration(elapsed)} in, still going`
+    : phase === 'paused'
+      ? `${spelledDuration(elapsed)} in, on hold`
+      : 'Not waiting on anything right now';
 
   return {
     globe,
-    headline,
+    kicker: 'WHO IS WAITING ON A MACHINE',
+    headline: where ?? 'Somewhere on this rock',
     sub,
     pips: real,
+    company: others === 0
+      ? 'No one else is mid-wait right now'
+      : `${others} other${others === 1 ? '' : 's'} mid-wait right now`,
+    smallPrint: 'The other pins are samples, so the map is never empty',
     footer: 'THE-WAIT.APP'
   };
 }

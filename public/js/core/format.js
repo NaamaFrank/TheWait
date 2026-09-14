@@ -41,6 +41,29 @@ export function humanDuration(totalSeconds) {
   return `${Math.floor(minutes / 60)}h ${minutes % 60}m`;
 }
 
+/**
+ * Durations with their units written out: `48s`, `30m 51s`, `52m`, `1h 2m`.
+ *
+ * `clockFace` is right on a timer, where the reader is watching it move and
+ * knows what the digits are. Printed cold on a share card, `30:51` reads just
+ * as easily as thirty hours - so anything leaving the app spells it out, and
+ * drops a trailing zero rather than saying `52m 0s`.
+ */
+export function spelledDuration(totalSeconds) {
+  const seconds = Math.max(0, Math.round(totalSeconds));
+
+  if (seconds < 60) return `${seconds}s`;
+
+  const minutes = Math.floor(seconds / 60);
+  const rest = seconds % 60;
+
+  if (minutes < 60) return rest ? `${minutes}m ${rest}s` : `${minutes}m`;
+
+  const hours = Math.floor(minutes / 60);
+  const overHours = minutes % 60;
+  return overHours ? `${hours}h ${overHours}m` : `${hours}h`;
+}
+
 /** Coarser form for headline metrics, where seconds are noise. */
 export function headlineDuration(totalSeconds) {
   const minutes = Math.round(Math.max(0, totalSeconds) / 60);

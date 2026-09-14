@@ -159,6 +159,27 @@ function barcode(ctx, y, seed) {
 
 const upper = (text) => String(text ?? '').toUpperCase();
 
+/** Breaks a line to fit the paper, since the small print is a sentence. */
+function wrap(ctx, text, { size, width }) {
+  ink(ctx, { size });
+  const words = String(text).split(' ');
+  const lines = [];
+  let line = '';
+
+  for (const word of words) {
+    const next = line ? `${line} ${word}` : word;
+    if (ctx.measureText(next).width > width && line) {
+      lines.push(line);
+      line = word;
+    } else {
+      line = next;
+    }
+  }
+
+  if (line) lines.push(line);
+  return lines;
+}
+
 /** Thermal paper, with the faint banding a cheap printer leaves behind. */
 function drawPaper(ctx, height) {
   const outline = () => {
@@ -276,7 +297,7 @@ function drawSlip(ctx, data) {
 
   if (data.voided) {
     line(0.4);
-    ink(ctx, { size: 17, weight: 700, colour: ACCENT });
+    ink(ctx, { size: 16, weight: 700, colour: ACCENT });
     ctx.fillText(data.voided, PAD_X, y);
     line(1.2);
   } else {
@@ -284,7 +305,16 @@ function drawSlip(ctx, data) {
   }
 
   rule(ctx, y);
-  line(1.6);
+  line(1.1);
+
+  // The small print, which on this slip has something worth reading.
+  if (data.smallPrint) {
+    for (const part of wrap(ctx, data.smallPrint, { size: 13, width: PAPER_WIDTH - PAD_X * 2 })) {
+      centred(ctx, part, y, { size: 13, colour: INK_FAINT });
+      line(0.75);
+    }
+    line(0.7);
+  }
 
   centred(ctx, data.stamp, y, { size: 20, weight: 700, spacing: 2 });
   line(1.3);

@@ -1,5 +1,5 @@
 import { el } from '../core/dom.js';
-import { clockFace, formatCount, headlineDuration, hourLabel } from '../core/format.js';
+import { formatCount, hourLabel, spelledDuration } from '../core/format.js';
 
 /**
  * Sharing.
@@ -37,22 +37,24 @@ function printedStamp() {
   return `${date} · ${time}`.toUpperCase();
 }
 
-function reclaimedSeconds(progress) {
-  return (progress?.mix ?? [])
-    .filter((slice) => slice.id !== 'idle')
-    .reduce((sum, slice) => sum + (slice.seconds ?? 0), 0);
-}
-
 /**
  * Turns a screen's worth of figures into a slip.
  *
  * Everything here is already on the Stats screen, so the shared card is the
  * same period the chips are on and there is nothing extra to fetch.
+ *
+ * Only facts the app actually holds. It knows how long you waited and how many
+ * things you cleared; it has never known how long any one of them took, so
+ * there is no "time reclaimed" here. The slip used to print one, derived from
+ * the whole length of every wait that had a task in it - which counted a
+ * thirty-minute wait as thirty minutes of work because you did one stretch.
  */
 export function buildReceiptData({ device, analytics, progress, sessions = [], periodLabel }) {
   const shown = sessions.slice(0, ITEMS);
   const cleared = progress?.tasksCleared ?? 0;
-  const reclaimed = reclaimedSeconds(progress);
+  const waits = analytics?.sessionCount ?? 0;
+  // Counted on the server, not rebuilt from the rounded percentage.
+  const used = progress?.waitsUsed ?? 0;
 
   const place = device?.city?.name ?? device?.country?.name ?? null;
   const who = [device?.displayName || 'Anonymous dev', place].filter(Boolean).join(' · ');
@@ -62,7 +64,7 @@ export function buildReceiptData({ device, analytics, progress, sessions = [], p
     notes.push({ label: 'BUSIEST HOUR', value: hourLabel(analytics.peakHour) });
   }
   if (analytics?.longestSessionSeconds) {
-    notes.push({ label: 'LONGEST WAIT', value: clockFace(analytics.longestSessionSeconds) });
+    notes.push({ label: 'LONGEST WAIT', value: spelledDuration(analytics.longestSessionSeconds) });
   }
   if (progress?.streakDays) {
     notes.push({ label: 'STREAK', value: `${progress.streakDays} DAY${progress.streakDays === 1 ? '' : 'S'}` });
@@ -76,18 +78,24 @@ export function buildReceiptData({ device, analytics, progress, sessions = [], p
       // When it happened, not what it was called. Six lines all reading
       // "Prompt run" is a list of nothing; the times are the texture.
       label: itemLabel(session.startedAt),
-      time: clockFace(session.durationSeconds),
+      time: spelledDuration(session.durationSeconds),
       note: session.tasksCleared
         ? `${session.tasksCleared} cleared`
         : NOTHING
     })),
-    more: Math.max(0, (analytics?.sessionCount ?? 0) - shown.length),
+    more: Math.max(0, waits - shown.length),
 
+    /*
+     * Four counts and one duration, no percentages. Two percentages of
+     * different denominators sat here before - 45% of the time against 40% of
+     * the waits - which invited the reader to divide one figure by another and
+     * find the answer did not match.
+     */
     totals: [
-      { label: 'WAITED', value: headlineDuration(analytics?.totalSeconds ?? 0) },
-      { label: 'RECLAIMED', value: headlineDuration(reclaimed) },
-      { label: 'CLEARED', value: formatCount(cleared) },
-      { label: 'PUT TO WORK', value: `${progress?.putToWorkPercent ?? 0}%` }
+      { label: 'TIME WAITED', value: spelledDuration(analytics?.totalSeconds ?? 0) },
+      { label: 'WAITS', value: formatCount(waits) },
+      { label: 'WAITS YOU USED', value: formatCount(used) },
+      { label: 'THINGS DONE', value: formatCount(cleared) }
     ],
 
     notes,
@@ -95,14 +103,17 @@ export function buildReceiptData({ device, analytics, progress, sessions = [], p
     // Owning the ones that got away is funnier than hiding them, and it is
     // the same number the Waits tile already admits to.
     voided: analytics?.abandonedCount
-      ? `** ${analytics.abandonedCount} LEFT RUNNING - VOID **`
+      ? `** ${analytics.abandonedCount} WAIT${analytics.abandonedCount === 1 ? '' : 'S'} LEFT RUNNING - NOT COUNTED **`
       : null,
+
+    // Receipts carry small print, and this one has something to explain.
+    smallPrint: 'A WAIT COUNTS AS USED IF YOU CLEARED SOMETHING DURING IT.',
 
     stamp: '*** THANK YOU ***',
     footer: 'COME BACK WHEN IT IS SLOW',
     code: 'THE-WAIT.APP',
     printedAt: printedStamp(),
-    seed: (analytics?.totalSeconds ?? 0) + cleared * 31 + (analytics?.sessionCount ?? 0) * 7
+    seed: (analytics?.totalSeconds ?? 0) + cleared * 31 + waits * 7
   };
 }
 

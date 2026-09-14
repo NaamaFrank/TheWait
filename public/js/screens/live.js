@@ -143,6 +143,9 @@ export function createLiveScreen({ store, modalRoot = null }) {
         globe: globe.element,
         device: store.state.device,
         presence: store.state.presence,
+        // Published by the Wait screen, so the card can say what your own
+        // clock reads rather than assuming you are mid-wait.
+        wait: store.state.wait,
         place: focus?.name ?? null
       })
     });
