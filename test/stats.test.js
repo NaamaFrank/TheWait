@@ -189,3 +189,32 @@ test('abandoned waits are kept out of the shape of the waits too', options, asyn
 
   assert.equal(counted, 1, 'the six-hour row is not in the "15 minutes+" column');
 });
+
+/* --- What the week's recap is built from --------------------------------- */
+
+test('a wait nobody ended does not get credited to whatever was cleared in it', options, async () => {
+  // Ten minutes of real waiting with a task in it, and six hours of a laptop
+  // left open with one stretch. Splitting a wait across its tasks means the
+  // second one claimed six hours of stretching.
+  await seedWait({ daysAgo: 1, durationSeconds: 600, tasks: 1 });
+  await seedWait({ daysAgo: 1, durationSeconds: 6 * 3600, tasks: 1 });
+
+  const { mix, abandonedCount, putToWorkPercent } = await buildProgress(DEVICE, UTC);
+  const worked = mix.filter((slice) => slice.id !== 'idle').reduce((sum, slice) => sum + slice.seconds, 0);
+
+  assert.equal(abandonedCount, 1);
+  assert.equal(worked, 600, 'ten minutes of work, not six hours and ten minutes');
+  assert.equal(putToWorkPercent, 100, 'of the waits that were actually waits');
+});
+
+test('the mix reports seconds as well as a share', options, async () => {
+  await seedWait({ daysAgo: 1, durationSeconds: 300, tasks: 1 });
+
+  const { mix } = await buildProgress(DEVICE, UTC);
+  const body = mix.find((slice) => slice.id === 'body');
+
+  // Percentages of a total do not round back to a duration, and the recap
+  // reports one.
+  assert.equal(body.seconds, 300);
+  assert.equal(Number.isInteger(body.seconds), true, 'a whole number of seconds');
+});

@@ -1,4 +1,5 @@
 import { randomUUID } from 'node:crypto';
+import { looksAbandoned } from './abandoned.js';
 import { config } from '../config.js';
 import { allCompletionsFor, insertCompletion } from '../db/completions.repo.js';
 import { badRequest } from '../http/errors.js';
@@ -148,7 +149,21 @@ export async function buildProgress(rawDeviceId, { days = 7, tzOffsetMinutes = 0
   let waitsToday = 0;
   let reclaimedTodaySeconds = 0;
 
+  let abandonedCount = 0;
+
   for (const wait of byWait) {
+    /*
+     * A wait nobody ended has its whole length split across whatever was
+     * cleared during it - so one stretch inside a six-hour forgotten timer
+     * reported six hours of stretching, and "put to work" counted a wait
+     * nobody worked through. The tasks themselves still count; only the
+     * length is untrusted, and length is all this loop uses.
+     */
+    if (looksAbandoned(wait.session.durationSeconds)) {
+      abandonedCount += 1;
+      continue;
+    }
+
     bestTasksInOneWait = Math.max(bestTasksInOneWait, wait.entries.length);
     if (wait.entries.some((entry) => entry.category === 'body')) waitsWithBodyTask += 1;
 
@@ -219,6 +234,8 @@ export async function buildProgress(rawDeviceId, { days = 7, tzOffsetMinutes = 0
     week,
     putToWorkPercent: windowWaits ? Math.round((waitsPutToWork / windowWaits) * 100) : 0,
     mix: buildMix(categorySeconds, idleSeconds),
+    // Left out of the mix and out of "put to work", and said so on screen.
+    abandonedCount,
     badges: BADGES.map(({ id, name, note, earned }) => ({ id, name, note, earned: earned(facts) })),
     generatedAt: new Date().toISOString()
   };
@@ -321,6 +338,9 @@ function buildMix(categorySeconds, idleSeconds) {
   return slices.map((slice) => ({
     id: slice.id,
     label: slice.label,
-    percent: Math.round((slice.seconds / total) * 100)
+    percent: Math.round((slice.seconds / total) * 100),
+    // The recap reports reclaimed time as a duration, and percentages of a
+    // total do not round back to one.
+    seconds: Math.round(slice.seconds)
   }));
 }

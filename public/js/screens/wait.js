@@ -55,7 +55,7 @@ const HINTS = {
   idle: 'Tap start when you send something off, then fill the wait with the task below.'
 };
 
-export function createWaitScreen({ store, onWaitLogged, onProgress }) {
+export function createWaitScreen({ store, onWaitLogged, onProgress, onShowLive }) {
   const element = el('section.screen', { 'data-screen': 'wait' });
 
   const timer = createWaitTimer({
@@ -87,6 +87,10 @@ export function createWaitScreen({ store, onWaitLogged, onProgress }) {
   /* --- Static structure, painted rather than rebuilt ---------------------- */
 
   const score = el('span.xp-chip-value', { text: '0' });
+
+  // Held rather than built inline: clearing a task animates the whole chip,
+  // not just the digits inside it.
+  const xpChip = el('div.xp-chip', {}, [el('span.xp-chip-label', { text: 'XP' }), score]);
 
   const statusText = el('span.status-chip-text', { text: 'No wait running' });
   const statusChip = el('div.status-chip', {}, [el('span.status-chip-dot'), statusText]);
@@ -154,6 +158,19 @@ export function createWaitScreen({ store, onWaitLogged, onProgress }) {
 
   const taskActions = el('div.task-actions', {}, [doneButton, nextButton]);
 
+  /*
+   * Who else is in the same boat, on the screen where you are actually sat.
+   *
+   * Real waiters only. The globe pads a quiet hour with sample pins and says
+   * so, but quoting a padded number here - where the claim is about you, now -
+   * would just be a lie.
+   */
+  const company = el('button.company', {
+    type: 'button',
+    hidden: true,
+    onclick: () => onShowLive?.()
+  });
+
   const waitsToday = el('div.tile-value', { text: '0' });
   const reclaimed = el('div.tile-value', { text: '0m', style: { color: 'var(--green)' } });
 
@@ -161,7 +178,7 @@ export function createWaitScreen({ store, onWaitLogged, onProgress }) {
     // The brand reads as the kicker here, so this screen opens the same way
     // as the other five instead of being the one with no title.
     screenHead('The Wait', 'Your wait', {
-      aside: el('div.xp-chip', {}, [el('span.xp-chip-label', { text: 'XP' }), score])
+      aside: xpChip
     }),
 
     el('div.card-cream', {}, [
@@ -183,7 +200,9 @@ export function createWaitScreen({ store, onWaitLogged, onProgress }) {
     el('div.grid-2', {}, [
       el('div.tile', {}, [el('div.label', { text: 'Waits today' }), waitsToday]),
       el('div.tile', {}, [el('div.label', { text: 'Reclaimed' }), reclaimed])
-    ])
+    ]),
+
+    company
   ]);
 
   /* --- Suggestions ------------------------------------------------------- */
@@ -232,6 +251,33 @@ export function createWaitScreen({ store, onWaitLogged, onProgress }) {
     paint();
   }
 
+  /**
+   * The moment the whole app exists for.
+   *
+   * It used to pass in silence: the number in the corner changed and the card
+   * was replaced. A tick of haptic and the XP landing where it was earned cost
+   * nothing and make clearing a task feel like it happened.
+   */
+  function celebrate(xp) {
+    // Phones only, and never against someone who has asked for less motion.
+    if (!reducedMotion()) navigator.vibrate?.(18);
+
+    xpChip.classList.remove('is-earned');
+    // Reading the layout restarts the animation rather than letting a second
+    // tap inside the same second go unmarked.
+    void xpChip.offsetWidth;
+    xpChip.classList.add('is-earned');
+
+    if (reducedMotion()) return;
+
+    const pop = el('span.earned-pop', { text: `+${xp}` });
+    taskActions.append(pop);
+    setTimeout(() => pop.remove(), 900);
+  }
+
+  const reducedMotion = () =>
+    globalThis.matchMedia?.('(prefers-reduced-motion: reduce)').matches === true;
+
   async function completeTask() {
     const current = activity();
     if (!current || busy) return;
@@ -243,6 +289,8 @@ export function createWaitScreen({ store, onWaitLogged, onProgress }) {
       const progress = await api.completeSuggestion(current.id, timer.waitId);
       store.set({ progress });
       onProgress?.(progress);
+      // Only once it is actually banked - a failed request is not a win.
+      celebrate(current.xp);
     } catch {
       // Nothing banked; the task stays on screen so it can be retried.
     } finally {
@@ -312,7 +360,27 @@ export function createWaitScreen({ store, onWaitLogged, onProgress }) {
     const device = store.state.device;
     if (!device) return;
 
-    api.heartbeat(device.cityId, activityLabel(activity())).catch(() => {});
+    // The heartbeat has always come back with the whole live snapshot; it was
+    // simply being dropped on the floor.
+    api.heartbeat(device.cityId, activityLabel(activity()))
+      .then((snapshot) => {
+        others = Math.max(0, (snapshot?.realWaiting ?? 1) - 1);
+        paintCompany();
+      })
+      .catch(() => {});
+  }
+
+  /** How many other real people are mid-wait; null until a beat comes back. */
+  let others = null;
+
+  function paintCompany() {
+    const running = timer.phase === 'running';
+    company.hidden = !running || others === null;
+    if (company.hidden) return;
+
+    company.textContent = others === 0
+      ? 'Nobody else is waiting right now. See the map →'
+      : `You and ${formatCount(others)} other${others === 1 ? '' : 's'} are waiting right now →`;
   }
 
   function startHeartbeat() {
@@ -377,6 +445,8 @@ export function createWaitScreen({ store, onWaitLogged, onProgress }) {
      * The question only exists while the wait does, and the elapsed time on
      * the clock above is the thing being disputed - so both numbers are shown.
      */
+    paintCompany();
+
     const stale = timer.stale;
     rescue.hidden = !stale || phase === 'idle';
 

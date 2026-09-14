@@ -60,7 +60,9 @@ async function bootstrap() {
       stats.refresh();
       board.refresh();
     },
-    onProgress: () => board.refresh()
+    onProgress: () => board.refresh(),
+    // The "others are waiting" line goes where the others are.
+    onShowLive: () => carousel?.go(SLUGS.indexOf('live'))
   });
 
   const screens = [wait, live, stats, streaks, board, you];

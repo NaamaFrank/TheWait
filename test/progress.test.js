@@ -238,7 +238,7 @@ test('a paused wait still keeps the tasks cleared after the pause', options, asy
 
   assert.equal(progress.putToWorkPercent, 100, 'the wait was used, whatever the clock said');
   assert.equal(progress.reclaimedTodaySeconds, 600);
-  assert.deepEqual(progress.mix, [{ id: 'body', label: 'Body', percent: 100 }]);
+  assert.deepEqual(progress.mix, [{ id: 'body', label: 'Body', percent: 100, seconds: 600 }]);
 });
 
 test('a task cleared with no wait running scores but belongs to no wait', options, async () => {

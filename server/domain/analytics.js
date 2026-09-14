@@ -1,6 +1,7 @@
 import { accountIdFor } from './devices.js';
 import { readSessionRecords } from './sessions.js';
 import { localDayKey, localDayStart, MS_PER_DAY, toLocal, weekdayInitial, weekdayShort } from './time.js';
+import { looksAbandoned } from './abandoned.js';
 import { clampInt } from './validate.js';
 
 const HOURS_IN_DAY = 24;
@@ -57,22 +58,6 @@ function bestDayOf(counts, totals) {
 }
 
 /** Percentage change from `previous` to `current`; null when there is no baseline. */
-/**
- * Past this, a logged wait is almost certainly one nobody ended.
- *
- * Even a long agent run comes back inside an hour; the sessions that pushed
- * past this were laptops closed with the clock going - real rows of five and
- * six hours. Counting them dragged the average, the distribution and the
- * longest-wait record all at once, so the screen described forgetfulness
- * rather than waiting.
- *
- * They are set aside rather than deleted, and reported, so the screen can say
- * how many it is not counting instead of quietly dropping them.
- */
-const ABANDONED_AFTER_SECONDS = 90 * 60;
-
-const looksAbandoned = (record) => record.durationSeconds > ABANDONED_AFTER_SECONDS;
-
 function percentChange(current, previous) {
   if (!previous) return null;
   return Math.round(((current - previous) / previous) * 100);
@@ -107,7 +92,7 @@ export async function buildAnalytics(rawDeviceId, { days = 7, tzOffsetMinutes = 
      * Set aside before anything is derived from it. It is still counted as a
      * wait that happened - it did - but none of its length is trusted.
      */
-    if (looksAbandoned(record)) {
+    if (looksAbandoned(record.durationSeconds)) {
       if (dayStart >= windowStart) abandonedCount += 1;
       continue;
     }

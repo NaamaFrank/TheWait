@@ -752,3 +752,92 @@
   color: var(--hero);
   background: var(--card-hover);
 }
+
+/* --- The week, at the top of Stats --------------------------------------- */
+
+/*
+ * Cream against the dark page: the rest of this screen is for looking things
+ * up, and this is the part worth coming back to. One week, four numbers, and
+ * one sentence that is actually about you.
+ */
+.recap {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 18px;
+  border-radius: 28px;
+  background: var(--cream);
+  color: var(--on-cream);
+}
+
+.recap .label-wide {
+  color: var(--on-cream-soft);
+}
+
+.recap-figures {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.recap-figure {
+  min-width: 0;
+}
+
+.recap-value {
+  font-family: var(--font-display);
+  font-weight: 800;
+  font-size: 20px;
+  line-height: 1.1;
+  color: var(--on-cream);
+}
+
+.recap-label {
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--on-cream-dim);
+  margin-top: 2px;
+}
+
+.recap-highlight {
+  font-size: 13px;
+  line-height: 1.5;
+  color: var(--on-cream-soft);
+  text-wrap: pretty;
+}
+
+.recap-share {
+  border: 2px solid var(--cream-line);
+  border-radius: 999px;
+  padding: 5px 14px;
+  background: var(--cream-hover);
+  font-family: var(--font);
+  font-weight: 700;
+  font-size: 11px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--on-cream);
+  cursor: pointer;
+}
+
+.recap-share:hover {
+  background: var(--cream-track);
+}
+
+.recap-note {
+  font-size: 11px;
+  color: var(--on-cream-dim);
+}
+
+.recap-note:empty {
+  display: none;
+}
+
+/* Four across is tight on a narrow phone. */
+@media (max-width: 400px) {
+  .recap-figures {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}

@@ -1309,3 +1309,73 @@ select.input option {
   flex: 1;
   min-width: 140px;
 }
+
+/* --- Clearing a task ------------------------------------------------------ */
+
+/*
+ * The XP chip takes the hit, so the reward lands on the number it changed.
+ * Both of these are skipped entirely under `prefers-reduced-motion`, which is
+ * checked in JS as well - the vibration has no CSS to opt out of.
+ */
+.xp-chip.is-earned {
+  animation: wt-earned 620ms cubic-bezier(0.22, 0.9, 0.2, 1);
+}
+
+@keyframes wt-earned {
+  0% { transform: scale(1); }
+  35% { transform: scale(1.18); }
+  100% { transform: scale(1); }
+}
+
+.earned-pop {
+  position: absolute;
+  right: 6px;
+  bottom: 100%;
+  font-family: var(--font-display);
+  font-weight: 800;
+  font-size: 15px;
+  color: var(--green);
+  pointer-events: none;
+  animation: wt-pop-up 900ms ease-out forwards;
+}
+
+@keyframes wt-pop-up {
+  0% { opacity: 0; transform: translateY(4px); }
+  25% { opacity: 1; transform: translateY(-6px); }
+  100% { opacity: 0; transform: translateY(-26px); }
+}
+
+/* The pop is positioned against this row. */
+.task-actions {
+  position: relative;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .xp-chip.is-earned { animation: none; }
+  .earned-pop { display: none; }
+}
+
+/* --- Who else is waiting, on the Wait screen ------------------------------ */
+
+.company {
+  width: 100%;
+  padding: 10px 12px;
+  border: 0;
+  border-radius: 14px;
+  background: none;
+  font-family: var(--font);
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text-soft);
+  cursor: pointer;
+  text-align: center;
+}
+
+.company[hidden] {
+  display: none;
+}
+
+.company:hover {
+  background: var(--card-hover);
+  color: var(--text);
+}
