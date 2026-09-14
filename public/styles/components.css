@@ -1379,3 +1379,110 @@ select.input option {
   background: var(--card-hover);
   color: var(--text);
 }
+
+/* --- Sharing the numbers -------------------------------------------------- */
+
+.head-action {
+  border: 2px solid var(--card-line-soft);
+  border-radius: 999px;
+  padding: 6px 15px;
+  background: var(--card);
+  font-family: var(--font);
+  font-weight: 700;
+  font-size: 11px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--text-off);
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.head-action:hover {
+  border-color: var(--card-line-hover);
+  color: var(--text);
+}
+
+.share-backdrop {
+  position: absolute;
+  inset: 0;
+  z-index: 40;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  background: rgba(8, 6, 5, 0.82);
+}
+
+.share-backdrop[hidden] {
+  display: none;
+}
+
+.share-sheet {
+  width: 100%;
+  max-width: 360px;
+  max-height: 100%;
+  overflow-y: auto;
+  scrollbar-width: none;
+}
+
+.share-sheet::-webkit-scrollbar {
+  width: 0;
+}
+
+.share-card {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 16px;
+  border-radius: 28px;
+  background: var(--frame);
+  border: 2px solid var(--frame-edge);
+}
+
+.share-close {
+  width: 30px;
+  height: 30px;
+  border: 0;
+  border-radius: 50%;
+  background: var(--card);
+  color: var(--text-soft);
+  font-size: 13px;
+  cursor: pointer;
+}
+
+.share-close:hover {
+  background: var(--card-hover);
+  color: var(--text);
+}
+
+/* The canvas is drawn at export size; this is only how big it is shown. */
+.receipt-frame {
+  border-radius: 18px;
+  overflow: hidden;
+  background: var(--page);
+}
+
+.receipt-canvas {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
+.share-note {
+  font-size: 12px;
+  text-align: center;
+  color: var(--text-soft);
+}
+
+.share-note:empty {
+  display: none;
+}
+
+/* Room for a taller preview once there is a desktop window to put it in. */
+[data-view="desktop"] .share-backdrop {
+  position: fixed;
+}
+
+[data-view="desktop"] .share-sheet {
+  max-width: 420px;
+}

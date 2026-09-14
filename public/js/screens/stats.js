@@ -3,6 +3,7 @@ import { el, render } from '../core/dom.js';
 import { clockFace, formatCount, headlineDuration, hourLabel, relativeTime } from '../core/format.js';
 import { calendarHeatmap, dayStrip } from '../components/charts.js';
 import { chipRow, emptyState, screenHead } from '../components/ui.js';
+import { buildReceiptData, createShareSheet } from '../components/share-sheet.js';
 
 /**
  * What the waiting added up to.
@@ -47,11 +48,6 @@ export function createStatsScreen({ store }) {
   /** All-time figures, kept apart so the records do not follow the chips. */
   let lifetime = { analytics: null, progress: null };
 
-  /** The last seven days, whatever range is on screen - the recap is weekly. */
-  let week = { analytics: null, progress: null };
-
-  const recap = el('div.recap');
-
   const headline = el('p.stat-headline');
   const ranges = chipRow(RANGES, range.id, (id) => setRange(id));
 
@@ -72,15 +68,22 @@ export function createStatsScreen({ store }) {
   const chartSlot = el('div.chart-slot');
   const trendNote = el('p.card-note');
 
+  const shareSheet = createShareSheet();
+
+  const shareButton = el('button.head-action', {
+    type: 'button',
+    'aria-label': 'Share your numbers',
+    onclick: () => openShare()
+  }, ['Share']);
+
   const distribution = el('div.card');
   const mixList = el('div.card');
   const records = el('div.grid-2');
   const recent = el('div.ticker');
 
   render(element, [
-    screenHead('Your waiting', 'Where it all went'),
+    screenHead('Your waiting', 'Where it all went', { aside: shareButton }),
     headline,
-    recap,
     ranges.element,
 
     el('div.grid-2', {}, [
@@ -120,8 +123,27 @@ export function createStatsScreen({ store }) {
     el('div.section', {}, [
       el('span.label.label-wide.records-head', { text: 'The last few' }),
       recent
-    ])
+    ]),
+
+    shareSheet.element
   ]);
+
+  /**
+   * The receipt is of whatever is on screen.
+   *
+   * Sharing the week while looking at all time would be a card about numbers
+   * the person is not reading, so the range chips decide the period and there
+   * is nothing extra to fetch.
+   */
+  function openShare() {
+    shareSheet.open(buildReceiptData({
+      device: store.state.device,
+      analytics: store.state.analytics,
+      progress: store.state.progress,
+      sessions,
+      periodLabel: range.id === 'all' ? 'All time' : `Last ${range.days} days`
+    }));
+  }
 
   /* --- The sentence at the top ------------------------------------------- */
 
@@ -141,100 +163,6 @@ export function createStatsScreen({ store }) {
             : 'None of it went anywhere yet.';
 
     headline.textContent = `${headlineDuration(analytics.totalSeconds)} of waiting ${span}. ${verdict}`;
-  }
-
-  /* --- The week ---------------------------------------------------------- */
-
-  /**
-   * A card for the last seven days, whichever range the chips are on.
-   *
-   * The rest of this screen is for looking things up. This is the bit worth
-   * coming back to on a Sunday: one week, four numbers, and the one sentence
-   * that is actually about you.
-   */
-  function reclaimedSeconds(progress) {
-    return (progress?.mix ?? [])
-      .filter((slice) => slice.id !== 'idle')
-      .reduce((sum, slice) => sum + (slice.seconds ?? 0), 0);
-  }
-
-  /** The line that makes it personal - the strongest true thing about the week. */
-  function weekHighlight(analytics, progress) {
-    const best = [...(progress?.mix ?? [])]
-      .filter((slice) => slice.id !== 'idle')
-      .sort((a, b) => b.seconds - a.seconds)[0];
-
-    if ((progress?.streakDays ?? 0) >= 3) {
-      return `${progress.streakDays} days running without breaking the streak.`;
-    }
-
-    if (analytics?.bestDay?.count > 1) {
-      return `${analytics.bestDay.weekday} was the busiest — ${analytics.bestDay.count} waits.`;
-    }
-
-    if (best?.seconds) return `Mostly ${best.label.toLowerCase()}, by the look of it.`;
-
-    return 'Clear a task during a wait and this starts filling in.';
-  }
-
-  function shareText(analytics, progress) {
-    return `This week I spent ${headlineDuration(analytics.totalSeconds)} waiting on an AI ` +
-      `and got ${headlineDuration(reclaimedSeconds(progress))} of it back. ` +
-      `${formatCount(progress.tasksCleared)} things cleared. #TheWait`;
-  }
-
-  async function shareWeek(analytics, progress) {
-    const text = shareText(analytics, progress);
-
-    try {
-      if (navigator.share) await navigator.share({ text });
-      else await navigator.clipboard.writeText(text);
-      shareNote.textContent = navigator.share ? '' : 'Copied.';
-    } catch {
-      // Dismissed, or no permission - nothing to report either way.
-    }
-  }
-
-  const shareNote = el('span.recap-note');
-
-  function paintRecap() {
-    const analytics = week.analytics;
-    const progress = week.progress;
-
-    if (!analytics?.sessionCount) {
-      render(recap, [
-        el('span.label.label-wide', { text: 'This week' }),
-        emptyState('Nothing this week yet.')
-      ]);
-      return;
-    }
-
-    const figures = [
-      ['Waited', headlineDuration(analytics.totalSeconds)],
-      ['Got back', headlineDuration(reclaimedSeconds(progress))],
-      ['Cleared', formatCount(progress?.tasksCleared ?? 0)],
-      ['Waits', formatCount(analytics.sessionCount)]
-    ];
-
-    render(recap, [
-      el('div.row-between', {}, [
-        el('span.label.label-wide', { text: 'This week' }),
-        el('button.recap-share', {
-          type: 'button',
-          onclick: () => shareWeek(analytics, progress)
-        }, [navigator.share ? 'Share' : 'Copy'])
-      ]),
-
-      el('div.recap-figures', {}, figures.map(([label, value]) =>
-        el('div.recap-figure', {}, [
-          el('div.recap-value', { text: value }),
-          el('div.recap-label', { text: label })
-        ])
-      )),
-
-      el('p.recap-highlight', { text: weekHighlight(analytics, progress) }),
-      shareNote
-    ]);
   }
 
   /* --- Pieces ------------------------------------------------------------ */
@@ -502,7 +430,6 @@ export function createStatsScreen({ store }) {
     if (asCalendar) render(chartSlot, [calendarHeatmap(analytics.daily)]);
     else paintBars(analytics.daily);
 
-    paintRecap();
     paintDistribution(analytics);
     paintMix(progress?.mix ?? []);
     if (lifetime.analytics) paintRecords(lifetime.analytics, lifetime.progress);
@@ -516,23 +443,17 @@ export function createStatsScreen({ store }) {
 
     try {
       const everything = RANGES.at(-1).days;
-      const WEEK = 7;
 
-      const [analytics, progress, history, allAnalytics, allProgress, weekAnalytics, weekProgress] =
-        await Promise.all([
-          api.getAnalytics(range.days),
-          api.getProgress(range.days),
-          api.listSessions(RECENT_WAITS),
-          // Records are lifetime bests, whatever period is on screen.
-          range.days === everything ? null : api.getAnalytics(everything),
-          range.days === everything ? null : api.getProgress(everything),
-          // And the recap is always the week, for the same reason.
-          range.days === WEEK ? null : api.getAnalytics(WEEK),
-          range.days === WEEK ? null : api.getProgress(WEEK)
-        ]);
+      const [analytics, progress, history, allAnalytics, allProgress] = await Promise.all([
+        api.getAnalytics(range.days),
+        api.getProgress(range.days),
+        api.listSessions(RECENT_WAITS),
+        // Records are lifetime bests, whatever period is on screen.
+        range.days === everything ? null : api.getAnalytics(everything),
+        range.days === everything ? null : api.getProgress(everything)
+      ]);
 
       lifetime = { analytics: allAnalytics ?? analytics, progress: allProgress ?? progress };
-      week = { analytics: weekAnalytics ?? analytics, progress: weekProgress ?? progress };
       sessions = history.sessions ?? [];
       store.set({ analytics, progress });
       paint();

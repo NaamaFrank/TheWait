@@ -13,7 +13,7 @@
  * every older cache.
  */
 
-const CACHE_VERSION = 'v29';
+const CACHE_VERSION = 'v31';
 const SHELL_CACHE = `thewait-shell-${CACHE_VERSION}`;
 const DATA_CACHE = `thewait-data-${CACHE_VERSION}`;
 
@@ -51,6 +51,8 @@ const SHELL_ASSETS = [
   '/js/components/welcome.js',
   '/js/components/place-picker.js',
   '/js/components/charts.js',
+  '/js/components/receipt.js',
+  '/js/components/share-sheet.js',
   '/js/components/geo.js',
   '/js/components/globe.js',
   '/js/components/ui.js',

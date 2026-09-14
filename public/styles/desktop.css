@@ -283,7 +283,6 @@
  * above it, with the chips that filter it stranded alongside.
  */
 [data-view="desktop"] .screen.is-current > :first-child,
-[data-view="desktop"] .screen > .recap,
 [data-view="desktop"] .screen > .screen-head,
 [data-view="desktop"] .screen > .grid-2,
 [data-view="desktop"] .screen > .chip-row,
