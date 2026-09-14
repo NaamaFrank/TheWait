@@ -130,10 +130,6 @@
   background: var(--gold);
 }
 
-.btn-hero.is-muted {
-  background: var(--hero-muted);
-}
-
 /* Outlined, sits on the dark card. */
 .btn-outline {
   min-height: 50px;
@@ -1510,34 +1506,53 @@ select.input option {
   gap: 10px;
 }
 
-/* --- What you are up for, under the task ---------------------------------- */
+/* --- The task, and what you are up for ------------------------------------ */
 
-.task-foot {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  flex-wrap: wrap;
-  padding-top: 4px;
-  border-top: 1px solid var(--card-line);
-  margin-top: 4px;
+/*
+ * A filter, the thing it filters, then what you can do about it - in that
+ * order down the card. The chips used to sit underneath the buttons, which
+ * read as a footnote rather than as the control for what was above them.
+ */
+.task-card {
+  gap: 10px;
 }
 
-.task-foot .chip-row {
-  flex: 1;
-  min-width: 0;
+.task-card .chip-row {
   overflow-x: auto;
   scrollbar-width: none;
+  flex-wrap: nowrap;
+  padding-bottom: 2px;
+  /* Bleeds to the card edge so a scrolled row does not look clipped. */
+  margin: 0 -18px;
+  padding-left: 18px;
+  padding-right: 18px;
 }
 
-.task-foot .chip-row::-webkit-scrollbar {
+.task-card .chip-row::-webkit-scrollbar {
   height: 0;
 }
 
-/* Quieter than Next: it is the rarer, more final of the two. */
+.task-card .chip {
+  flex: none;
+}
+
+/* The task itself gets the room, whatever is above and below it. */
+.task-body {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 2px 0;
+}
+
+/*
+ * Quieter than Next and set apart from it: the rare, final one of the two.
+ * Right-aligned so it is nowhere near the thumb that reaches for "Did it".
+ */
 .task-ban {
+  align-self: flex-end;
   border: 0;
   background: none;
-  padding: 6px 4px;
+  padding: 2px 0;
   font-family: var(--font);
   font-size: 11px;
   font-weight: 600;

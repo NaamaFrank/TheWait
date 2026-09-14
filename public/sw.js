@@ -13,7 +13,7 @@
  * every older cache.
  */
 
-const CACHE_VERSION = 'v35';
+const CACHE_VERSION = 'v36';
 const SHELL_CACHE = `thewait-shell-${CACHE_VERSION}`;
 const DATA_CACHE = `thewait-data-${CACHE_VERSION}`;
 

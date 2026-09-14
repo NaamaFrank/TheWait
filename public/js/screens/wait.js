@@ -176,6 +176,8 @@ export function createWaitScreen({ store, onWaitLogged, onProgress, onShowLive }
 
   const moods = chipRow(MOODS.map((m) => ({ id: m.id ?? 'any', label: m.label })), 'any', (id) => {
     mood = id === 'any' ? null : id;
+    // `chipRow` does not move the pill itself - the caller owns which is on.
+    moods.select(id);
     loadQueue();
   });
 
@@ -189,7 +191,7 @@ export function createWaitScreen({ store, onWaitLogged, onProgress, onShowLive }
     type: 'button',
     'aria-label': 'Never show me this again',
     onclick: () => banTask()
-  }, ['Never again']);
+  }, ['Don’t show me this again']);
 
   const taskActions = el('div.task-actions', {}, [doneButton, nextButton]);
 
@@ -225,12 +227,13 @@ export function createWaitScreen({ store, onWaitLogged, onProgress, onShowLive }
       hint
     ]),
 
-    el('div.card', {}, [
+    el('div.card.task-card', {}, [
       el('div.row-between', {}, [taskHeading, taskTag]),
-      taskTitle,
-      taskSub,
+      // The filter sits above what it filters.
+      moods.element,
+      el('div.task-body', {}, [taskTitle, taskSub]),
       taskActions,
-      el('div.task-foot', {}, [moods.element, banButton])
+      banButton
     ]),
 
     el('div.grid-2', {}, [
@@ -554,15 +557,20 @@ export function createWaitScreen({ store, onWaitLogged, onProgress, onShowLive }
     taskTitle.textContent =
       current?.title ??
       (staleCatalogue ? 'The server is on an older build' : 'Finding you something to do…');
-    taskTitle.classList.toggle('is-off', phase !== 'running');
     taskSub.textContent =
       current?.sub ??
       (staleCatalogue ? 'It is serving a suggestion catalogue this app cannot read. Restart it.' : '');
-    taskActions.classList.toggle('is-off', phase !== 'running');
-
+    /*
+     * Nothing here is greyed out by the phase any more.
+     *
+     * It used to dim the task, the buttons and the hero colour whenever a wait
+     * was not running - while leaving every one of them working. Clearing a
+     * task with no wait going is allowed and scores; it simply belongs to no
+     * wait. The heading already says which of the three states you are in, so
+     * the grey was saying "you cannot" about things you can.
+     */
     doneButton.textContent = current ? `Did it +${current.xp}` : 'Did it';
     doneButton.disabled = !current || busy;
-    doneButton.classList.toggle('is-muted', phase !== 'running');
     nextButton.disabled = !queue.length;
 
     score.textContent = formatCount(progress?.score ?? 0);

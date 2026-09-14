@@ -66,10 +66,6 @@
   text-wrap: pretty;
 }
 
-.task-title.is-off {
-  color: var(--text-off);
-}
-
 .task-sub {
   font-size: 13px;
   line-height: 1.45;
@@ -84,10 +80,6 @@
 
 .task-actions .btn-hero {
   flex: 1;
-}
-
-.task-actions.is-off {
-  opacity: 0.8;
 }
 
 /* --- Live --------------------------------------------------------------- */
