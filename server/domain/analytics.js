@@ -57,6 +57,22 @@ function bestDayOf(counts, totals) {
 }
 
 /** Percentage change from `previous` to `current`; null when there is no baseline. */
+/**
+ * Past this, a logged wait is almost certainly one nobody ended.
+ *
+ * Even a long agent run comes back inside an hour; the sessions that pushed
+ * past this were laptops closed with the clock going - real rows of five and
+ * six hours. Counting them dragged the average, the distribution and the
+ * longest-wait record all at once, so the screen described forgetfulness
+ * rather than waiting.
+ *
+ * They are set aside rather than deleted, and reported, so the screen can say
+ * how many it is not counting instead of quietly dropping them.
+ */
+const ABANDONED_AFTER_SECONDS = 90 * 60;
+
+const looksAbandoned = (record) => record.durationSeconds > ABANDONED_AFTER_SECONDS;
+
 function percentChange(current, previous) {
   if (!previous) return null;
   return Math.round(((current - previous) / previous) * 100);
@@ -81,9 +97,20 @@ export async function buildAnalytics(rawDeviceId, { days = 7, tzOffsetMinutes = 
   const currentDurations = [];
   const previousDurations = [];
 
+  let abandonedCount = 0;
+
   for (const record of records) {
     const local = toLocal(record.startedAt, offset);
     const dayStart = localDayStart(local);
+
+    /*
+     * Set aside before anything is derived from it. It is still counted as a
+     * wait that happened - it did - but none of its length is trusted.
+     */
+    if (looksAbandoned(record)) {
+      if (dayStart >= windowStart) abandonedCount += 1;
+      continue;
+    }
 
     if (dayStart >= windowStart) {
       currentDurations.push(record.durationSeconds);
@@ -144,6 +171,8 @@ export async function buildAnalytics(rawDeviceId, { days = 7, tzOffsetMinutes = 
     totalChangePercent: percentChange(current.totalSeconds, previous.totalSeconds),
     countChangePercent: percentChange(current.sessionCount, previous.sessionCount),
     peakHour: peak.sessionCount ? peak.hour : null,
+    // Left out of every figure above, and said out loud rather than hidden.
+    abandonedCount,
     daily,
     hourly,
     lifetimeSessionCount: records.length,

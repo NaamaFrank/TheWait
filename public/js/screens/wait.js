@@ -68,6 +68,9 @@ export function createWaitScreen({ store, onWaitLogged, onProgress }) {
   let queue = [];
   let cursor = 0;
   let queueBucket = null;
+
+  /** A bigger size the wait has grown into, applied at the next task. */
+  let pendingBucket = null;
   let loadingQueue = false;
   let staleCatalogue = false;
   let busy = false;
@@ -103,6 +106,31 @@ export function createWaitScreen({ store, onWaitLogged, onProgress }) {
   const bar = el('div.bar', { role: 'presentation' }, [barFill]);
 
   const hint = el('p.hint', { text: HINTS.idle });
+
+  /*
+   * The stale-wait question.
+   *
+   * A wait whose clock ran on with nobody watching is almost always a laptop
+   * that was closed, not a six-hour wait. Rather than guess, this offers the
+   * last moment somebody was demonstrably there and lets the answer be no.
+   */
+  const staleLine = el('p.rescue-line');
+
+  const rescueEnd = el('button.btn.btn-hero.rescue-primary', {
+    type: 'button',
+    onclick: () => resolveStale(false)
+  }, ['End it there']);
+
+  const rescueKeep = el('button.btn.btn-outline-cream', {
+    type: 'button',
+    onclick: () => resolveStale(true)
+  }, ["No, it's still running"]);
+
+  const rescue = el('div.rescue', { hidden: true, role: 'group', 'aria-label': 'Unattended wait' }, [
+    el('span.rescue-title', { text: 'Was this wait still going?' }),
+    staleLine,
+    el('div.rescue-actions', {}, [rescueEnd, rescueKeep])
+  ]);
 
   const endButton = el('button.btn.btn-outline-cream', {
     type: 'button',
@@ -141,6 +169,7 @@ export function createWaitScreen({ store, onWaitLogged, onProgress }) {
       el('div.clock-row', {}, [el('div.clock-col', {}, [clock, caption]), press]),
       bar,
       endButton,
+      rescue,
       hint
     ]),
 
@@ -164,6 +193,7 @@ export function createWaitScreen({ store, onWaitLogged, onProgress }) {
   async function loadQueue({ append = false } = {}) {
     if (loadingQueue) return;
     loadingQueue = true;
+    pendingBucket = null;
 
     try {
       const seconds = timer.elapsedSeconds;
@@ -189,6 +219,14 @@ export function createWaitScreen({ store, onWaitLogged, onProgress }) {
   }
 
   function showNext() {
+    // Now is the moment to grow into the size the wait has reached: the task
+    // on screen is being left behind anyway.
+    if (pendingBucket) {
+      pendingBucket = null;
+      loadQueue();
+      return;
+    }
+
     if (cursor + 1 >= queue.length) loadQueue({ append: true });
     cursor = Math.min(cursor + 1, Math.max(0, queue.length - 1));
     paint();
@@ -232,6 +270,28 @@ export function createWaitScreen({ store, onWaitLogged, onProgress }) {
     }
 
     paint();
+  }
+
+  async function resolveStale(keep) {
+    if (busy) return;
+    busy = true;
+    paint();
+
+    try {
+      const session = await timer.resolveStale(keep);
+
+      if (session) {
+        stopHeartbeat();
+        api.stopPresence().catch(() => {});
+        onWaitLogged?.();
+        store.set({ progress: await api.getProgress() });
+      }
+    } catch {
+      // Left as it was; the next read asks again.
+    } finally {
+      busy = false;
+      paint();
+    }
   }
 
   /**
@@ -313,6 +373,27 @@ export function createWaitScreen({ store, onWaitLogged, onProgress }) {
     clock.classList.toggle('is-idle', phase === 'idle');
     caption.textContent = CAPTIONS[phase];
 
+    /*
+     * The question only exists while the wait does, and the elapsed time on
+     * the clock above is the thing being disputed - so both numbers are shown.
+     */
+    const stale = timer.stale;
+    rescue.hidden = !stale || phase === 'idle';
+
+    if (stale) {
+      const because = stale.basis === 'last-task'
+        ? 'That is when you last cleared a task'
+        : 'That is when this was last open';
+
+      staleLine.textContent =
+        `Nothing here for ${headlineDuration(stale.unwatchedSeconds)}, ` +
+        `and the clock kept going. ${because} — ending it there logs ` +
+        `${clockFace(stale.suggestedElapsedSeconds)} instead of ${clockFace(elapsed)}.`;
+
+      rescueEnd.disabled = busy;
+      rescueKeep.disabled = busy;
+    }
+
     pressGlyph.textContent = phase === 'running' ? '❚❚' : '▶';
     pressGlyph.style.letterSpacing = phase === 'running' ? '2px' : '0';
     pressLabel.textContent = phase === 'running' ? 'Pause' : phase === 'paused' ? 'Resume' : 'Start';
@@ -373,9 +454,16 @@ export function createWaitScreen({ store, onWaitLogged, onProgress }) {
     if (timer.phase !== 'running') return;
 
     paint();
-    // The suggestion should match how long the wait has actually become.
+
+    /*
+     * The suggestions should match how long the wait has actually become - a
+     * two-second task is no use ten minutes in. But reloading the queue here
+     * replaced it and reset the cursor, so crossing a boundary swapped out the
+     * task being read mid-sentence. The new size is queued instead, and taken
+     * up at the next task rather than snatched from under this one.
+     */
     const bucket = bucketFor(timer.elapsedSeconds);
-    if (bucket && queueBucket && bucket !== queueBucket) loadQueue();
+    if (bucket && queueBucket && bucket !== queueBucket) pendingBucket = bucket;
   }, 1000);
 
   store.subscribe(() => paint(), ['progress', 'analytics', 'device']);

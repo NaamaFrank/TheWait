@@ -5,7 +5,16 @@ import test, { after, before, beforeEach } from 'node:test';
 import { endDatabase, query, resetDatabase, skipWithoutDatabase } from './helpers/database.mjs';
 import { ensureDevice } from '../server/domain/devices.js';
 import { createPairingCode, redeemPairingCode } from '../server/domain/pairing.js';
-import { beginWait, continueWait, finishWait, getWait, holdWait } from '../server/domain/wait.js';
+import { randomUUID } from 'node:crypto';
+import {
+  beginWait,
+  continueWait,
+  finishWait,
+  getWait,
+  holdWait,
+  resolveStaleWait
+} from '../server/domain/wait.js';
+import { accountIdFor } from '../server/domain/devices.js';
 
 /**
  * The wait in progress.
@@ -149,4 +158,128 @@ test('the clock is measured by the server, not the caller', options, async () =>
 
   const wait = await getWait(PHONE);
   assert.ok(wait.elapsedSeconds >= 95 && wait.elapsedSeconds <= 96, `got ${wait.elapsedSeconds}`);
+});
+
+/* --- Waits nobody was there to end --------------------------------------- */
+
+/**
+ * The clock does not care whether anyone is watching, so a laptop closed
+ * mid-wait kept counting - real sessions of five and six hours, which dragged
+ * every average and every record on the Stats screen with them.
+ *
+ * Nothing is ended automatically: a long wait can be genuine. The person is
+ * asked, and the offer is always a moment that has already passed, so saying
+ * yes can only ever shorten the wait.
+ */
+
+/** Rewinds the open wait, as if it had been running unattended. */
+async function leaveRunning({ forMinutes, unwatchedMinutes }) {
+  await query(
+    `UPDATE active_waits
+       SET started_at = now() - make_interval(mins => $1),
+           resumed_at = now() - make_interval(mins => $1),
+           last_seen_at = now() - make_interval(mins => $2)`,
+    [forMinutes, unwatchedMinutes]
+  );
+}
+
+test('a wait nobody watched is offered back, not banked in full', options, async () => {
+  await ensureDevice(PHONE);
+  await beginWait(PHONE);
+  await leaveRunning({ forMinutes: 360, unwatchedMinutes: 354 });
+
+  const wait = await getWait(PHONE);
+
+  assert.ok(wait.stale, 'six hours with nobody there is not a wait');
+  assert.equal(wait.stale.basis, 'last-seen');
+  // Six hours on the clock, six minutes of anyone actually being there.
+  assert.ok(wait.elapsedSeconds > 21_000, 'the clock really did run that long');
+  assert.ok(wait.stale.suggestedElapsedSeconds < 400, 'the offer is the six minutes');
+});
+
+test('the last cleared task is better evidence than the last look', options, async () => {
+  await ensureDevice(PHONE);
+  await beginWait(PHONE);
+  await leaveRunning({ forMinutes: 360, unwatchedMinutes: 354 });
+
+  const accountId = await accountIdFor(PHONE);
+  const [open] = await query('SELECT wait_id, resumed_at FROM active_waits WHERE account_id = $1', [accountId]);
+
+  await query(
+    `INSERT INTO completions (id, account_id, suggestion_id, category, bucket, wait_id, xp, completed_at)
+     VALUES ($1, $2, 's001', 'body', 'micro', $3, 20, $4::timestamptz + interval '20 minutes')`,
+    [randomUUID(), accountId, open.wait_id, open.resumed_at]
+  );
+
+  const wait = await getWait(PHONE);
+
+  assert.equal(wait.stale.basis, 'last-task', 'someone was demonstrably there at that point');
+  assert.ok(Math.abs(wait.stale.suggestedElapsedSeconds - 1200) < 30, 'twenty minutes, give or take');
+});
+
+test('accepting the offer logs the short wait, not the long one', options, async () => {
+  await ensureDevice(PHONE);
+  await beginWait(PHONE);
+  await leaveRunning({ forMinutes: 360, unwatchedMinutes: 354 });
+
+  // The screen reads the wait before it can show the question.
+  const seen = await getWait(PHONE);
+  assert.ok(seen.stale);
+
+  const { session } = await resolveStaleWait(PHONE, { keep: false });
+
+  assert.ok(session, 'it is still banked, just honestly');
+  assert.ok(session.durationSeconds < 400, `logged ${session.durationSeconds}s, expected about 360`);
+  assert.equal((await getWait(PHONE)).phase, 'idle');
+});
+
+test('reading the wait does not erase the gap that proves nobody was there', options, async () => {
+  await ensureDevice(PHONE);
+  await beginWait(PHONE);
+  await leaveRunning({ forMinutes: 360, unwatchedMinutes: 354 });
+
+  // Polling is what the screen does; it must not talk itself out of asking.
+  for (let i = 0; i < 3; i += 1) assert.ok((await getWait(PHONE)).stale, `still stale on read ${i + 1}`);
+
+  const { session } = await resolveStaleWait(PHONE, { keep: false });
+  assert.ok(session.durationSeconds < 400, 'and the offer is still the short one');
+});
+
+test('saying it is still running keeps the wait and stops the asking', options, async () => {
+  await ensureDevice(PHONE);
+  await beginWait(PHONE);
+  await leaveRunning({ forMinutes: 360, unwatchedMinutes: 354 });
+  assert.ok((await getWait(PHONE)).stale);
+
+  const kept = await resolveStaleWait(PHONE, { keep: true });
+
+  assert.equal(kept.session, null, 'nothing was banked');
+  assert.equal(kept.wait.phase, 'running');
+  assert.equal((await getWait(PHONE)).stale, null, 'and it does not nag');
+});
+
+test('a long wait somebody is watching is left alone', options, async () => {
+  await ensureDevice(PHONE);
+  await beginWait(PHONE);
+  await leaveRunning({ forMinutes: 40, unwatchedMinutes: 0 });
+
+  assert.equal((await getWait(PHONE)).stale, null, 'forty minutes at the screen is a real wait');
+});
+
+test('a paused wait is never stale - it is not accruing anything', options, async () => {
+  await ensureDevice(PHONE);
+  await beginWait(PHONE);
+  await holdWait(PHONE);
+  await query("UPDATE active_waits SET last_seen_at = now() - interval '6 hours'");
+
+  assert.equal((await getWait(PHONE)).stale, null);
+});
+
+test('ending normally is unaffected by any of this', options, async () => {
+  await ensureDevice(PHONE);
+  await beginWait(PHONE);
+  await leaveRunning({ forMinutes: 12, unwatchedMinutes: 0 });
+
+  const { session } = await finishWait(PHONE);
+  assert.ok(session.durationSeconds > 700, 'the full twelve minutes, as always');
 });

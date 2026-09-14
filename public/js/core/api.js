@@ -95,6 +95,9 @@ export const api = {
   pauseWait: () => request('/api/wait/pause', { method: 'POST' }),
   resumeWait: () => request('/api/wait/resume', { method: 'POST' }),
   endWait: () => request('/api/wait/end', { method: 'POST' }),
+  // `keep` says the wait is genuinely still running; otherwise the server ends
+  // it back at the moment someone was last demonstrably there.
+  resolveStaleWait: (keep) => request('/api/wait/resolve-stale', { method: 'POST', body: { keep } }),
 
   createPairingCode: () => request('/api/pair', { method: 'POST' }),
   cancelPairingCode: () => request('/api/pair/cancel', { method: 'POST' }),

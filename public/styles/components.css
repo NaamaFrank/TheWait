@@ -1263,3 +1263,49 @@ select.input option {
   background: var(--hero);
   animation: wt-pulse 1.6s infinite;
 }
+
+/* --- The stale-wait question -------------------------------------------- */
+
+/*
+ * Sits inside the cream timer card, under the end button, because it is about
+ * the number on the clock directly above it. Framed rather than shouted: the
+ * usual answer costs nothing and the wrong answer is recoverable.
+ */
+.rescue {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 14px;
+  border-radius: 20px;
+  background: var(--cream-track);
+  border: 2px solid var(--cream-line);
+}
+
+.rescue[hidden] {
+  display: none;
+}
+
+.rescue-title {
+  font-family: var(--font-display);
+  font-weight: 800;
+  font-size: 14px;
+  color: var(--on-cream);
+}
+
+.rescue-line {
+  font-size: 12px;
+  line-height: 1.5;
+  color: var(--on-cream-soft);
+  text-wrap: pretty;
+}
+
+.rescue-actions {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.rescue-actions .btn {
+  flex: 1;
+  min-width: 140px;
+}

@@ -14,7 +14,7 @@ import { api } from './api.js';
  * the wrong number.
  */
 
-const IDLE = { phase: 'idle', waitId: null, baseMs: 0, since: 0 };
+const IDLE = { phase: 'idle', waitId: null, baseMs: 0, since: 0, stale: null };
 
 export function createWaitTimer({ onChange } = {}) {
   let state = { ...IDLE };
@@ -29,7 +29,9 @@ export function createWaitTimer({ onChange } = {}) {
       phase: wait?.phase ?? 'idle',
       waitId: wait?.waitId ?? null,
       baseMs: (wait?.elapsedSeconds ?? 0) * 1000,
-      since: Date.now()
+      since: Date.now(),
+      // Set when the clock ran on with nobody looking; the screen asks about it.
+      stale: wait?.stale ?? null
     };
 
     onChange?.();
@@ -59,6 +61,11 @@ export function createWaitTimer({ onChange } = {}) {
 
     get waitId() {
       return state.waitId;
+    },
+
+    /** Non-null when this wait looks like one nobody was there to end. */
+    get stale() {
+      return state.stale;
     },
 
     get elapsedSeconds() {
@@ -105,6 +112,25 @@ export function createWaitTimer({ onChange } = {}) {
         const ended = await api.endWait();
         finished = ended.session;
         return ended.wait;
+      });
+
+      const session = finished;
+      finished = null;
+      return session;
+    },
+
+    /**
+     * Answers the stale-wait question.
+     *
+     * Ending returns the session the server logged, exactly as `end` does, so
+     * the screen can bank it the same way. Keeping returns null and the clock
+     * carries on - the read alone is what stops it being asked again.
+     */
+    async resolveStale(keep) {
+      await change(async () => {
+        const resolved = await api.resolveStaleWait(keep);
+        finished = resolved.session;
+        return resolved.wait;
       });
 
       const session = finished;

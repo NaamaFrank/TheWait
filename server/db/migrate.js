@@ -40,6 +40,10 @@ const steps = [
   {
     name: '005-chosen-avatars',
     sql: () => fs.readFileSync(path.join(dbDir, '005-chosen-avatars.sql'), 'utf8')
+  },
+  {
+    name: '006-wait-last-seen',
+    sql: () => fs.readFileSync(path.join(dbDir, '006-wait-last-seen.sql'), 'utf8')
   }
 ];
 

@@ -1,4 +1,4 @@
-import { query, transaction } from './pool.js';
+import { query, queryOne, transaction } from './pool.js';
 
 /** Cleared tasks - the ledger XP, streaks and badges are all computed from. */
 
@@ -77,4 +77,20 @@ export async function scoresSince(since) {
     score: row.score,
     tasksCleared: row.tasks
   }));
+}
+
+/**
+ * When the last task was cleared inside one wait.
+ *
+ * For a wait nobody ended, this is the best evidence there is of when the
+ * person was still actually there.
+ */
+export async function lastCompletionAt(accountId, waitId) {
+  const row = await queryOne(
+    `SELECT max(completed_at) AS at FROM completions
+     WHERE account_id = $1 AND wait_id = $2`,
+    [accountId, waitId]
+  );
+
+  return row?.at ?? null;
 }

@@ -142,3 +142,50 @@ test('records look back further than the current streak', options, async () => {
   assert.ok(progress.streakDays <= 1, 'and is not the current one');
   assert.equal(progress.bestTasksInOneWait, 6);
 });
+
+/* --- Waits nobody ended -------------------------------------------------- */
+
+/**
+ * A laptop closed mid-wait logs a session of several hours. It is not a wait,
+ * and counting it made the average, the spread and the longest-wait record all
+ * describe forgetfulness rather than waiting. They are set aside and counted
+ * separately, so the screen can say what it is leaving out.
+ */
+
+test('a wait left running all night is not counted as a wait', options, async () => {
+  await seedWait({ daysAgo: 1, durationSeconds: 120 });
+  await seedWait({ daysAgo: 1, durationSeconds: 300 });
+  await seedWait({ daysAgo: 1, durationSeconds: 6 * 3600 });
+
+  const { sessionCount, abandonedCount, averageSessionSeconds } = await buildAnalytics(DEVICE, UTC);
+
+  assert.equal(sessionCount, 2, 'the two real waits');
+  assert.equal(abandonedCount, 1, 'and one reported, not hidden');
+  assert.equal(averageSessionSeconds, 210, 'six hours would have made this over two hours');
+});
+
+test('the longest-wait record is a wait, not a forgotten timer', options, async () => {
+  await seedWait({ daysAgo: 1, durationSeconds: 1800 });
+  await seedWait({ daysAgo: 1, durationSeconds: 5 * 3600 });
+
+  const { longestSessionSeconds } = await buildAnalytics(DEVICE, UTC);
+  assert.equal(longestSessionSeconds, 1800, 'half an hour is the real best');
+});
+
+test('a long but plausible wait still counts', options, async () => {
+  await seedWait({ daysAgo: 1, durationSeconds: 80 * 60 });
+
+  const { sessionCount, abandonedCount } = await buildAnalytics(DEVICE, UTC);
+  assert.equal(sessionCount, 1, 'an hour and twenty is a long agent run, not a mistake');
+  assert.equal(abandonedCount, 0);
+});
+
+test('abandoned waits are kept out of the shape of the waits too', options, async () => {
+  await seedWait({ daysAgo: 1, durationSeconds: 30 });
+  await seedWait({ daysAgo: 1, durationSeconds: 6 * 3600 });
+
+  const { distribution } = await buildAnalytics(DEVICE, UTC);
+  const counted = distribution.reduce((sum, bucket) => sum + bucket.count, 0);
+
+  assert.equal(counted, 1, 'the six-hour row is not in the "15 minutes+" column');
+});

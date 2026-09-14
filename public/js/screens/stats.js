@@ -56,6 +56,9 @@ export function createStatsScreen({ store }) {
   const cleared = el('div.tile-value', { text: '0' });
   const timeDelta = el('span.tile-delta');
 
+  /** Waits nobody ended, which no figure on this screen counts. */
+  const setAside = el('span.tile-delta');
+
   const ringSlot = el('div.chart-slot');
   const whenNote = el('p.card-note');
 
@@ -84,7 +87,7 @@ export function createStatsScreen({ store }) {
         el('div.label', { text: 'Put to work' }),
         putToWork
       ]),
-      el('div.tile.tile-lg', {}, [el('div.label', { text: 'Waits' }), waitCount]),
+      el('div.tile.tile-lg', {}, [el('div.label', { text: 'Waits' }), waitCount, setAside]),
       el('div.tile.tile-lg', {}, [el('div.label', { text: 'Tasks cleared' }), cleared])
     ]),
 
@@ -369,6 +372,16 @@ export function createStatsScreen({ store }) {
 
     timeWaited.textContent = headlineDuration(analytics.totalSeconds);
     waitCount.textContent = formatCount(analytics.sessionCount);
+
+    /*
+     * Said out loud rather than quietly dropped. A wait left running overnight
+     * is not a wait, and counting it made the average, the spread and the
+     * longest-wait record all describe forgetfulness instead of waiting.
+     */
+    const abandoned = analytics.abandonedCount ?? 0;
+    setAside.textContent = abandoned
+      ? `${abandoned} left running, not counted`
+      : '';
     cleared.textContent = formatCount(progress?.tasksCleared ?? 0);
     putToWork.textContent = `${progress?.putToWorkPercent ?? 0}%`;
 
