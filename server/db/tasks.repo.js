@@ -12,10 +12,10 @@ import { query, queryOne } from './pool.js';
  */
 export async function recordSkip(accountId, suggestionId) {
   await query(
-    `INSERT INTO task_skips (account_id, suggestion_id, skips, last_skipped_at)
+    `INSERT INTO task_memory (account_id, suggestion_id, skips, last_skipped_at)
      VALUES ($1, $2, 1, now())
      ON CONFLICT (account_id, suggestion_id) DO UPDATE
-       SET skips = task_skips.skips + 1, last_skipped_at = now()`,
+       SET skips = task_memory.skips + 1, last_skipped_at = now()`,
     [accountId, suggestionId]
   );
 }
@@ -23,7 +23,7 @@ export async function recordSkip(accountId, suggestionId) {
 /** "Never show me this again" - a decision, not a mood. */
 export async function blockSuggestion(accountId, suggestionId, blocked = true) {
   await query(
-    `INSERT INTO task_skips (account_id, suggestion_id, skips, blocked)
+    `INSERT INTO task_memory (account_id, suggestion_id, skips, blocked)
      VALUES ($1, $2, 0, $3)
      ON CONFLICT (account_id, suggestion_id) DO UPDATE SET blocked = $3`,
     [accountId, suggestionId, blocked]
@@ -32,7 +32,7 @@ export async function blockSuggestion(accountId, suggestionId, blocked = true) {
 
 export async function readSkips(accountId) {
   const rows = await query(
-    'SELECT suggestion_id, skips, blocked FROM task_skips WHERE account_id = $1',
+    'SELECT suggestion_id, skips, blocked FROM task_memory WHERE account_id = $1',
     [accountId]
   );
 
@@ -41,6 +41,35 @@ export async function readSkips(accountId) {
     skips: row.skips,
     blocked: row.blocked
   }));
+}
+
+/**
+ * Records that a suggestion was actually put in front of someone.
+ *
+ * Reported when the screen paints it, not when the queue is built: a build
+ * hands back a batch and only the first of them is seen.
+ */
+export async function recordShown(accountId, suggestionId) {
+  await query(
+    `INSERT INTO task_memory (account_id, suggestion_id, shown, last_shown_at)
+     VALUES ($1, $2, 1, now())
+     ON CONFLICT (account_id, suggestion_id) DO UPDATE
+       SET shown = task_memory.shown + 1, last_shown_at = now()`,
+    [accountId, suggestionId]
+  );
+}
+
+/** The last few it showed, so the next build can offer something else. */
+export async function readRecentlyShown(accountId, limit) {
+  const rows = await query(
+    `SELECT suggestion_id FROM task_memory
+     WHERE account_id = $1 AND last_shown_at IS NOT NULL
+     ORDER BY last_shown_at DESC
+     LIMIT $2`,
+    [accountId, limit]
+  );
+
+  return rows.map((row) => row.suggestion_id);
 }
 
 /* --- Your own tasks ------------------------------------------------------- */

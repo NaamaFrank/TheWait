@@ -9,19 +9,21 @@ Current branch: `rebuild-postgres-and-ui`.
 
 ## Unfinished work
 
-Stated as what would be built, then not delivered. These are owed.
+Nothing outstanding. Both items that were stated and not delivered are done:
 
-- **Chains of small steps for long waits.** Promised as the second half of the
-  answer to "you cannot predict how long a wait will be": rather than one long
-  task, a short routine of three or four steps, interruptible at every one, so
-  an answer landing mid-chain costs nothing. Only the median cap
-  (`sizeFor` in `server/domain/queue.js`) was built. Nothing in the code chains
-  anything.
-- **Remember what has been shown, across waits.** The queue weights by what you
-  clear and suppresses what you skip, but a task shown and quietly ignored -
-  never actioned either way - is invisible to it. `exclude` in
-  `public/js/screens/wait.js` only covers the current load, and `task_skips`
-  only records an explicit press of Next.
+- ~~**Chains of small steps for long waits.**~~ Eight routines in the
+  catalogue, three or four steps each, offered on waits long enough to be
+  worth one. Every step is a whole small thing and scores on its own, so an
+  answer arriving mid-routine costs nothing. A routine is worth exactly what
+  one task of that size is worth - the remainder of the division goes to the
+  earliest steps, because a routine that quietly pays less than the task it
+  replaces is a reason not to start one.
+- ~~**Remember what has been shown, across waits.**~~ `task_skips` is now
+  `task_memory`, since it is no longer only about skips. The screen reports
+  each task as it is painted rather than when the queue is built - a build
+  hands back a batch and only the first of it is seen. The last dozen shown
+  are held back and come round again after that, which is a far softer signal
+  than a skip: you may have cleared it, or the answer simply arrived.
 
 ---
 
@@ -71,7 +73,7 @@ Flagged during the work, never turned into a task.
   do not fix it.
 - **Skips are per-account only.** There is no way to ask which suggestions
   *everyone* skips, which is the query that would let the catalogue be pruned
-  and rewritten on evidence. `task_skips` has the data; nothing aggregates
+  and rewritten on evidence. `task_memory` has the data; nothing aggregates
   across accounts.
 - **Nothing to do on the globe but look.** No wave, no reaction, no way to see
   what the person in São Paulo did with their two minutes. The globe is the

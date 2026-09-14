@@ -6,12 +6,14 @@ import {
   blockSuggestion,
   countUserTasks,
   listUserTasks,
+  readRecentlyShown,
   readSkips,
+  recordShown,
   recordSkip
 } from '../db/tasks.repo.js';
 import { accountIdFor } from './devices.js';
 import { readSessionRecords } from './sessions.js';
-import { bucketForSeconds, listBuckets, pickSuggestions } from './suggestions.js';
+import { bucketForSeconds, listBuckets, listChains, pickSuggestions } from './suggestions.js';
 import { looksAbandoned } from './abandoned.js';
 import { optionalText } from './validate.js';
 import { badRequest, HttpError, notFound } from '../http/errors.js';
@@ -30,6 +32,27 @@ const MAX_TITLE = 80;
 
 /** Past this many skips a suggestion stops being offered on its own. */
 const SKIPS_BEFORE_RETIRED = 3;
+
+/**
+ * How many recently-shown suggestions are held back from the next build.
+ *
+ * Skipping something is a signal; simply having been shown it is not - you may
+ * have cleared it, or the answer arrived. But seeing the same task three waits
+ * running is the repetition this was meant to stop, so the last few are set
+ * aside and come round again after that.
+ *
+ * `pickSuggestions` falls back to the whole bucket if the filters leave it
+ * nothing, so this can never empty the queue.
+ */
+const RECENTLY_SHOWN = 12;
+
+/**
+ * How often a long wait is offered a chain rather than a single task.
+ *
+ * Not always: a routine is a bigger ask than one thing, and someone who wants
+ * one thing should not have to skip past a routine to get it.
+ */
+const CHAIN_SHARE = 0.4;
 
 /**
  * How much a category you actually do is favoured over one you ignore.
@@ -100,8 +123,9 @@ function tasteFrom(completions) {
 export async function buildQueue(rawDeviceId, { seconds = 0, category = null, count = 3, exclude = [] } = {}) {
   const accountId = await accountIdFor(rawDeviceId);
 
-  const [skips, own, sessions, completions] = await Promise.all([
+  const [skips, recent, own, sessions, completions] = await Promise.all([
     readSkips(accountId),
+    readRecentlyShown(accountId, RECENTLY_SHOWN),
     listUserTasks(accountId),
     readSessionRecords(accountId),
     allCompletionsFor(accountId)
@@ -137,18 +161,40 @@ export async function buildQueue(rawDeviceId, { seconds = 0, category = null, co
     bucket: bucket.id,
     category,
     count: Math.max(wanted * 3, 9),
-    exclude: [...excluded, ...blocked, ...tired],
+    // Recently shown is the softest of the three: held back, not retired.
+    exclude: [...excluded, ...blocked, ...tired, ...recent],
     weights: tasteFrom(completions),
     weight: TASTE_WEIGHT
   });
 
-  // Yours first, then the catalogue's, trimmed to what was asked for.
-  const items = [...mine, ...picked.items].slice(0, wanted);
+  /*
+   * A chain, sometimes, on the waits long enough to be worth one. Offered
+   * after anything you wrote yourself and before the single tasks, so it is
+   * one Next away rather than something to be got past.
+   */
+  const routines = listChains(bucket.id, category)
+    .filter((chain) => !excluded.has(chain.id) && !blocked.has(chain.id) && !tired.has(chain.id));
+
+  const chain = routines.length && Math.random() < CHAIN_SHARE
+    ? [routines[Math.floor(Math.random() * routines.length)]]
+    : [];
+
+  // Yours first, then a routine if there is one, then the rest.
+  const items = [...mine, ...chain, ...picked.items].slice(0, wanted);
 
   return { bucket, category, items, yours: mine.length };
 }
 
 /* --- What you tell it ----------------------------------------------------- */
+
+/** Reported by the screen when a task is actually put in front of someone. */
+export async function markShown(rawDeviceId, suggestionId) {
+  const id = optionalText(suggestionId, 'suggestionId', 64);
+  if (!id) return { ok: false };
+
+  await recordShown(await accountIdFor(rawDeviceId), id);
+  return { ok: true };
+}
 
 export async function skipSuggestion(rawDeviceId, suggestionId) {
   const id = optionalText(suggestionId, 'suggestionId', 64);

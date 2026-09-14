@@ -86,6 +86,44 @@ export function createWaitScreen({ store, onWaitLogged, onProgress, onShowLive }
 
   /** A bigger size the wait has grown into, applied at the next task. */
   let pendingBucket = null;
+
+  /** The last id reported as shown, so a repaint does not report it twice. */
+  let reported = null;
+
+  function reportShown(id) {
+    if (!id || id === reported) return;
+    reported = id;
+    api.markShown(id).catch(() => {});
+  }
+
+  /**
+   * How far into the routine on screen, if the current item is one.
+   *
+   * A chain is a handful of small steps rather than one long task, because
+   * the app cannot know how long this wait will be: an answer arriving in the
+   * middle of step two costs nothing, since step two was a whole small thing
+   * on its own and the steps before it are already banked.
+   */
+  let step = 0;
+
+  /** The task on screen: a step of the current chain, or the item itself. */
+  function shown() {
+    const item = activity();
+    if (!item?.steps?.length) return item;
+
+    const at = item.steps[Math.min(step, item.steps.length - 1)];
+    // The step's own share, not the routine's total - that is what clearing
+    // this one actually pays.
+    return {
+      ...item,
+      id: at.id,
+      title: at.title,
+      sub: item.title,
+      xp: at.xp ?? item.xp,
+      stepOf: item.steps.length,
+      stepNo: step + 1
+    };
+  }
   let loadingQueue = false;
   let staleCatalogue = false;
   let busy = false;
@@ -272,6 +310,7 @@ export function createWaitScreen({ store, onWaitLogged, onProgress, onShowLive }
     if (loadingQueue) return;
     loadingQueue = true;
     pendingBucket = null;
+    step = 0;
 
     try {
       const seconds = timer.elapsedSeconds;
@@ -316,6 +355,9 @@ export function createWaitScreen({ store, onWaitLogged, onProgress, onShowLive }
     const passed = skip ? activity() : null;
     if (passed) api.skipSuggestion(passed.id).catch(() => {});
 
+    // Next leaves the whole routine, not just the step you are on.
+    step = 0;
+
     // Now is the moment to grow into the size the wait has reached: the task
     // on screen is being left behind anyway.
     if (pendingBucket) {
@@ -357,6 +399,7 @@ export function createWaitScreen({ store, onWaitLogged, onProgress, onShowLive }
     globalThis.matchMedia?.('(prefers-reduced-motion: reduce)').matches === true;
 
   async function banTask() {
+    // The whole routine, not the step: you are turning down the thing offered.
     const current = activity();
     if (!current || busy) return;
 
@@ -367,7 +410,7 @@ export function createWaitScreen({ store, onWaitLogged, onProgress, onShowLive }
   }
 
   async function completeTask() {
-    const current = activity();
+    const current = shown();
     if (!current || busy) return;
 
     busy = true;
@@ -381,10 +424,22 @@ export function createWaitScreen({ store, onWaitLogged, onProgress, onShowLive }
       celebrate(current.xp);
     } catch {
       // Nothing banked; the task stays on screen so it can be retried.
-    } finally {
       busy = false;
-      showNext({ skip: false });
+      paint();
+      return;
     }
+
+    busy = false;
+
+    // Part-way through a routine: on to the next step, not a different task.
+    const item = activity();
+    if (item?.steps?.length && step + 1 < item.steps.length) {
+      step += 1;
+      paint();
+      return;
+    }
+
+    showNext({ skip: false });
   }
 
   /* --- The wait itself --------------------------------------------------- */
@@ -571,15 +626,20 @@ export function createWaitScreen({ store, onWaitLogged, onProgress, onShowLive }
 
     endButton.hidden = phase === 'idle';
 
-    const current = activity();
+    const current = shown();
     taskHeading.textContent = HEADINGS[phase];
-    taskTag.textContent = current?.tag ?? '—';
+    taskTag.textContent = current?.stepOf
+      ? `${current.tag} · step ${current.stepNo} of ${current.stepOf}`
+      : current?.tag ?? '—';
     taskTitle.textContent =
       current?.title ??
       (staleCatalogue ? 'The server is on an older build' : 'Finding you something to do…');
     taskSub.textContent =
       current?.sub ??
       (staleCatalogue ? 'It is serving a suggestion catalogue this app cannot read. Restart it.' : '');
+
+    // Told once per task, so the queue can offer something else next time.
+    reportShown(current?.id);
     /*
      * Nothing here is greyed out by the phase any more.
      *

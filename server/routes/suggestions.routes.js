@@ -6,6 +6,7 @@ import {
   buildQueue,
   createUserTask,
   getUserTasks,
+  markShown,
   removeUserTask,
   skipSuggestion
 } from '../domain/queue.js';
@@ -28,6 +29,15 @@ export function registerSuggestionRoutes(router) {
       exclude: (query.get('exclude') ?? '').split(',').filter(Boolean)
     })
   );
+
+  /*
+   * Reported when a task is painted, not when the queue is built: a build
+   * hands back a batch and only the first of them is ever seen.
+   */
+  router.post('/api/suggestions/seen', async ({ req, deviceId }) => {
+    const body = await readJsonBody(req, config.maxBodyBytes);
+    return markShown(deviceId, body?.suggestionId);
+  });
 
   /*
    * "Next" used to record nothing, which made the most-pressed button in the

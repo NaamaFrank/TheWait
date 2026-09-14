@@ -10,10 +10,12 @@ import {
   buildQueue,
   createUserTask,
   getUserTasks,
+  markShown,
   removeUserTask,
   sizeFor,
   skipSuggestion
 } from '../server/domain/queue.js';
+import { getSuggestion, listChains } from '../server/domain/suggestions.js';
 
 /**
  * What to offer next.
@@ -33,7 +35,7 @@ before(async () => {
 
 beforeEach(async () => {
   if (skipWithoutDatabase) return;
-  await query('TRUNCATE accounts, devices, sessions, completions, pairing_codes, active_waits, task_skips, user_tasks CASCADE');
+  await query('TRUNCATE accounts, devices, sessions, completions, pairing_codes, active_waits, task_memory, user_tasks CASCADE');
   await ensureDevice(DEVICE);
 });
 
@@ -172,4 +174,99 @@ test('a forgotten timer does not talk it into longer tasks', options, () => {
 test('a brand new account is not second-guessed', options, () => {
   assert.equal(sizeFor(2000, []).id, 'long', 'nothing to go on, so the catalogue decides');
   assert.equal(sizeFor(2000, [{ durationSeconds: 60 }]).id, 'long', 'one wait is not a pattern');
+});
+
+/* --- What it has already shown -------------------------------------------- */
+
+/**
+ * Skipping is a signal; being shown something is not - you may have cleared
+ * it, or the answer arrived. But seeing the same task three waits running is
+ * the repetition all of this was meant to stop, so the last few are held back
+ * and come round again once others have gone past.
+ */
+test('a task just shown is not offered again straight away', options, async () => {
+  const { items } = await buildQueue(DEVICE, { seconds: 30, count: 1 });
+  const seen = items[0].id;
+
+  await markShown(DEVICE, seen);
+
+  assert.equal(await offeredWithin(seen, 25), false, 'not next time round');
+});
+
+test('being shown is held back, not retired', options, async () => {
+  const { items } = await buildQueue(DEVICE, { seconds: 30, count: 1 });
+  const first = items[0].id;
+  await markShown(DEVICE, first);
+
+  // The window is the last dozen shown, so a dozen others push it back out.
+  for (let i = 0; i < 14; i += 1) {
+    const next = await buildQueue(DEVICE, { seconds: 30, count: 1 });
+    await markShown(DEVICE, next.items[0].id);
+  }
+
+  assert.equal(await offeredWithin(first, 60), true, 'it comes round again');
+});
+
+test('it counts how many times it has shown one', options, async () => {
+  await markShown(DEVICE, 's001');
+  await markShown(DEVICE, 's001');
+
+  const [row] = await query(
+    'SELECT shown, skips FROM task_memory WHERE suggestion_id = $1',
+    ['s001']
+  );
+
+  assert.equal(row.shown, 2);
+  assert.equal(row.skips, 0, 'shown is not the same fact as skipped');
+});
+
+/* --- Chains --------------------------------------------------------------- */
+
+/**
+ * A routine of small steps rather than one long task.
+ *
+ * The app cannot know how long this wait will be, so it must never hand over
+ * something that only pays off if you finish it. Every step is a whole small
+ * thing, and the ones you did are banked whenever the answer lands.
+ */
+test('a chain is worth what one task of that size is worth', options, () => {
+  for (const [bucket, worth] of [['long', 40], ['medium', 30]]) {
+    for (const chain of listChains(bucket)) {
+      const total = chain.steps.reduce((sum, step) => sum + step.xp, 0);
+
+      // Not `worth / steps` rounded: forty split three ways is thirteen each,
+      // which comes to thirty-nine, and a routine that quietly pays less than
+      // the task it replaces is a reason not to start one.
+      assert.equal(total, worth, `${chain.id} pays ${total}, a ${bucket} task pays ${worth}`);
+      assert.equal(chain.xp, worth, 'and the routine advertises its total');
+    }
+  }
+});
+
+test('a step of a chain scores on its own', options, async () => {
+  const [chain] = listChains('long');
+  const step = getSuggestion(chain.steps[0].id);
+
+  assert.ok(step, 'a step resolves like any other suggestion');
+  assert.equal(step.xp, chain.steps[0].xp, 'its own share, not the total');
+  assert.equal(step.sub, chain.title, 'and says which routine it belongs to');
+});
+
+test('chains are offered whole, never as loose steps', options, async () => {
+  const seenIds = new Set();
+
+  for (let i = 0; i < 40; i += 1) {
+    const { items } = await buildQueue(DEVICE, { seconds: 1800, count: 4 });
+    for (const item of items) seenIds.add(item.id);
+  }
+
+  const stepIds = listChains('long').flatMap((chain) => chain.steps.map((step) => step.id));
+  assert.equal(stepIds.some((id) => seenIds.has(id)), false, 'no half-routines in the queue');
+});
+
+test('a wait too short for a routine is not offered one', options, async () => {
+  for (let i = 0; i < 20; i += 1) {
+    const { items } = await buildQueue(DEVICE, { seconds: 20, count: 6 });
+    assert.equal(items.some((item) => item.kind === 'chain'), false);
+  }
 });

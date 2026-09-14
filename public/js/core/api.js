@@ -120,6 +120,11 @@ export const api = {
 
   getSuggestionMeta: () => request('/api/suggestions/meta'),
 
+  // Reported when a task is actually painted, so the queue can offer
+  // something else next time rather than the same one three waits running.
+  markShown: (suggestionId) =>
+    request('/api/suggestions/seen', { method: 'POST', body: { suggestionId } }),
+
   // "Next" reports what it passed over, so the queue can stop offering it.
   skipSuggestion: (suggestionId) =>
     request('/api/suggestions/skip', { method: 'POST', body: { suggestionId } }),

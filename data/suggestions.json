@@ -1,5 +1,5 @@
 {
-  "version": 2,
+  "version": 3,
   "buckets": [
     {
       "id": "micro",
@@ -1410,6 +1410,107 @@
       "category": "reflect",
       "title": "Decide what you are going to stop doing.",
       "sub": "Stopping something is a decision. Make it deliberately."
+    }
+  ],
+  "chains": [
+    {
+      "id": "c001",
+      "bucket": "long",
+      "category": "tidy",
+      "title": "Reset the desk",
+      "sub": "Four small things. Stop wherever the answer lands.",
+      "steps": [
+        "Clear everything off the desk that does not live there.",
+        "Wipe the surface. Yes, properly, with the thing you never use.",
+        "Untangle the cable that has been annoying you for a month.",
+        "Put one object back deliberately, where you actually want it."
+      ]
+    },
+    {
+      "id": "c002",
+      "bucket": "long",
+      "category": "body",
+      "title": "Unstick your shoulders",
+      "sub": "Four minutes of undoing a morning at a keyboard.",
+      "steps": [
+        "Roll your shoulders backwards ten times, slower than feels useful.",
+        "Clasp your hands behind your back and open your chest. Thirty seconds.",
+        "Drop one ear towards one shoulder and breathe. Then the other side.",
+        "Stand up and reach for the ceiling as if you meant it."
+      ]
+    },
+    {
+      "id": "c003",
+      "bucket": "long",
+      "category": "reset",
+      "title": "Come back down",
+      "sub": "For when the last hour has been a lot.",
+      "steps": [
+        "Box breathing: four in, four hold, four out, four hold. Five rounds.",
+        "Name five things you can see without moving your head.",
+        "Drink a full glass of water. All of it.",
+        "Look at something more than twenty feet away for a minute."
+      ]
+    },
+    {
+      "id": "c004",
+      "bucket": "long",
+      "category": "craft",
+      "title": "Leave the code better",
+      "sub": "Three small repayments on the debt.",
+      "steps": [
+        "Delete a block of commented-out code. Git remembers it.",
+        "Rename one thing so it says what it actually does.",
+        "Write the comment explaining the bit you had to think about twice."
+      ]
+    },
+    {
+      "id": "c005",
+      "bucket": "long",
+      "category": "tidy",
+      "title": "Empty the inbox a bit",
+      "sub": "Three passes. Not to zero, just to less.",
+      "steps": [
+        "Archive everything you will obviously never read.",
+        "Reply to the one that takes under a minute.",
+        "Move the one you are avoiding to tomorrow, on purpose, with a time."
+      ]
+    },
+    {
+      "id": "c006",
+      "bucket": "medium",
+      "category": "body",
+      "title": "Actually move",
+      "sub": "Three bursts. Your legs have been folded for hours.",
+      "steps": [
+        "Ten slow squats next to the chair.",
+        "Walk to the furthest window in the building and look out of it.",
+        "Shake out your hands and wrists for thirty seconds."
+      ]
+    },
+    {
+      "id": "c007",
+      "bucket": "medium",
+      "category": "reflect",
+      "title": "Work out what you are doing",
+      "sub": "Three questions, out loud if nobody is listening.",
+      "steps": [
+        "Say what problem you are actually solving. Out loud.",
+        "Say what you would try next if this approach fails.",
+        "Write the one sentence you would put in the pull request."
+      ]
+    },
+    {
+      "id": "c008",
+      "bucket": "long",
+      "category": "connect",
+      "title": "Be a person for five minutes",
+      "sub": "Three things that are not work.",
+      "steps": [
+        "Message someone you have been meaning to message.",
+        "Say something specific and nice to a colleague about their work.",
+        "Make a plan with an actual date in it."
+      ]
     }
   ]
 }

@@ -10,6 +10,54 @@ const bucketsById = new Map(catalogue.buckets.map((bucket) => [bucket.id, bucket
 const categoriesById = new Map(catalogue.categories.map((category) => [category.id, category]));
 const itemsById = new Map(catalogue.items.map((item) => [item.id, item]));
 
+/**
+ * Chains: a short routine for a long wait, as a list of small steps.
+ *
+ * The app cannot know how long a wait will be, so it must never hand over
+ * something that only pays off if you finish it. Every step is a whole small
+ * thing on its own, which makes an answer landing in the middle of one cost
+ * nothing - you did the steps you did.
+ *
+ * The steps are registered individually so a cleared one resolves like any
+ * other suggestion, but they are kept out of the shuffled pool: a chain is
+ * offered as a chain, never as a loose step.
+ */
+const chains = (catalogue.chains ?? []).map((chain) => {
+  const bucket = bucketsById.get(chain.bucket);
+  const count = chain.steps.length;
+
+  /*
+   * The whole chain is worth what one task of that size is worth, so doing
+   * four steps is not four times the pay of doing one long thing.
+   *
+   * The remainder goes to the earliest steps rather than being rounded away:
+   * forty split three ways is thirteen each, which comes to thirty-nine, and
+   * a routine that quietly pays a point less than the task it replaces is a
+   * reason not to start one.
+   */
+  const total = bucket?.xp ?? 0;
+  const each = Math.floor(total / count);
+  const spare = total - each * count;
+
+  return {
+    ...chain,
+    totalXp: total,
+    steps: chain.steps.map((title, index) => ({
+      id: `${chain.id}-${index + 1}`,
+      title,
+      index,
+      count,
+      xp: Math.max(1, each + (index < spare ? 1 : 0))
+    }))
+  };
+});
+
+const chainsById = new Map(chains.map((chain) => [chain.id, chain]));
+
+const stepsById = new Map(
+  chains.flatMap((chain) => chain.steps.map((step) => [step.id, { chain, step }]))
+);
+
 /** The bucket whose range contains `seconds`; falls back to the longest bucket. */
 export function bucketForSeconds(seconds) {
   const match = catalogue.buckets.find(
@@ -42,7 +90,42 @@ function decorate(item) {
 /** Looks up one suggestion, for scoring a completion the client reports. */
 export function getSuggestion(id) {
   const item = itemsById.get(id);
-  return item ? decorate(item) : null;
+  if (item) return decorate(item);
+
+  // A single step of a chain, which scores its share of the whole.
+  const held = stepsById.get(id);
+  if (!held) return null;
+
+  return {
+    id: held.step.id,
+    bucket: held.chain.bucket,
+    category: held.chain.category,
+    title: held.step.title,
+    sub: held.chain.title,
+    tag: categoriesById.get(held.chain.category)?.label ?? held.chain.category,
+    xp: held.step.xp,
+    bucketLabel: bucketsById.get(held.chain.bucket)?.label ?? held.chain.bucket
+  };
+}
+
+/** The chains that suit a size of wait, ready to offer as whole routines. */
+export function listChains(bucketId, category = null) {
+  return chains
+    .filter((chain) => chain.bucket === bucketId)
+    .filter((chain) => !category || chain.category === category)
+    .map((chain) => ({
+      id: chain.id,
+      kind: 'chain',
+      bucket: chain.bucket,
+      category: chain.category,
+      title: chain.title,
+      sub: chain.sub,
+      tag: categoriesById.get(chain.category)?.label ?? chain.category,
+      // The routine's total; each step carries its own share.
+      xp: chain.totalXp,
+      bucketLabel: bucketsById.get(chain.bucket)?.label ?? chain.bucket,
+      steps: chain.steps.map((step) => ({ id: step.id, title: step.title, xp: step.xp }))
+    }));
 }
 
 /** Display label for a category id, so other domains need not reload the catalogue. */
