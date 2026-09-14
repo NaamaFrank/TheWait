@@ -7,8 +7,8 @@
   "scope": "/",
   "display": "standalone",
   "orientation": "portrait",
-  "background_color": "#07111e",
-  "theme_color": "#07111e",
+  "background_color": "#14100F",
+  "theme_color": "#14100F",
   "categories": ["productivity", "developer", "utilities"],
   "icons": [
     { "src": "/icons/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
@@ -16,8 +16,8 @@
     { "src": "/icons/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
   ],
   "shortcuts": [
-    { "name": "Start a wait", "url": "/#/timer", "icons": [{ "src": "/icons/icon-192.png", "sizes": "192x192" }] },
-    { "name": "Insights", "url": "/#/insights", "icons": [{ "src": "/icons/icon-192.png", "sizes": "192x192" }] },
-    { "name": "Globe", "url": "/#/globe", "icons": [{ "src": "/icons/icon-192.png", "sizes": "192x192" }] }
+    { "name": "Start a wait", "url": "/#/wait", "icons": [{ "src": "/icons/icon-192.png", "sizes": "192x192" }] },
+    { "name": "Who's waiting", "url": "/#/live", "icons": [{ "src": "/icons/icon-192.png", "sizes": "192x192" }] },
+    { "name": "Your numbers", "url": "/#/stats", "icons": [{ "src": "/icons/icon-192.png", "sizes": "192x192" }] }
   ]
 }

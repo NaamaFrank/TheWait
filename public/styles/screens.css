@@ -1,393 +1,754 @@
-/* Screen-specific layout: the timer face, the suggestion deck, the globe. */
+/* Screen-specific composition. Anything reused twice belongs in components.css. */
 
-/* --- Timer -------------------------------------------------------------- */
-
-.timer-stage {
-  display: grid;
-  place-items: center;
-  padding: var(--space-4) 0 var(--space-2);
+.row-between {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
 }
 
-.timer-button {
-  position: relative;
-  display: grid;
-  place-items: center;
-  width: min(74vw, 264px);
-  aspect-ratio: 1;
-  border-radius: 50%;
-  background:
-    radial-gradient(circle at 50% 40%, rgba(30, 52, 92, 0.9), rgba(10, 19, 34, 0.95) 70%);
-  border: 1px solid var(--border);
-  box-shadow: inset 0 0 40px rgba(125, 250, 255, 0.06), 0 24px 60px -30px rgba(0, 0, 0, 0.95);
-  transition: transform 180ms ease;
+.row-baseline {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
 }
 
-.timer-button:active {
-  transform: scale(0.98);
+/* --- Wait --------------------------------------------------------------- */
+
+.clock-row {
+  display: flex;
+  align-items: center;
+  gap: 18px;
 }
 
-/* The gradient ring. `conic-gradient` in a mask keeps the centre transparent. */
-.timer-ring {
-  position: absolute;
-  inset: -3px;
-  border-radius: 50%;
-  background: conic-gradient(
-    from 180deg,
-    var(--cyan),
-    var(--purple),
-    var(--violet),
-    var(--cyan)
-  );
-  padding: 2px;
-  mask: radial-gradient(farthest-side, transparent calc(100% - 2px), #000 calc(100% - 2px));
-  -webkit-mask: radial-gradient(farthest-side, transparent calc(100% - 2px), #000 calc(100% - 2px));
-  opacity: 0.55;
-  transition: opacity 300ms ease;
-}
-
-.timer-button.is-running .timer-ring {
-  opacity: 1;
-  animation: ring-spin 7s linear infinite;
-}
-
-@keyframes ring-spin {
-  to { transform: rotate(1turn); }
-}
-
-/* Breathing halo, only while a wait is active. */
-.timer-button.is-running::after {
-  content: "";
-  position: absolute;
-  inset: -14px;
-  border-radius: 50%;
-  border: 1px solid rgba(125, 250, 255, 0.28);
-  animation: halo 2.6s ease-out infinite;
-  pointer-events: none;
-}
-
-@keyframes halo {
-  0% { transform: scale(0.94); opacity: 0.7; }
-  100% { transform: scale(1.12); opacity: 0; }
-}
-
-.timer-inner {
+.clock-col {
+  flex: 1;
+  min-width: 0;
   display: flex;
   flex-direction: column;
-  align-items: center;
-  gap: var(--space-2);
-  z-index: 1;
+  gap: 4px;
 }
 
-.timer-face {
-  font-family: var(--font-mono);
-  font-size: clamp(38px, 13vw, 52px);
-  font-weight: 600;
-  letter-spacing: -0.02em;
+.clock {
+  font-family: var(--font-display);
+  font-weight: 800;
+  font-size: 60px;
+  line-height: 0.88;
+  color: var(--on-cream);
   font-variant-numeric: tabular-nums;
-  text-shadow: 0 0 26px rgba(125, 250, 255, 0.4);
 }
 
-.timer-caption {
-  font-size: var(--text-sm);
-  color: var(--text-muted);
+.clock.is-idle {
+  color: var(--on-cream-soft);
 }
 
-.screen-timer.is-running .timer-caption {
-  color: var(--cyan);
+.clock-caption {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--on-cream-soft);
+  text-wrap: pretty;
 }
 
-.timer-actions {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: var(--space-3);
-}
-
-.label-input {
-  width: 100%;
-  min-height: 46px;
-  padding: 0 var(--space-4);
-  color: var(--text);
-  background: var(--glass);
-  border: 1px solid var(--border);
-  border-radius: var(--radius-pill);
-  font-size: var(--text-sm);
-}
-
-.label-input::placeholder {
-  color: var(--text-dim);
-}
-
-.label-input:focus {
-  border-color: var(--border-bright);
-  outline: none;
-}
-
-/* --- Suggestions -------------------------------------------------------- */
-
-.suggestion-bucket {
-  font-size: var(--text-xs);
-  color: var(--text-dim);
+.est {
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--on-cream-soft);
   white-space: nowrap;
 }
 
-.suggestion-list {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-2);
+.task-title {
+  font-family: var(--font-display);
+  font-weight: 800;
+  font-size: 24px;
+  line-height: 1.15;
+  color: var(--text);
+  text-wrap: pretty;
 }
 
-.suggestion {
-  display: flex;
-  align-items: flex-start;
-  gap: var(--space-3);
-  padding: var(--space-3);
-  background: var(--surface-raised);
-  border: 1px solid var(--border);
-  border-left: 2px solid var(--accent, var(--cyan));
-  border-radius: var(--radius-md);
-  animation: suggestion-in 300ms ease-out backwards;
+.task-title.is-off {
+  color: var(--text-off);
 }
 
-.suggestion:nth-child(2) { animation-delay: 60ms; }
-.suggestion:nth-child(3) { animation-delay: 120ms; }
-
-@keyframes suggestion-in {
-  from { opacity: 0; transform: translateX(-6px); }
-  to { opacity: 1; transform: none; }
-}
-
-.suggestion-mark {
-  display: grid;
-  place-items: center;
-  width: 24px;
-  height: 24px;
-  flex: none;
-  color: var(--accent, var(--cyan));
-}
-
-.suggestion-body {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-1);
-}
-
-.suggestion-text {
-  font-size: var(--text-sm);
+.task-sub {
+  font-size: 13px;
   line-height: 1.45;
+  color: var(--text-soft);
+  text-wrap: pretty;
 }
 
-.suggestion-tag {
-  font-size: var(--text-xs);
-  text-transform: uppercase;
-  letter-spacing: 0.1em;
-  color: var(--text-dim);
+.task-actions {
+  display: flex;
+  gap: 10px;
 }
 
-/* --- Globe -------------------------------------------------------------- */
-
-.globe-stage {
-  position: relative;
-  border-radius: var(--radius-lg);
-  overflow: hidden;
-  background: radial-gradient(circle at 50% 45%, rgba(16, 32, 60, 0.7), rgba(6, 12, 22, 0.95));
-  border: 1px solid var(--border);
+.task-actions .btn-hero {
+  flex: 1;
 }
 
-.globe-canvas {
-  display: block;
-  width: 100%;
-  height: min(72vw, 340px);
-  touch-action: none;
-  cursor: grab;
+.task-actions.is-off {
+  opacity: 0.8;
 }
 
-.globe-canvas:active {
-  cursor: grabbing;
-}
+/* --- Live --------------------------------------------------------------- */
 
-.globe-overlay {
-  position: absolute;
-  inset: auto var(--space-3) var(--space-3);
-  pointer-events: none;
+.live-count {
+  font-size: 12px;
+  color: var(--text-soft);
 }
 
 .globe-card {
+  position: relative;
   display: flex;
-  align-items: center;
-  gap: var(--space-3);
-  padding: var(--space-3) var(--space-4);
-  background: rgba(13, 21, 36, 0.72);
-  border: 1px solid var(--border-bright);
-  border-radius: var(--radius-md);
-  backdrop-filter: blur(16px);
+  justify-content: center;
+  border-radius: 34px;
+  background: var(--card);
+  border: 3px solid var(--card-line-soft);
+  padding: 10px;
+  box-shadow: inset 0 2px 0 var(--card-inset);
 }
 
-.globe-card-body {
+.globe-card canvas {
+  display: block;
+  touch-action: none;
+  cursor: grab;
+  border-radius: 50%;
+}
+
+.globe-card canvas:active {
+  cursor: grabbing;
+}
+
+.globe-hint {
+  position: absolute;
+  right: 20px;
+  bottom: 18px;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  color: var(--text-dim);
+  text-transform: uppercase;
+  pointer-events: none;
+}
+
+.ticker-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 6px;
+}
+
+.ticker-count {
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  color: var(--gold);
+}
+
+/* --- Stats -------------------------------------------------------------- */
+
+.tile-lg {
+  border-radius: 26px;
+  padding: 16px;
+}
+
+.tile-lg .tile-value {
+  font-size: 32px;
+  line-height: 1.15;
+}
+
+.tile-fill {
+  border: none;
+  color: var(--on-cream);
+}
+
+.tile-fill .label {
+  color: inherit;
+  opacity: 0.7;
+}
+
+.tile-fill .tile-value {
+  color: inherit;
+}
+
+.tile-hero { background: var(--hero); }
+.tile-gold { background: var(--gold); }
+
+.delta {
+  font-family: var(--font-display);
+  font-weight: 800;
+  font-size: 13px;
+  color: var(--green);
+}
+
+.delta.is-down {
+  color: var(--hero);
+}
+
+.delta.is-flat {
+  color: var(--text-muted);
+}
+
+/*
+ * The box a chart is drawn in. `--chart-h` is the floor, not the height: when
+ * this card is paired with a taller one the drawing grows into the extra room
+ * instead of leaving it empty under the note.
+ */
+.chart-slot {
+  flex: 1;
+  min-height: var(--chart-h);
   display: flex;
   flex-direction: column;
 }
 
-.globe-card-value {
-  font-size: var(--text-sm);
-  font-weight: 600;
+.chart {
+  display: flex;
+  align-items: stretch;
+  gap: 8px;
+  flex: 1;
+  min-height: 0;
 }
 
-.globe-count {
-  color: var(--cyan);
-  font-variant-numeric: tabular-nums;
+.chart-col {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
 }
 
-.globe-card-label {
-  font-size: var(--text-xs);
+/*
+ * The space a bar grows in, which is the card's height less the day letter.
+ * Bars are sized as a percentage of this, so the chart follows `--chart-h`
+ * wherever it is redefined instead of being drawn against a number in JS.
+ */
+.chart-track {
+  flex: 1;
+  min-height: 0;
+  width: 100%;
+  display: flex;
+  align-items: flex-end;
+}
+
+.chart-bar {
+  width: 100%;
+  border-radius: 999px;
+  background: var(--card-line);
+  transition: height 400ms ease;
+}
+
+.chart-bar.is-today {
+  background: var(--hero);
+}
+
+.chart-day {
+  font-size: 11px;
+  font-weight: 700;
   color: var(--text-dim);
 }
 
-/* --- Region detail & list ----------------------------------------------- */
-
-.region-detail {
+.mix-row {
   display: flex;
-  align-items: center;
-  gap: var(--space-3);
-  padding: var(--space-3) var(--space-4);
-  background: var(--surface-raised);
-  border: 1px solid var(--border-bright);
-  border-radius: var(--radius-md);
+  flex-direction: column;
+  gap: 6px;
 }
 
-.region-detail-body {
+.mix-head {
+  display: flex;
+  justify-content: space-between;
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--text);
+}
+
+.mix-pct {
+  color: var(--text-muted);
+}
+
+/* --- Streaks ------------------------------------------------------------ */
+
+.streak-card {
+  border-radius: 32px;
+  gap: 14px;
+}
+
+.streak-head {
+  display: flex;
+  align-items: flex-end;
+  gap: 10px;
+}
+
+.streak-num {
+  font-family: var(--font-display);
+  font-weight: 800;
+  font-size: 56px;
+  line-height: 0.9;
+  color: var(--hero);
+}
+
+.streak-cap {
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  color: var(--on-cream-soft);
+  text-transform: uppercase;
+  padding-bottom: 9px;
+}
+
+.week {
+  display: flex;
+  gap: 7px;
+}
+
+.week-day {
+  flex: 1;
+  height: 44px;
+  border-radius: 14px;
+  background: var(--cream-track);
+  color: var(--on-cream-dim);
   display: flex;
   align-items: center;
-  gap: var(--space-3);
+  justify-content: center;
+  font-family: var(--font-display);
+  font-weight: 800;
+  font-size: 12px;
+}
+
+.week-day.is-on {
+  background: var(--hero);
+  color: var(--cream);
+}
+
+.streak-note {
+  font-size: 12px;
+  line-height: 1.45;
+  color: var(--on-cream-soft);
+  text-wrap: pretty;
+}
+
+.badge {
+  border-radius: 26px;
+  background: var(--card);
+  border: 2px solid var(--card-line-soft);
+  padding: 15px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  min-height: 124px;
+}
+
+.badge-mark {
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  border: 3px solid var(--gold);
+  background: var(--hero);
+}
+
+.badge-name {
+  font-family: var(--font-display);
+  font-weight: 800;
+  font-size: 15px;
+  line-height: 1.15;
+  color: var(--text);
+  text-wrap: pretty;
+}
+
+.badge-note {
+  font-size: 11px;
+  line-height: 1.4;
+  color: var(--text-soft);
+  text-wrap: pretty;
+}
+
+.badge.is-locked {
+  background: var(--card-off);
+  border-color: var(--card-off-line);
+}
+
+.badge.is-locked .badge-mark {
+  border-color: var(--card-line);
+  background: transparent;
+}
+
+.badge.is-locked .badge-name { color: var(--text-dim); }
+.badge.is-locked .badge-note { color: var(--text-faint); }
+
+/* --- Board -------------------------------------------------------------- */
+
+.board {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.board-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 15px;
+  border-radius: 22px;
+  background: var(--card);
+  border: 2px solid var(--card-line);
+}
+
+.board-rank {
+  flex: none;
+  width: 24px;
+  font-family: var(--font-display);
+  font-weight: 800;
+  font-size: 16px;
+  color: var(--text-dim);
+  font-variant-numeric: tabular-nums;
+}
+
+.board-rank.is-podium {
+  color: var(--gold);
+}
+
+.board-body {
   flex: 1;
   min-width: 0;
 }
 
-.region-detail-flag {
-  font-family: var(--font-mono);
-  font-size: var(--text-xs);
-  letter-spacing: 0.08em;
-  color: var(--cyan);
-  padding: var(--space-1) var(--space-2);
-  border: 1px solid var(--border);
-  border-radius: var(--radius-sm);
+.board-name {
+  font-family: var(--font-display);
+  font-weight: 800;
+  font-size: 15px;
+  color: var(--text);
 }
 
-.region-detail-name {
-  display: block;
-  font-size: var(--text-sm);
-  font-weight: 600;
+.board-meta {
+  font-size: 11px;
+  color: var(--text-muted);
 }
 
-.region-detail-country {
-  font-size: var(--text-xs);
-  color: var(--text-dim);
-}
-
-.region-detail-count {
-  display: flex;
-  flex-direction: column;
-  align-items: flex-end;
-}
-
-.region-detail-count strong {
-  font-size: var(--text-lg);
-  color: var(--cyan);
+.board-score {
+  flex: none;
+  font-family: var(--font-display);
+  font-weight: 800;
+  font-size: 16px;
+  color: var(--text);
   font-variant-numeric: tabular-nums;
 }
 
-.region-detail-count span {
-  font-size: var(--text-xs);
-  color: var(--text-dim);
+.board-row.is-me {
+  background: var(--cream);
+  border-color: var(--gold);
 }
 
-.region-list {
-  display: flex;
-  flex-direction: column;
-}
+.board-row.is-me .board-name { color: var(--on-cream); }
+.board-row.is-me .board-meta { color: var(--on-cream-soft); }
+.board-row.is-me .board-rank,
+.board-row.is-me .board-score { color: var(--hero); }
 
-.region-row {
-  display: flex;
+/* --- You ---------------------------------------------------------------- */
+
+.photo-card {
   align-items: center;
-  gap: var(--space-3);
-  width: 100%;
-  padding: var(--space-3) var(--space-2);
-  text-align: left;
-  border-top: 1px solid var(--border);
-  border-radius: var(--radius-sm);
-  transition: background 160ms ease;
+  gap: 12px;
 }
 
-.region-row:first-child {
-  border-top: none;
-}
-
-.region-row:hover,
-.region-row.is-selected {
-  background: rgba(125, 250, 255, 0.06);
-}
-
-.region-dot {
-  width: 8px;
-  height: 8px;
+/*
+ * The chosen avatar, shown large. Smaller than the old photo frame, because a
+ * character does not need 178 pixels to be legible and the picker beneath it
+ * has to fit on a phone without pushing everything else off the screen.
+ */
+.avatar-ring {
+  width: 92px;
+  height: 92px;
   flex: none;
   border-radius: 50%;
-  background: var(--cyan);
-  box-shadow: 0 0 10px rgba(125, 250, 255, 0.8);
+  border: 3px solid var(--tint-1);
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
-.region-name {
+.avatar-ring-face {
+  font-size: 46px;
+  line-height: 1;
+}
+
+@media (max-width: 460px) {
+  .avatar-ring {
+    width: 74px;
+    height: 74px;
+  }
+
+  .avatar-ring-face {
+    font-size: 36px;
+  }
+}
+
+.photo-copy {
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.photo-title {
+  font-family: var(--font-display);
+  font-weight: 800;
+  font-size: 15px;
+  color: var(--text);
+}
+
+.photo-note {
+  font-size: 12px;
+  line-height: 1.4;
+  color: var(--text-soft);
+  text-wrap: pretty;
+}
+
+.fields {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+/* --- Stats: the sentence, the ring, the calendar ------------------------- */
+
+.stat-headline {
+  font-size: 14px;
+  line-height: 1.5;
+  color: var(--text-soft);
+  text-wrap: pretty;
+}
+
+.tile-delta {
+  display: block;
+  margin-top: 2px;
+  font-size: 10px;
+  font-weight: 700;
+  opacity: 0.75;
+}
+
+.tile-delta:empty {
+  display: none;
+}
+
+.day-strip {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
   flex: 1;
-  font-size: var(--text-sm);
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
+  min-height: 0;
 }
 
-.region-badge {
-  padding: 2px var(--space-2);
-  font-size: var(--text-xs);
-  color: #04121c;
-  background: var(--mint);
-  border-radius: var(--radius-pill);
+/*
+ * `stretch`, not `flex-end`, and the columns do the aligning.
+ *
+ * The bars are a percentage of the column they stand in, and a percentage
+ * height needs a parent whose own height is settled. `flex-end` leaves each
+ * column as tall as its contents - which is the bar - so the percentage had
+ * nothing to resolve against and every bar came out empty.
+ */
+.day-bars {
+  display: flex;
+  align-items: stretch;
+  gap: 2px;
+  flex: 1;
+  min-height: 0;
 }
 
-.region-count {
-  font-family: var(--font-mono);
-  font-size: var(--text-sm);
+.day-hour {
+  flex: 1;
+  display: flex;
+  align-items: flex-end;
+  min-width: 0;
+}
+
+.day-bar {
+  width: 100%;
+  border-radius: 999px;
+  background: var(--gold);
+  transition: height 300ms ease;
+}
+
+/* The hour you wait most, picked out without needing to read the axis. */
+.day-bar.is-peak {
+  background: var(--hero);
+}
+
+.day-axis {
+  position: relative;
+  height: 12px;
+}
+
+.day-mark {
+  position: absolute;
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  color: var(--text-dim);
+  transform: translateX(-50%);
+}
+
+/* Midnight again, at the far end - the strip is a whole day. */
+.day-mark.is-end {
+  right: 0;
+  transform: none;
+}
+
+/* The sentence under a chart, saying what the chart shows. */
+.card-note {
+  font-size: 12px;
   color: var(--text-muted);
+}
+
+.card-note:empty {
+  display: none;
+}
+
+
+/*
+ * The five intensity steps, named once. A month is drawn as divs and a year as
+ * an SVG, so the same value has to reach both `background` and `fill`.
+ */
+.heat-0 { --heat: var(--card-line); }
+.heat-1 { --heat: #5A4E45; }
+.heat-2 { --heat: #8A6A3D; }
+.heat-3 { --heat: var(--gold-deep); }
+.heat-4 { --heat: var(--gold); }
+
+/*
+ * A month: weekdays across, weeks down.
+ *
+ * The cells take their width from the column and their height from what is
+ * left of `--chart-h`, so they are wider than they are tall. Making them
+ * square would mean choosing between filling the width and keeping the card
+ * the size it is at every other range, and the card size wins.
+ */
+.heat-grid {
+  display: grid;
+  grid-template-columns: repeat(7, minmax(0, 1fr));
+  /* Row one is the weekday initials; the weeks after it share what remains. */
+  grid-template-rows: auto;
+  grid-auto-rows: minmax(0, 1fr);
+  gap: 5px;
+  flex: 1;
+  min-height: 0;
+  /* Seven columns spread across a whole desktop row read as stripes. */
+  max-width: 560px;
+}
+
+.heat-dow {
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-align: center;
+  color: var(--text-dim);
+  line-height: 1.4;
+}
+
+.heat-box {
+  border-radius: 5px;
+  background: var(--heat, var(--card-line));
+}
+
+.heat-box.is-today {
+  outline: 2px solid var(--hero);
+  outline-offset: -2px;
+}
+
+/* A year scrolls sideways rather than squashing 53 weeks into 350px. */
+.heatmap-scroll {
+  overflow-x: auto;
+  scrollbar-width: none;
+  /* Shorter than the others by nature, so it is centred in the same box. */
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  align-items: center;
+}
+
+.heatmap-scroll::-webkit-scrollbar {
+  height: 0;
+}
+
+.heatmap {
+  display: block;
+}
+
+.heat-cell {
+  fill: var(--heat, var(--card-line));
+}
+
+.heat-cell.is-today {
+  stroke: var(--hero);
+  stroke-width: 2;
+}
+
+/* --- Stats: records and recent waits ------------------------------------ */
+
+.records-head {
+  display: block;
+  margin-bottom: 10px;
+  padding: 0 4px;
+}
+
+.record-value {
+  font-family: var(--font-display);
+  font-weight: 800;
+  font-size: 22px;
+  line-height: 1.2;
+  color: var(--text);
+}
+
+.record-hint {
+  font-size: 11px;
+  color: var(--text-muted);
+}
+
+.wait-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 11px 14px;
+  border-radius: 20px;
+  background: var(--card);
+  border: 2px solid var(--card-line);
+}
+
+.wait-length {
+  flex: none;
+  min-width: 56px;
+  font-family: var(--font-display);
+  font-weight: 800;
+  font-size: 16px;
+  color: var(--gold);
   font-variant-numeric: tabular-nums;
 }
 
-/* --- Location controls -------------------------------------------------- */
-
-.location-controls {
-  display: grid;
-  gap: var(--space-3);
+.wait-body {
+  flex: 1;
+  min-width: 0;
 }
 
-.region-select {
-  min-height: 46px;
-  padding: 0 var(--space-4);
-  background: var(--glass);
-  border: 1px solid var(--border);
-  border-radius: var(--radius-pill);
-  font-size: var(--text-sm);
-  appearance: none;
+.wait-when {
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--text);
 }
 
-.region-select option {
-  background: var(--surface-solid);
+.wait-did {
+  font-size: 11px;
+  color: var(--text-muted);
 }
 
-/* --- Analytics extras --------------------------------------------------- */
-
-.export-button {
-  align-self: center;
+.wait-forget {
+  flex: none;
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  color: var(--text-dim);
+  font-size: 12px;
 }
 
-@media (min-width: 420px) {
-  .location-controls {
-    grid-template-columns: 1fr auto;
-    align-items: center;
-  }
+.wait-forget:hover {
+  color: var(--hero);
+  background: var(--card-hover);
 }

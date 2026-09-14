@@ -11,8 +11,16 @@
   "scripts": {
     "start": "node server/index.js",
     "dev": "node --watch server/index.js",
-    "test": "node --test test/*.test.js",
-    "icons": "node scripts/generate-icons.mjs"
+    "test": "node --test --test-concurrency=1 test/*.test.js",
+    "icons": "node scripts/generate-icons.mjs",
+    "cities": "node scripts/build-cities.mjs",
+    "db:up": "docker run -d --name thewait-pg -e POSTGRES_PASSWORD=thewait -e POSTGRES_USER=thewait -e POSTGRES_DB=thewait -p 55432:5432 postgres:16-alpine",
+    "db:down": "docker rm -f thewait-pg",
+    "db:migrate": "node -e \"import('./server/db/migrate.js').then(m=>m.migrate()).then(()=>process.exit(0))\"",
+    "db:import": "node scripts/import-json-data.mjs"
   },
-  "license": "MIT"
+  "license": "MIT",
+  "dependencies": {
+    "pg": "^8.23.0"
+  }
 }

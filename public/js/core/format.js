@@ -1,13 +1,32 @@
 /** Presentation-only helpers. Kept pure so screens never re-implement them. */
 
-/** `HH:MM:SS`, or `MM:SS` under an hour - the running timer face. */
+/**
+ * The big timer face: `M:SS`, growing to `H:MM:SS` past an hour. Minutes are
+ * deliberately unpadded so a short wait reads `1:24` rather than `01:24`.
+ */
 export function clockFace(totalSeconds) {
   const seconds = Math.max(0, Math.floor(totalSeconds));
   const hours = Math.floor(seconds / 3600);
   const minutes = Math.floor((seconds % 3600) / 60);
   const pad = (value) => String(value).padStart(2, '0');
 
-  return hours ? `${hours}:${pad(minutes)}:${pad(seconds % 60)}` : `${pad(minutes)}:${pad(seconds % 60)}`;
+  return hours ? `${hours}:${pad(minutes)}:${pad(seconds % 60)}` : `${minutes}:${pad(seconds % 60)}`;
+}
+
+/**
+ * Up to two letters for an avatar. Names arrive as `Kev Wu` but also as
+ * `kev_wu` or `priya.builds`, so separators count as spaces.
+ */
+export function initials(name) {
+  const parts = String(name ?? '')
+    .replace(/[._-]/g, ' ')
+    .split(' ')
+    .filter(Boolean);
+
+  const first = parts[0] ?? '?';
+  const second = parts[1] ? parts[1][0] : first[1] ?? '';
+
+  return (first[0] + second).toUpperCase();
 }
 
 /** Compact human duration: `4s`, `2m 14s`, `1h 42m`. */

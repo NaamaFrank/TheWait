@@ -13,9 +13,17 @@
  * every older cache.
  */
 
-const CACHE_VERSION = 'v1';
+const CACHE_VERSION = 'v27';
 const SHELL_CACHE = `thewait-shell-${CACHE_VERSION}`;
 const DATA_CACHE = `thewait-data-${CACHE_VERSION}`;
+
+/**
+ * Serving the shell cache-first is right in production and actively hostile in
+ * development: every edit needs a CACHE_VERSION bump before it can be seen. On
+ * a local origin the shell goes to the network instead, so a plain reload shows
+ * the code that is actually on disk.
+ */
+const IS_LOCAL = ['localhost', '127.0.0.1', '[::1]'].includes(self.location.hostname);
 
 const SHELL_ASSETS = [
   '/',
@@ -26,21 +34,33 @@ const SHELL_ASSETS = [
   '/styles/base.css',
   '/styles/components.css',
   '/styles/screens.css',
+  '/styles/desktop.css',
+  '/styles/desktop.css',
   '/js/main.js',
   '/js/core/api.js',
+  '/js/core/carousel.js',
   '/js/core/dom.js',
   '/js/core/format.js',
   '/js/core/identity.js',
-  '/js/core/router.js',
+  '/js/core/pwa.js',
   '/js/core/store.js',
+  '/js/core/view-mode.js',
+  '/js/core/view-mode.js',
+  '/js/core/wait-timer.js',
+  '/js/components/pairing.js',
+  '/js/components/welcome.js',
+  '/js/components/place-picker.js',
   '/js/components/charts.js',
+  '/js/components/geo.js',
   '/js/components/globe.js',
-  '/js/components/icons.js',
-  '/js/components/land.js',
   '/js/components/ui.js',
-  '/js/screens/analytics.js',
-  '/js/screens/globe.js',
-  '/js/screens/timer.js',
+  '/js/screens/board.js',
+  '/js/screens/live.js',
+  '/js/screens/stats.js',
+  '/js/screens/streaks.js',
+  '/js/screens/wait.js',
+  '/js/screens/you.js',
+  '/data/countries-110m.json',
   '/icons/icon-192.png',
   '/icons/icon-512.png',
   '/icons/apple-touch-icon.png'
@@ -139,5 +159,5 @@ self.addEventListener('fetch', (event) => {
     return;
   }
 
-  event.respondWith(cacheFirst(request));
+  event.respondWith(IS_LOCAL ? networkFirst(request) : cacheFirst(request));
 });

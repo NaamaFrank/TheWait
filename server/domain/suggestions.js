@@ -8,6 +8,7 @@ const catalogue = JSON.parse(fs.readFileSync(path.join(config.dataDir, 'suggesti
 
 const bucketsById = new Map(catalogue.buckets.map((bucket) => [bucket.id, bucket]));
 const categoriesById = new Map(catalogue.categories.map((category) => [category.id, category]));
+const itemsById = new Map(catalogue.items.map((item) => [item.id, item]));
 
 /** The bucket whose range contains `seconds`; falls back to the longest bucket. */
 export function bucketForSeconds(seconds) {
@@ -18,14 +19,35 @@ export function bucketForSeconds(seconds) {
   return match ?? catalogue.buckets[catalogue.buckets.length - 1];
 }
 
+/**
+ * Adds everything the client shows but the catalogue does not repeat 190 times:
+ * the pill label taken from the category, and the XP taken from the bucket, so
+ * a longer wait is worth more than a twenty-second one.
+ */
 function decorate(item) {
+  const bucket = bucketsById.get(item.bucket);
+
   return {
-    ...item,
-    categoryLabel: categoriesById.get(item.category)?.label ?? item.category,
-    accent: categoriesById.get(item.category)?.accent ?? 'cyan',
-    iconName: categoriesById.get(item.category)?.icon ?? 'spark',
-    bucketLabel: bucketsById.get(item.bucket)?.label ?? item.bucket
+    id: item.id,
+    bucket: item.bucket,
+    category: item.category,
+    title: item.title,
+    sub: item.sub,
+    tag: categoriesById.get(item.category)?.label ?? item.category,
+    xp: bucket?.xp ?? 0,
+    bucketLabel: bucket?.label ?? item.bucket
   };
+}
+
+/** Looks up one suggestion, for scoring a completion the client reports. */
+export function getSuggestion(id) {
+  const item = itemsById.get(id);
+  return item ? decorate(item) : null;
+}
+
+/** Display label for a category id, so other domains need not reload the catalogue. */
+export function getCategoryLabel(categoryId) {
+  return categoriesById.get(categoryId)?.label ?? categoryId;
 }
 
 export function getMeta() {

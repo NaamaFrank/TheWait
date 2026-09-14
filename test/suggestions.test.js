@@ -34,3 +34,39 @@ test('a narrow filter still returns something', () => {
   const result = pickSuggestions({ seconds: 30, category: 'does-not-exist', count: 3 });
   assert.ok(result.items.length > 0);
 });
+
+/**
+ * Version skew between the running server and the client.
+ *
+ * The catalogue is read once at boot, so a server left running across a change
+ * to `data/suggestions.json` keeps serving the previous shape. That is what put
+ * "Did it +undefined" on screen, so the client now refuses those items.
+ */
+test('a task card rejects payloads from an older server build', async () => {
+  const { isRenderable } = await import('../public/js/screens/wait.js');
+  const { pickSuggestions } = await import('../server/domain/suggestions.js');
+
+  // The exact shape the pre-XP server returned.
+  const oldShape = {
+    id: 's083',
+    bucket: 'short',
+    category: 'craft',
+    text: 'Pin the dependency version you have been getting away with.',
+    categoryLabel: 'Craft',
+    accent: 'violet',
+    iconName: 'code',
+    bucketLabel: '1-5 minutes'
+  };
+
+  assert.equal(isRenderable(oldShape), false, 'no title, tag or xp');
+  assert.equal(isRenderable(null), false);
+  assert.equal(isRenderable({ ...oldShape, title: 'x', tag: 'Craft' }), false, 'xp is still missing');
+  assert.equal(isRenderable({ id: 'a', title: 'x', tag: 'Craft', xp: 0 }), true, 'a free task is still valid');
+
+  // And everything the current server actually serves is renderable.
+  const { items } = pickSuggestions({ seconds: 120, count: 12, seed: 'shape' });
+  assert.ok(items.length > 0);
+  for (const item of items) {
+    assert.equal(isRenderable(item), true, `${item.id} should render`);
+  }
+});

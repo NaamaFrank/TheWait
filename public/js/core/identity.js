@@ -9,7 +9,7 @@ const STORAGE_KEY = 'thewait.deviceId';
  */
 let memoryFallback = null;
 
-function generateId() {
+export function newId() {
   if (globalThis.crypto?.randomUUID) return globalThis.crypto.randomUUID();
 
   // RFC 4122 v4 shape from getRandomValues, for older WebViews.
@@ -26,11 +26,11 @@ export function getDeviceId() {
     const existing = localStorage.getItem(STORAGE_KEY);
     if (existing) return existing;
 
-    const created = generateId();
+    const created = newId();
     localStorage.setItem(STORAGE_KEY, created);
     return created;
   } catch {
-    memoryFallback ??= generateId();
+    memoryFallback ??= newId();
     return memoryFallback;
   }
 }

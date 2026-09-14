@@ -4,8 +4,10 @@ import { hourLabel } from '../public/js/core/format.js';
 import { clockFace, headlineDuration, humanDuration } from '../public/js/core/format.js';
 
 test('clock face drops the hour segment under an hour', () => {
-  assert.equal(clockFace(0), '00:00');
-  assert.equal(clockFace(74), '01:14');
+  // Minutes are unpadded so the big timer face reads 1:14, not 01:14.
+  assert.equal(clockFace(0), '0:00');
+  assert.equal(clockFace(74), '1:14');
+  assert.equal(clockFace(600), '10:00');
   assert.equal(clockFace(3671), '1:01:11');
 });
 

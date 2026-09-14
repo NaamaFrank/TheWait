@@ -12,10 +12,10 @@ import { fileURLToPath } from 'node:url';
 
 const outputDir = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..', 'public', 'icons');
 
-const BACKGROUND = [7, 17, 30];
-const CYAN = [125, 250, 255];
-const PURPLE = [141, 109, 255];
-const DEEP = [18, 26, 62];
+const BACKGROUND = [20, 16, 15]; // #14100F, the app's page colour
+const GOLD = [255, 197, 61]; // #FFC53D
+const HERO = [255, 90, 54]; // #FF5A36
+const DEEP = [193, 63, 33]; // #C13F21, the pressed-button shadow
 
 const CRC_TABLE = Uint32Array.from({ length: 256 }, (_, n) => {
   let c = n;
@@ -91,12 +91,12 @@ function drawIcon(size) {
 
       // Outer atmosphere.
       const glow = clamp01(1 - (distance - orbRadius) / (size * 0.24));
-      if (distance > orbRadius) colour = mix(colour, CYAN, glow * glow * 0.18);
+      if (distance > orbRadius) colour = mix(colour, GOLD, glow * glow * 0.14);
 
       // The ring.
       const ringDelta = Math.abs(distance - ringRadius);
       if (ringDelta < ringWidth) {
-        colour = mix(colour, CYAN, (1 - ringDelta / ringWidth) * 0.8);
+        colour = mix(colour, GOLD, (1 - ringDelta / ringWidth) * 0.85);
       }
 
       // The orb, lit from the upper left.
@@ -105,13 +105,13 @@ function drawIcon(size) {
         const ly = (dy + orbRadius * 0.38) / orbRadius;
         const lit = clamp01(1 - Math.hypot(lx, ly) * 0.78);
 
-        // Shade from a deep indigo in the shadow to a cyan highlight, so the
-        // orb reads as a lit sphere rather than a flat disc.
-        colour = mix(DEEP, mix(PURPLE, CYAN, lit ** 2.2), 0.18 + 0.82 * lit ** 0.85);
+        // Shade from the button's own shadow colour up to a gold highlight, so
+        // the orb reads as the app's chunky press button rather than a flat disc.
+        colour = mix(DEEP, mix(HERO, GOLD, lit ** 2.4), 0.2 + 0.8 * lit ** 0.85);
 
         // Soften the silhouette edge.
         const edge = clamp01((orbRadius - distance) / 1.6);
-        colour = mix(mix([...BACKGROUND], CYAN, glow * glow * 0.18), colour, edge);
+        colour = mix(mix([...BACKGROUND], GOLD, glow * glow * 0.14), colour, edge);
       }
 
       const offset = (y * size + x) * 4;
