@@ -5,9 +5,10 @@ import { allCompletionsFor, insertCompletion } from '../db/completions.repo.js';
 import { badRequest } from '../http/errors.js';
 import { accountIdFor } from './devices.js';
 import { readSessionRecords } from './sessions.js';
-import { getCategoryLabel, getSuggestion } from './suggestions.js';
+import { getCategoryLabel, getSuggestion, listBuckets } from './suggestions.js';
+import { listUserTasks } from '../db/tasks.repo.js';
 import { localDayKey, localDayStart, MS_PER_DAY, toLocal, weekdayInitial } from './time.js';
-import { clampInt, optionalUuid, requireDeviceId } from './validate.js';
+import { isUuid, clampInt, optionalUuid, requireDeviceId } from './validate.js';
 
 /**
  * XP, streaks and badges.
@@ -67,9 +68,15 @@ const MIX_ROWS = 4;
 export async function recordCompletion(rawDeviceId, payload, options = {}) {
   const deviceId = requireDeviceId(rawDeviceId);
   const accountId = await accountIdFor(deviceId);
-  const suggestion = getSuggestion(payload?.suggestionId);
+  /*
+   * From the catalogue, or from the tasks this person wrote themselves. Their
+   * own were rejected outright before, because the catalogue was the only
+   * place a task could come from.
+   */
+  const suggestion =
+    getSuggestion(payload?.suggestionId) ?? (await ownTaskAsSuggestion(accountId, payload?.suggestionId));
 
-  if (!suggestion) throw badRequest('"suggestionId" must name a suggestion in the catalogue');
+  if (!suggestion) throw badRequest('"suggestionId" must name a task you were offered');
 
   const record = {
     id: randomUUID(),
@@ -88,6 +95,28 @@ export async function recordCompletion(rawDeviceId, payload, options = {}) {
   await insertCompletion(record, { keep: config.maxCompletionsPerDevice });
 
   return buildProgress(deviceId, options);
+}
+
+/**
+ * One of your own tasks, in the shape the catalogue would have returned.
+ *
+ * Scored by its size, exactly as a catalogue task of that bucket is, so
+ * writing your own is not a way to mint XP and not a way to lose it either.
+ */
+async function ownTaskAsSuggestion(accountId, id) {
+  if (!isUuid(id)) return null;
+
+  const mine = (await listUserTasks(accountId)).find((task) => task.id === id);
+  if (!mine) return null;
+
+  const bucket = listBuckets().find((candidate) => candidate.id === mine.bucket);
+
+  return {
+    id: mine.id,
+    category: 'yours',
+    bucket: mine.bucket,
+    xp: bucket?.xp ?? 0
+  };
 }
 
 /** Total XP earned in the last `days` local days. Used by the leaderboard. */

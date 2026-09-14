@@ -46,7 +46,11 @@ export function getSuggestion(id) {
 }
 
 /** Display label for a category id, so other domains need not reload the catalogue. */
+/** Tasks people wrote themselves are not in the catalogue's categories. */
+const OWN_CATEGORY = { id: 'yours', label: 'Your own' };
+
 export function getCategoryLabel(categoryId) {
+  if (categoryId === OWN_CATEGORY.id) return OWN_CATEGORY.label;
   return categoriesById.get(categoryId)?.label ?? categoryId;
 }
 
@@ -66,8 +70,22 @@ export function getMeta() {
  * poll without the list reshuffling underneath the user. `exclude` lets a
  * client ask for a different set without repeating what it just showed.
  */
-export function pickSuggestions({ seconds = 0, category = null, count = 3, seed = null, exclude = [] } = {}) {
-  const bucket = bucketForSeconds(Math.max(0, Number(seconds) || 0));
+export function pickSuggestions({
+  seconds = 0,
+  bucket: bucketId = null,
+  category = null,
+  count = 3,
+  seed = null,
+  exclude = [],
+  weights = null,
+  weight = 1
+} = {}) {
+  // The caller may have already decided the size - `queue.js` caps it by how
+  // long this person's waits actually run, which this module cannot know.
+  const bucket = bucketId
+    ? bucketsById.get(bucketId) ?? bucketForSeconds(Math.max(0, Number(seconds) || 0))
+    : bucketForSeconds(Math.max(0, Number(seconds) || 0));
+
   const excluded = new Set(exclude);
 
   let pool = catalogue.items.filter((item) => item.bucket === bucket.id && !excluded.has(item.id));
@@ -81,9 +99,49 @@ export function pickSuggestions({ seconds = 0, category = null, count = 3, seed 
   }
 
   const wanted = clampInt(count, 3, { min: 1, max: 12 });
-  const picked = shuffle(pool, seed).slice(0, wanted).map(decorate);
+
+  // The weighted pool holds an item more than once, so the shuffle is walked
+  // rather than sliced - otherwise a favoured task fills the queue by itself.
+  const seen = new Set();
+  const picked = [];
+
+  for (const item of shuffle(weighted(pool, weights, weight), seed)) {
+    if (seen.has(item.id)) continue;
+    seen.add(item.id);
+    picked.push(decorate(item));
+    if (picked.length === wanted) break;
+  }
 
   return { bucket, category, items: picked };
+}
+
+/**
+ * Tilts the pool towards categories this person actually clears.
+ *
+ * By repetition rather than by sorting: a weighted shuffle still turns up
+ * something from a category they have never touched, which a ranked list
+ * would never do. Clearing a few "craft" tasks should lean the queue, not
+ * narrow it to one category for good.
+ */
+function weighted(pool, weights, weight) {
+  if (!weights?.size || weight <= 1) return pool;
+
+  const most = Math.max(...weights.values());
+  if (!most) return pool;
+
+  const out = [];
+  for (const item of pool) {
+    const share = (weights.get(item.category) ?? 0) / most;
+    const copies = 1 + Math.round(share * (weight - 1));
+    for (let i = 0; i < copies; i += 1) out.push(item);
+  }
+
+  return out;
+}
+
+/** The sizes of wait, for anything that needs to order or validate them. */
+export function listBuckets() {
+  return catalogue.buckets;
 }
 
 /** Deterministic Fisher-Yates when `seed` is supplied, random otherwise. */

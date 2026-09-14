@@ -1509,3 +1509,132 @@ select.input option {
   align-items: center;
   gap: 10px;
 }
+
+/* --- What you are up for, under the task ---------------------------------- */
+
+.task-foot {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+  padding-top: 4px;
+  border-top: 1px solid var(--card-line);
+  margin-top: 4px;
+}
+
+.task-foot .chip-row {
+  flex: 1;
+  min-width: 0;
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+
+.task-foot .chip-row::-webkit-scrollbar {
+  height: 0;
+}
+
+/* Quieter than Next: it is the rarer, more final of the two. */
+.task-ban {
+  border: 0;
+  background: none;
+  padding: 6px 4px;
+  font-family: var(--font);
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--text-dim);
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.task-ban:hover {
+  color: var(--hero);
+}
+
+/* --- Your own tasks ------------------------------------------------------- */
+
+.own-list {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.own-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 9px 12px;
+  border-radius: 14px;
+  background: var(--card-inset);
+}
+
+.own-row-body {
+  flex: 1;
+  min-width: 0;
+}
+
+.own-title {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text);
+}
+
+.own-size-tag {
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--text-off);
+  margin-top: 1px;
+}
+
+.own-remove {
+  border: 0;
+  background: none;
+  color: var(--text-dim);
+  font-size: 12px;
+  cursor: pointer;
+  padding: 4px;
+}
+
+.own-remove:hover {
+  color: var(--hero);
+}
+
+.own-empty {
+  font-size: 12px;
+  color: var(--text-dim);
+  padding: 2px 2px 4px;
+}
+
+.own-sizes {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+.own-size {
+  border: 2px solid var(--card-line);
+  border-radius: 999px;
+  padding: 5px 11px;
+  background: none;
+  font-family: var(--font);
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--text-soft);
+  cursor: pointer;
+}
+
+.own-size.is-active {
+  border-color: var(--hero);
+  background: var(--hero-muted);
+  color: var(--cream);
+}
+
+.own-note {
+  font-size: 11px;
+  color: var(--hero);
+}
+
+.own-note:empty {
+  display: none;
+}

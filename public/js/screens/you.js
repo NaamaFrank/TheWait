@@ -4,6 +4,7 @@ import { initials } from '../core/format.js';
 import { createPairing } from '../components/pairing.js';
 import { createPlacePicker } from '../components/place-picker.js';
 import { screenHead } from '../components/ui.js';
+import { createOwnTasks } from '../components/own-tasks.js';
 
 /**
  * The profile card.
@@ -106,6 +107,8 @@ export function createYouScreen({ store, onSaved }) {
    * looks and what this device is. `display: contents` on a phone, so that is
    * still the one flat stack it always was, in exactly this order.
    */
+  const ownTasks = createOwnTasks();
+
   render(element, [
     screenHead('Your pin', 'Set up your card'),
 
@@ -134,6 +137,7 @@ export function createYouScreen({ store, onSaved }) {
       el('div.card', {}, [el('span.label', { text: 'Pin color' }), swatches]),
       visibilityRow,
       saveButton,
+      ownTasks.element,
       pairing.element
     ])
   ]);
@@ -260,7 +264,13 @@ export function createYouScreen({ store, onSaved }) {
 
   return {
     element,
-    enter: paint,
+
+    enter() {
+      paint();
+      // Another device may have added one since this screen was last looked at.
+      ownTasks.refresh();
+    },
+
     destroy: () => pairing.destroy()
   };
 }

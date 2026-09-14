@@ -118,7 +118,17 @@ export const api = {
       params: { seconds, category, count, seed, exclude: exclude?.join(',') }
     }),
 
-  getSuggestionMeta: () => request('/api/suggestions/meta')
+  getSuggestionMeta: () => request('/api/suggestions/meta'),
+
+  // "Next" reports what it passed over, so the queue can stop offering it.
+  skipSuggestion: (suggestionId) =>
+    request('/api/suggestions/skip', { method: 'POST', body: { suggestionId } }),
+  blockSuggestion: (suggestionId) =>
+    request('/api/suggestions/block', { method: 'POST', body: { suggestionId, blocked: true } }),
+
+  listTasks: () => request('/api/tasks'),
+  addTask: (title, bucket) => request('/api/tasks', { method: 'POST', body: { title, bucket } }),
+  deleteTask: (id) => request(`/api/tasks/${encodeURIComponent(id)}`, { method: 'DELETE' })
 };
 
 export { ApiError };

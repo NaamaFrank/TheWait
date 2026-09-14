@@ -2,7 +2,7 @@ import { api } from '../core/api.js';
 import { el, render } from '../core/dom.js';
 import { clockFace, formatCount, headlineDuration } from '../core/format.js';
 import { createWaitTimer } from '../core/wait-timer.js';
-import { screenHead } from '../components/ui.js';
+import { chipRow, screenHead } from '../components/ui.js';
 
 /**
  * The home screen: one clock, one task, two numbers.
@@ -28,6 +28,21 @@ const CAPTIONS = {
 };
 
 const HEADINGS = { running: 'Do this now', paused: 'On hold', idle: 'Next time' };
+
+/**
+ * What you are up for, said the way a person would say it.
+ *
+ * The server has always taken a category filter and no screen ever sent one.
+ * Framed by where you are rather than by the catalogue's own taxonomy -
+ * nobody waiting on a prompt thinks "I would like a reflect task".
+ */
+const MOODS = [
+  { id: null, label: 'Anything' },
+  { id: 'body', label: 'Get up' },
+  { id: 'tidy', label: 'At my desk' },
+  { id: 'craft', label: 'Keep working' },
+  { id: 'reset', label: 'Wind down' }
+];
 
 /**
  * Everything a task card needs to render.
@@ -156,6 +171,26 @@ export function createWaitScreen({ store, onWaitLogged, onProgress, onShowLive }
     onclick: () => showNext()
   }, ['Next']);
 
+  /** Set by the chips; null means whatever the queue thinks best. */
+  let mood = null;
+
+  const moods = chipRow(MOODS.map((m) => ({ id: m.id ?? 'any', label: m.label })), 'any', (id) => {
+    mood = id === 'any' ? null : id;
+    loadQueue();
+  });
+
+  /**
+   * The one you never want to see again.
+   *
+   * Different from Next, which is "not right now" - so it is a separate
+   * control rather than a long press nobody would find.
+   */
+  const banButton = el('button.task-ban', {
+    type: 'button',
+    'aria-label': 'Never show me this again',
+    onclick: () => banTask()
+  }, ['Never again']);
+
   const taskActions = el('div.task-actions', {}, [doneButton, nextButton]);
 
   /*
@@ -194,7 +229,8 @@ export function createWaitScreen({ store, onWaitLogged, onProgress, onShowLive }
       el('div.row-between', {}, [taskHeading, taskTag]),
       taskTitle,
       taskSub,
-      taskActions
+      taskActions,
+      el('div.task-foot', {}, [moods.element, banButton])
     ]),
 
     el('div.grid-2', {}, [
@@ -217,7 +253,12 @@ export function createWaitScreen({ store, onWaitLogged, onProgress, onShowLive }
     try {
       const seconds = timer.elapsedSeconds;
       const seen = append ? queue.map((item) => item.id) : [];
-      const { bucket, items } = await api.getSuggestions({ seconds, count: BATCH, exclude: seen });
+      const { bucket, items } = await api.getSuggestions({
+        seconds,
+        category: mood,
+        count: BATCH,
+        exclude: seen
+      });
 
       queueBucket = bucket.id;
 
@@ -237,7 +278,21 @@ export function createWaitScreen({ store, onWaitLogged, onProgress, onShowLive }
     }
   }
 
-  function showNext() {
+  /**
+   * @param skip Whether the task being left behind was passed over. False when
+   *   it was cleared or banned - both also move the queue on, and counting
+   *   those as skips would teach the queue to stop offering the tasks people
+   *   actually do.
+   */
+  function showNext({ skip = true } = {}) {
+    /*
+     * Tell the server what was passed over. This was the most-pressed button
+     * in the app and it recorded nothing, so a suggestion turned down eleven
+     * times looked exactly like one never seen before.
+     */
+    const passed = skip ? activity() : null;
+    if (passed) api.skipSuggestion(passed.id).catch(() => {});
+
     // Now is the moment to grow into the size the wait has reached: the task
     // on screen is being left behind anyway.
     if (pendingBucket) {
@@ -278,6 +333,16 @@ export function createWaitScreen({ store, onWaitLogged, onProgress, onShowLive }
   const reducedMotion = () =>
     globalThis.matchMedia?.('(prefers-reduced-motion: reduce)').matches === true;
 
+  async function banTask() {
+    const current = activity();
+    if (!current || busy) return;
+
+    // Optimistic: the queue moves on either way, and a failed block is a task
+    // that turns up once more rather than anything lost.
+    api.blockSuggestion(current.id).catch(() => {});
+    showNext({ skip: false });
+  }
+
   async function completeTask() {
     const current = activity();
     if (!current || busy) return;
@@ -295,7 +360,7 @@ export function createWaitScreen({ store, onWaitLogged, onProgress, onShowLive }
       // Nothing banked; the task stays on screen so it can be retried.
     } finally {
       busy = false;
-      showNext();
+      showNext({ skip: false });
     }
   }
 
