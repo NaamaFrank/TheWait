@@ -5,6 +5,7 @@ import { createPairing } from '../components/pairing.js';
 import { createPlacePicker } from '../components/place-picker.js';
 import { screenHead } from '../components/ui.js';
 import { createOwnTasks } from '../components/own-tasks.js';
+import { createAgents } from '../components/agents.js';
 
 /**
  * The profile card.
@@ -108,6 +109,7 @@ export function createYouScreen({ store, onSaved }) {
    * still the one flat stack it always was, in exactly this order.
    */
   const ownTasks = createOwnTasks();
+  const agents = createAgents();
 
   render(element, [
     screenHead('Your pin', 'Set up your card'),
@@ -138,6 +140,7 @@ export function createYouScreen({ store, onSaved }) {
       visibilityRow,
       saveButton,
       ownTasks.element,
+      agents.element,
       pairing.element
     ])
   ]);
@@ -269,6 +272,7 @@ export function createYouScreen({ store, onSaved }) {
       paint();
       // Another device may have added one since this screen was last looked at.
       ownTasks.refresh();
+      agents.refresh();
     },
 
     destroy: () => pairing.destroy()

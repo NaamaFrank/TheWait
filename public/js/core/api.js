@@ -131,6 +131,11 @@ export const api = {
   blockSuggestion: (suggestionId) =>
     request('/api/suggestions/block', { method: 'POST', body: { suggestionId, blocked: true } }),
 
+  listAgents: () => request('/api/agents'),
+  // The token comes back once and is never retrievable again.
+  createAgent: (label) => request('/api/agents', { method: 'POST', body: { label } }),
+  revokeAgent: (id) => request(`/api/agents/${encodeURIComponent(id)}`, { method: 'DELETE' }),
+
   listTasks: () => request('/api/tasks'),
   addTask: (title, bucket) => request('/api/tasks', { method: 'POST', body: { title, bucket } }),
   deleteTask: (id) => request(`/api/tasks/${encodeURIComponent(id)}`, { method: 'DELETE' })

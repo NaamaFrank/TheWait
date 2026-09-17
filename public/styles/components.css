@@ -1674,3 +1674,43 @@ select.input option {
 .own-note:empty {
   display: none;
 }
+
+/* --- A token, shown once -------------------------------------------------- */
+
+.agent-reveal {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 14px;
+  border-radius: 18px;
+  background: var(--card-off);
+  border: 2px solid var(--hero-muted);
+}
+
+.agent-reveal[hidden] {
+  display: none;
+}
+
+.agent-once {
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--hero);
+}
+
+.agent-token,
+.agent-cmd {
+  display: block;
+  padding: 10px;
+  border-radius: 10px;
+  background: var(--page);
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: 11px;
+  line-height: 1.5;
+  color: var(--text);
+  word-break: break-all;
+}
+
+.agent-steps {
+  font-size: 11px;
+  color: var(--text-soft);
+}

@@ -52,6 +52,10 @@ const steps = [
   {
     name: '008-task-memory-shown',
     sql: () => fs.readFileSync(path.join(dbDir, '008-task-memory-shown.sql'), 'utf8')
+  },
+  {
+    name: '009-agent-tokens',
+    sql: () => fs.readFileSync(path.join(dbDir, '009-agent-tokens.sql'), 'utf8')
   }
 ];
 

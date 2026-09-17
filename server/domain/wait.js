@@ -9,7 +9,7 @@ import {
   startWait
 } from '../db/waits.repo.js';
 import { accountIdFor } from './devices.js';
-import { createSession } from './sessions.js';
+import { createSessionForAccount } from './sessions.js';
 
 /**
  * The wait in progress.
@@ -104,7 +104,16 @@ export async function getWait(rawDeviceId) {
 }
 
 export async function beginWait(rawDeviceId) {
-  const accountId = await accountIdFor(rawDeviceId);
+  return beginWaitForAccount(await accountIdFor(rawDeviceId));
+}
+
+/**
+ * The same, for a caller that has an account but no device.
+ *
+ * An agent token belongs to the account, not to a browser - an editor hook is
+ * not a device that anyone paired.
+ */
+export async function beginWaitForAccount(accountId) {
   return toPublicWait(await startWait(accountId, randomUUID()));
 }
 
@@ -131,16 +140,27 @@ export async function continueWait(rawDeviceId) {
  * both bank the same wait - the second finds nothing to end.
  */
 export async function finishWait(rawDeviceId, { endAt = null } = {}) {
-  const accountId = await accountIdFor(rawDeviceId);
+  return finishWaitForAccount(await accountIdFor(rawDeviceId), { endAt, deviceId: rawDeviceId });
+}
+
+/**
+ * Ends the wait for an account, with or without a device behind it.
+ *
+ * `sessions.device_id` is nullable - a device can be unlinked without erasing
+ * what it recorded - so a wait an editor hook closed logs perfectly well with
+ * no device attached to it.
+ */
+export async function finishWaitForAccount(accountId, { endAt = null, deviceId = null, label = 'Prompt run' } = {}) {
   const finished = await clearWait(accountId, { endAt });
 
   if (!finished) return { session: null, wait: toPublicWait(null) };
 
-  const session = await createSession(rawDeviceId, {
+  const session = await createSessionForAccount(accountId, {
     waitId: finished.waitId,
     startedAt: finished.startedAt,
     durationSeconds: finished.durationSeconds,
-    label: 'Prompt run'
+    deviceId,
+    label
   });
 
   return { session, wait: toPublicWait(null) };

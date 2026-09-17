@@ -394,6 +394,79 @@ an unmigrated database turns one clear failure into a hundred confusing ones.
 Each step runs once and is recorded, under an advisory lock so that several
 instances starting at the same moment on a rolling deploy cannot race.
 
+## Connecting Claude Code
+
+A wait is the gap between sending a prompt and the answer landing. Claude Code
+knows exactly when both happen, so it can run the clock for you and there is
+nothing to remember and nothing left running overnight.
+
+Two hooks: `UserPromptSubmit` opens a wait, `Stop` closes it.
+
+**1. Mint a token.** You screen, *Connected editors*, "Connect Claude Code".
+It is shown once - the server keeps only a sha256 of it.
+
+**2. Give it to the hook script**, which stores it in `~/.thewait/token` at
+`0600`. Never paste it into `settings.json`: that file gets committed, copied
+between machines and read out over screenshares.
+
+```
+node scripts/thewait-hook.mjs login twk_...
+node scripts/thewait-hook.mjs status
+```
+
+**3. Add the hooks** to `.claude/settings.json`:
+
+```json
+{
+  "hooks": {
+    "UserPromptSubmit": [
+      { "hooks": [{ "type": "command",
+        "command": "node /absolute/path/to/scripts/thewait-hook.mjs start" }] }
+    ],
+    "Stop": [
+      { "hooks": [{ "type": "command",
+        "command": "node /absolute/path/to/scripts/thewait-hook.mjs end" }] }
+    ]
+  }
+}
+```
+
+`THEWAIT_URL` overrides the address if the app is not on `127.0.0.1:3000`. It
+must be a local one - the token is refused from anywhere else.
+
+### What the token can do, and what it cannot
+
+It is a deliberately weaker credential than the device id, which is a permanent
+bearer token for the whole account.
+
+- **Two endpoints only.** `POST /api/wait/start` and `POST /api/wait/end`. The
+  allowlist lives in `server/http/router.js` and is matched exactly, so a route
+  added later is locked out until somebody lists it on purpose. It cannot read
+  your history, change your profile, or mint another credential.
+- **This machine only.** Refused from any non-loopback address, checked before
+  the token is even looked up. The server often binds to `0.0.0.0` so a phone
+  can reach the app; that must not widen what a token can do.
+- **Hashed at rest.** A copy of `agent_tokens` is not a copy of anybody's
+  tokens.
+- **Revocable**, from the same card that minted it, with the last-used time
+  beside it so an unexpected one is visible.
+- **Not usable from a browser.** `Authorization` is deliberately absent from
+  the CORS allowlist, so a page on another origin cannot send one even if it
+  somehow obtained it.
+
+The hook never fails a turn: no token, no server, a slow reply - it exits 0 and
+says nothing.
+
+### Two things to know
+
+**One wait per account.** Two Claude Code sessions at once means the second
+`start` replaces the first, and the second `Stop` ends it. Concurrent waits
+would need the token to carry a session id.
+
+**`Stop` also fires on clear, resume and compact**, so an `end` can arrive with
+no `start` behind it. Harmless - ending nothing logs nothing - but it is why
+the wait screen's rescue prompt still earns its place for unhooked sessions.
+
 ## Installable (PWA)
 
 The app ships a manifest, icons and a service worker, so it can be added to a

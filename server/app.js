@@ -10,6 +10,7 @@ import { registerPresenceRoutes } from './routes/presence.routes.js';
 import { registerProgressRoutes } from './routes/progress.routes.js';
 import { registerSessionRoutes } from './routes/sessions.routes.js';
 import { registerSuggestionRoutes } from './routes/suggestions.routes.js';
+import { registerAgentRoutes } from './routes/agents.routes.js';
 import { registerWaitRoutes } from './routes/wait.routes.js';
 
 /** Builds the request listener. Kept free of `listen` so tests can drive it directly. */
@@ -23,6 +24,7 @@ export function createApp() {
   registerPairingRoutes(router);
   registerSessionRoutes(router);
   registerWaitRoutes(router);
+  registerAgentRoutes(router);
   registerAnalyticsRoutes(router);
   registerPresenceRoutes(router);
   registerSuggestionRoutes(router);

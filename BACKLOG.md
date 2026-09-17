@@ -31,10 +31,19 @@ Nothing outstanding. Both items that were stated and not delivered are done:
 
 Discussed, agreed to leave, still worth doing.
 
-- **Browser extension to close the loop.** Detect when claude.ai or ChatGPT
-  stops streaming and end the wait automatically. The highest-ceiling idea on
-  the list: it removes the forgotten-timer problem at source rather than
-  cleaning up after it. A separate project in shape and size.
+- ~~**Close the loop with the agent.**~~ Done for Claude Code, and without an
+  extension: it has a hook system, so `UserPromptSubmit` opens a wait and
+  `Stop` closes it. Scoped `twk_` tokens, loopback only, two endpoints,
+  hashed at rest, revocable - see the README.
+- **Cursor, and the browsers.** Cursor is VS Code-based, so an extension could
+  hook its chat lifecycle, but there is no documented equivalent of Claude
+  Code's hooks and that needs checking rather than assuming. claude.ai and
+  ChatGPT in a browser still need a browser extension; the hook route does not
+  reach them.
+- **Concurrent waits.** One wait per account, so two Claude Code sessions at
+  once means the second `start` replaces the first. The token would need to
+  carry a session id, and `active_waits` a row per session rather than per
+  account.
 - **"Got a minute?" mode.** The task engine without a wait running. Worth
   knowing the server already accepts a completion with a null `waitId` - it
   scores and belongs to no wait - so this is an entry point, not a feature.

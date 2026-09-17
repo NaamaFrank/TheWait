@@ -1,4 +1,5 @@
 import { randomUUID } from 'node:crypto';
+import { findAccounts } from '../db/accounts.repo.js';
 import { config } from '../config.js';
 import { allSessionsFor, deleteSession as removeSession, insertSession, listSessionsFor } from '../db/sessions.repo.js';
 import { accountIdFor, ensureDevice } from './devices.js';
@@ -37,6 +38,23 @@ export async function createSession(rawDeviceId, payload) {
   const deviceId = requireDeviceId(rawDeviceId);
   const device = await ensureDevice(deviceId);
 
+  return createSessionForAccount(device.accountId, { ...payload, deviceId, cityId: payload.cityId ?? device.cityId });
+}
+
+/**
+ * Logs a wait against an account, with or without a device behind it.
+ *
+ * An agent token has no device - an editor hook is not a browser anybody
+ * paired - and `sessions.device_id` is nullable precisely so history can
+ * outlive the device that recorded it.
+ */
+export async function createSessionForAccount(accountId, payload) {
+  const deviceId = payload.deviceId ?? null;
+  // Without a device there is nobody to ask where this happened, so the
+  // account's own city stands in - the same one the globe already pins you to.
+  const [account] = deviceId ? [] : await findAccounts([accountId]);
+  const fallbackCity = account?.cityId ?? null;
+
   const durationSeconds = Math.round(
     requireNumber(payload.durationSeconds, 'durationSeconds', { min: 0, max: config.maxSessionSeconds })
   );
@@ -46,7 +64,7 @@ export async function createSession(rawDeviceId, payload) {
 
   const record = {
     id: randomUUID(),
-    accountId: device.accountId,
+    accountId,
     // The client's id for this wait, which the tasks cleared during it also
     // carry. That link is what ties a wait to what was done in it.
     waitId: optionalUuid(payload.waitId, 'waitId'),
@@ -55,7 +73,7 @@ export async function createSession(rawDeviceId, payload) {
     durationSeconds,
     startedAt,
     endedAt,
-    cityId: resolveCity(payload.cityId ?? device.cityId).id
+    cityId: resolveCity(payload.cityId ?? fallbackCity).id
   };
 
   await insertSession(record, { keep: config.maxSessionsPerDevice });
