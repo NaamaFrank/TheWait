@@ -414,7 +414,7 @@ node scripts/thewait-hook.mjs login twk_...
 node scripts/thewait-hook.mjs status
 ```
 
-**3. Add the hooks** to `.claude/settings.json`:
+**3. Add the hooks** to `.claude/settings.json` (already done in this repo):
 
 ```json
 {
@@ -431,8 +431,15 @@ node scripts/thewait-hook.mjs status
 }
 ```
 
+Both are `async`, so nothing waits on the app before your prompt is sent, and
+`${CLAUDE_PROJECT_DIR:-...}` keeps the command working whether or not Claude
+Code substitutes that variable - the fallback is this checkout.
+
 `THEWAIT_URL` overrides the address if the app is not on `127.0.0.1:3000`. It
 must be a local one - the token is refused from anywhere else.
+
+The server has to be running for anything to be recorded. When it is not, the
+hook exits silently and that turn is simply not logged.
 
 ### What the token can do, and what it cannot
 
