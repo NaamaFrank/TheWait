@@ -1,7 +1,11 @@
 node_modules/
 
-# Runtime data. Reference data (regions, suggestions) is committed; anything
-# the app writes at runtime is not.
+# Secrets.
+.env
+
+# Left over from before the database. `npm run db:import` reads them; nothing
+# writes them any more, and they can be deleted once imported.
 data/sessions.json
 data/devices.json
+data/completions.json
 data/*.tmp

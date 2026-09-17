@@ -1,13 +1,32 @@
 /** Presentation-only helpers. Kept pure so screens never re-implement them. */
 
-/** `HH:MM:SS`, or `MM:SS` under an hour - the running timer face. */
+/**
+ * The big timer face: `M:SS`, growing to `H:MM:SS` past an hour. Minutes are
+ * deliberately unpadded so a short wait reads `1:24` rather than `01:24`.
+ */
 export function clockFace(totalSeconds) {
   const seconds = Math.max(0, Math.floor(totalSeconds));
   const hours = Math.floor(seconds / 3600);
   const minutes = Math.floor((seconds % 3600) / 60);
   const pad = (value) => String(value).padStart(2, '0');
 
-  return hours ? `${hours}:${pad(minutes)}:${pad(seconds % 60)}` : `${pad(minutes)}:${pad(seconds % 60)}`;
+  return hours ? `${hours}:${pad(minutes)}:${pad(seconds % 60)}` : `${minutes}:${pad(seconds % 60)}`;
+}
+
+/**
+ * Up to two letters for an avatar. Names arrive as `Kev Wu` but also as
+ * `kev_wu` or `priya.builds`, so separators count as spaces.
+ */
+export function initials(name) {
+  const parts = String(name ?? '')
+    .replace(/[._-]/g, ' ')
+    .split(' ')
+    .filter(Boolean);
+
+  const first = parts[0] ?? '?';
+  const second = parts[1] ? parts[1][0] : first[1] ?? '';
+
+  return (first[0] + second).toUpperCase();
 }
 
 /** Compact human duration: `4s`, `2m 14s`, `1h 42m`. */
@@ -20,6 +39,29 @@ export function humanDuration(totalSeconds) {
   if (minutes < 60) return `${minutes}m ${seconds % 60}s`;
 
   return `${Math.floor(minutes / 60)}h ${minutes % 60}m`;
+}
+
+/**
+ * Durations with their units written out: `48s`, `30m 51s`, `52m`, `1h 2m`.
+ *
+ * `clockFace` is right on a timer, where the reader is watching it move and
+ * knows what the digits are. Printed cold on a share card, `30:51` reads just
+ * as easily as thirty hours - so anything leaving the app spells it out, and
+ * drops a trailing zero rather than saying `52m 0s`.
+ */
+export function spelledDuration(totalSeconds) {
+  const seconds = Math.max(0, Math.round(totalSeconds));
+
+  if (seconds < 60) return `${seconds}s`;
+
+  const minutes = Math.floor(seconds / 60);
+  const rest = seconds % 60;
+
+  if (minutes < 60) return rest ? `${minutes}m ${rest}s` : `${minutes}m`;
+
+  const hours = Math.floor(minutes / 60);
+  const overHours = minutes % 60;
+  return overHours ? `${hours}h ${overHours}m` : `${hours}h`;
 }
 
 /** Coarser form for headline metrics, where seconds are noise. */

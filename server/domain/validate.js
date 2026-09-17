@@ -9,6 +9,20 @@ export function requireDeviceId(deviceId) {
   return deviceId.toLowerCase();
 }
 
+/** Whether something is shaped like a UUID, without objecting if it is not. */
+export function isUuid(value) {
+  return typeof value === 'string' && UUID_PATTERN.test(value);
+}
+
+/** A UUID that may be absent, for links the client is not obliged to supply. */
+export function optionalUuid(value, field) {
+  if (value === undefined || value === null || value === '') return null;
+  if (typeof value !== 'string' || !UUID_PATTERN.test(value)) {
+    throw badRequest(`"${field}" must be a UUID when present`);
+  }
+  return value.toLowerCase();
+}
+
 export function requireNumber(value, field, { min = -Infinity, max = Infinity } = {}) {
   const parsed = Number(value);
 

@@ -1,168 +1,155 @@
-import { svg } from '../core/dom.js';
-import { headlineDuration, hourLabel } from '../core/format.js';
+import { el, svg } from '../core/dom.js';
+import { hourLabel } from '../core/format.js';
 
 /**
- * Two SVG charts, both driven straight from the analytics payload.
+ * The Stats screen's drawings.
  *
- * They share a single value-to-geometry helper so the line and the bars agree
- * on padding and scaling instead of each inventing their own.
+ * SVG rather than canvas: these are static once rendered, so there is nothing
+ * to animate and no reason to run a render loop or worry about device pixel
+ * ratios. They are also the only place `hourLabel` was ever written for.
  */
 
-const VIEWBOX = { width: 320, height: 140 };
-const PADDING = { top: 14, right: 10, bottom: 22, left: 10 };
+/* --- When you wait -------------------------------------------------------- */
 
-function plotArea() {
-  return {
-    left: PADDING.left,
-    top: PADDING.top,
-    width: VIEWBOX.width - PADDING.left - PADDING.right,
-    height: VIEWBOX.height - PADDING.top - PADDING.bottom
-  };
-}
+/** Where the axis is labelled. Every third hour is noise at this width. */
+const HOUR_MARKS = [0, 6, 12, 18];
 
-/** Maps a value in `[0, max]` onto the plot's y axis, top-down. */
-function scaleY(value, max, area) {
-  if (max <= 0) return area.top + area.height;
-  return area.top + area.height * (1 - value / max);
-}
+/**
+ * The day, midnight to midnight, one bar an hour.
+ *
+ * This was a twenty-four hour dial, which read as a clock face - and a clock
+ * face has twelve hours on it, so nobody could tell which wedge was 3am and
+ * which was 3pm. A left-to-right strip is plainer and says the thing outright.
+ */
+export function dayStrip(hourly, { peakHour = null } = {}) {
+  const busiest = Math.max(1, ...hourly.map((entry) => entry.sessionCount));
 
-function chartRoot(children, { label }) {
-  return svg(
-    'svg',
-    {
-      class: 'chart',
-      viewBox: `0 0 ${VIEWBOX.width} ${VIEWBOX.height}`,
-      preserveAspectRatio: 'none',
-      role: 'img',
-      'aria-label': label
-    },
-    children
-  );
-}
+  const bars = hourly.map((entry) => {
+    const share = entry.sessionCount / busiest;
 
-function gridLines(area) {
-  return [0.25, 0.5, 0.75, 1].map((fraction) =>
-    svg('line', {
-      class: 'chart-grid',
-      x1: area.left,
-      x2: area.left + area.width,
-      y1: area.top + area.height * fraction,
-      y2: area.top + area.height * fraction
-    })
-  );
-}
-
-function emptyState(area, message) {
-  return svg(
-    'text',
-    { class: 'chart-empty', x: area.left + area.width / 2, y: area.top + area.height / 2, 'text-anchor': 'middle' },
-    [message]
-  );
-}
-
-/** Smooth cubic path through the points, tangents estimated from neighbours. */
-function smoothPath(points) {
-  if (points.length < 2) return '';
-
-  const segments = [`M${points[0].x} ${points[0].y}`];
-
-  for (let i = 0; i < points.length - 1; i += 1) {
-    const previous = points[i - 1] ?? points[i];
-    const current = points[i];
-    const next = points[i + 1];
-    const following = points[i + 2] ?? next;
-
-    const control1 = { x: current.x + (next.x - previous.x) / 6, y: current.y + (next.y - previous.y) / 6 };
-    const control2 = { x: next.x - (following.x - current.x) / 6, y: next.y - (following.y - current.y) / 6 };
-
-    segments.push(`C${control1.x} ${control1.y} ${control2.x} ${control2.y} ${next.x} ${next.y}`);
-  }
-
-  return segments.join(' ');
-}
-
-/** Average wait by hour of day - the PRD's trend line. */
-export function hourlyTrendChart(hourly) {
-  const area = plotArea();
-  const max = Math.max(...hourly.map((entry) => entry.averageSeconds), 1);
-  const hasData = hourly.some((entry) => entry.sessionCount > 0);
-
-  if (!hasData) {
-    return chartRoot([...gridLines(area), emptyState(area, 'No waits logged yet')], {
-      label: 'Wait time by hour of day, no data yet'
-    });
-  }
-
-  const points = hourly.map((entry, index) => ({
-    x: area.left + (area.width * index) / (hourly.length - 1),
-    y: scaleY(entry.averageSeconds, max, area),
-    entry
-  }));
-
-  const fillPath = `${smoothPath(points)} L${points.at(-1).x} ${area.top + area.height} L${points[0].x} ${area.top + area.height} Z`;
-
-  const nodes = points
-    .filter((point) => point.entry.sessionCount > 0)
-    .map((point) =>
-      svg('circle', {
-        class: 'chart-node',
-        cx: point.x,
-        cy: point.y,
-        r: 2.6,
-        'vector-effect': 'non-scaling-stroke'
-      }, [svg('title', {}, [`${hourLabel(point.entry.hour)} - ${headlineDuration(point.entry.averageSeconds)} avg`])])
-    );
-
-  const axis = [0, 6, 12, 18].map((hour) =>
-    svg('text', {
-      class: 'chart-axis',
-      x: area.left + (area.width * hour) / (hourly.length - 1),
-      y: VIEWBOX.height - 6,
-      'text-anchor': hour === 0 ? 'start' : 'middle'
-    }, [hourLabel(hour)])
-  );
-
-  return chartRoot(
-    [
-      svg('defs', {}, [
-        svg('linearGradient', { id: 'trendFill', x1: '0', y1: '0', x2: '0', y2: '1' }, [
-          svg('stop', { offset: '0', 'stop-color': '#7dfaff', 'stop-opacity': '0.34' }),
-          svg('stop', { offset: '1', 'stop-color': '#8d6dff', 'stop-opacity': '0' })
-        ])
-      ]),
-      ...gridLines(area),
-      svg('path', { class: 'chart-fill', d: fillPath }),
-      svg('path', { class: 'chart-line', d: smoothPath(points), 'vector-effect': 'non-scaling-stroke' }),
-      ...nodes,
-      ...axis
-    ],
-    { label: 'Average wait time by hour of day' }
-  );
-}
-
-/** Per-day totals across the analytics window. */
-export function dailyBarChart(daily) {
-  const area = plotArea();
-  const max = Math.max(...daily.map((day) => day.totalSeconds), 1);
-  const slot = area.width / daily.length;
-  const barWidth = Math.min(slot * 0.5, 18);
-
-  const bars = daily.flatMap((day, index) => {
-    const centre = area.left + slot * (index + 0.5);
-    const top = scaleY(day.totalSeconds, max, area);
-
-    return [
-      svg('rect', {
-        class: day.isToday ? 'chart-bar is-today' : 'chart-bar',
-        x: centre - barWidth / 2,
-        y: top,
-        width: barWidth,
-        height: Math.max(2, area.top + area.height - top),
-        rx: barWidth / 2
-      }, [svg('title', {}, [`${day.weekday} - ${headlineDuration(day.totalSeconds)}`])]),
-      svg('text', { class: 'chart-axis', x: centre, y: VIEWBOX.height - 6, 'text-anchor': 'middle' }, [day.weekday])
-    ];
+    return el('div.day-hour', { title: `${hourLabel(entry.hour)}: ${entry.sessionCount} waits` }, [
+      el('div.day-bar', {
+        class: entry.hour === peakHour && entry.sessionCount ? 'is-peak' : '',
+        // A share of the strip, not a pixel count - the strip grows with the
+        // card. The floor keeps an empty hour visible as the track it sits in.
+        style: { height: `${entry.sessionCount ? 18 + share * 82 : 4}%` }
+      })
+    ]);
   });
 
-  return chartRoot([...gridLines(area), ...bars], { label: 'Total wait time per day' });
+  const marks = HOUR_MARKS.map((hour) =>
+    el('span.day-mark', { style: { left: `${(hour / 24) * 100}%` }, text: hourLabel(hour).replace(' ', '') })
+  );
+
+  return el('div.day-strip', {}, [
+    el('div.day-bars', { role: 'img', 'aria-label': 'Waits by hour of day' }, bars),
+    el('div.day-axis', {}, [...marks, el('span.day-mark.is-end', { text: '12AM' })])
+  ]);
+}
+
+/* --- The calendar --------------------------------------------------------- */
+
+const CELL = 13;
+const GAP = 3;
+
+/**
+ * Up to this many days are drawn as a month grid; past it, a scrolling strip.
+ *
+ * Thirty days in week-columns is five narrow columns stranded against the left
+ * edge of a card four times as wide. Laid out the way a month is normally read
+ * - weekdays across, weeks down - the same thirty squares fill the space.
+ */
+const GRID_MAX_DAYS = 45;
+
+/** Sunday-first, to match `getUTCDay`. */
+const WEEKDAY_INITIALS = ['S', 'M', 'T', 'W', 'T', 'F', 'S'];
+
+/** Five steps read as "some, more, a lot"; a smooth gradient reads as noise. */
+function band(count, busiest) {
+  return count === 0 ? 0 : Math.min(4, Math.ceil((count / busiest) * 4));
+}
+
+function cellTitle(day) {
+  return `${day.date}: ${day.sessionCount} ${day.sessionCount === 1 ? 'wait' : 'waits'}`;
+}
+
+/** How many blanks before the first day, so every column is one weekday. */
+function leadingBlanks(daily) {
+  return new Date(`${daily[0].date}T00:00:00Z`).getUTCDay();
+}
+
+/**
+ * A month, weekdays across and weeks down.
+ *
+ * The squares size themselves from the column width, so this fills whatever
+ * it is given rather than sitting in the corner of it.
+ */
+function calendarGrid(daily, busiest) {
+  const pad = Array.from({ length: leadingBlanks(daily) }, () => el('div.heat-pad'));
+
+  const squares = daily.map((day) =>
+    el('div.heat-box', {
+      class: `heat-${band(day.sessionCount, busiest)}${day.isToday ? ' is-today' : ''}`,
+      title: cellTitle(day)
+    })
+  );
+
+  return el('div.heat-grid', { role: 'img', 'aria-label': `Waits per day over the last ${daily.length} days` }, [
+    ...WEEKDAY_INITIALS.map((initial) => el('span.heat-dow', { text: initial })),
+    ...pad,
+    ...squares
+  ]);
+}
+
+/**
+ * A year, a column per week, scrolled to the recent end.
+ *
+ * Left-to-right is oldest-to-newest, so the default scroll position shows the
+ * far past - months of empty squares, with everything that actually happened
+ * off the right edge. It opens on today instead.
+ */
+function calendarStrip(daily, busiest) {
+  const cells = [...Array.from({ length: leadingBlanks(daily) }, () => null), ...daily];
+  const weeks = Math.ceil(cells.length / 7);
+
+  const squares = cells.map((day, index) => {
+    if (!day) return null;
+
+    return svg('rect', {
+      x: Math.floor(index / 7) * (CELL + GAP),
+      y: (index % 7) * (CELL + GAP),
+      width: CELL,
+      height: CELL,
+      rx: 3,
+      class: `heat-cell heat-${band(day.sessionCount, busiest)}${day.isToday ? ' is-today' : ''}`
+    }, [svg('title', {}, [cellTitle(day)])]);
+  });
+
+  const scroller = el('div.heatmap-scroll', {}, [
+    svg('svg', {
+      class: 'heatmap',
+      width: weeks * (CELL + GAP),
+      height: 7 * (CELL + GAP),
+      viewBox: `0 0 ${weeks * (CELL + GAP)} ${7 * (CELL + GAP)}`,
+      role: 'img',
+      'aria-label': `Waits per day over the last ${daily.length} days`
+    }, squares.filter(Boolean))
+  ]);
+
+  // Only once it is in the document does it have a width to scroll within.
+  const toEnd = () => { scroller.scrollLeft = scroller.scrollWidth; };
+  if (typeof requestAnimationFrame === 'function') requestAnimationFrame(toEnd);
+  else toEnd();
+
+  return scroller;
+}
+
+export function calendarHeatmap(daily) {
+  if (!daily.length) return el('p.empty', { text: 'Nothing here yet.' });
+
+  const busiest = Math.max(1, ...daily.map((day) => day.sessionCount));
+
+  return daily.length <= GRID_MAX_DAYS
+    ? calendarGrid(daily, busiest)
+    : calendarStrip(daily, busiest);
 }

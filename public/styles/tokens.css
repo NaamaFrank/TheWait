@@ -1,71 +1,110 @@
-/* Design tokens. The single source of truth for colour, space and type. */
+/*
+ * Design tokens for "Soft Toy". Every value here is taken from the design
+ * bundle rather than approximated, so a colour only ever changes in one place.
+ */
 
 :root {
   color-scheme: dark;
 
-  /* Surfaces */
-  --page-bg: #07111e;
-  --surface: rgba(17, 27, 46, 0.72);
-  --surface-solid: #0d1524;
-  --surface-raised: rgba(22, 33, 59, 0.86);
-  --glass: rgba(255, 255, 255, 0.045);
+  /* --- Surfaces --------------------------------------------------------- */
+  --page: #14100F;
+  --frame: #1C1714;
+  --frame-edge: #2C2521;
 
-  /* Text */
-  --text: #eefbff;
-  --text-muted: #a7b6d0;
-  --text-dim: #778399;
+  --card: #241E1A;
+  --card-line: #332B26;
+  --card-line-soft: #3A322C;
+  --card-line-hover: #5A4E45;
+  --card-hover: #2C2521;
+  --card-inset: #4A4038;
 
-  /* Accents */
-  --cyan: #7dfaff;
-  --cyan-deep: #00b4ff;
-  --purple: #8d6dff;
-  --violet: #b4a7ff;
-  --mint: #9affdc;
-  --danger: #ff9d9d;
+  /* Unearned / inactive surfaces sit a shade below the live ones. */
+  --card-off: #1F1A17;
+  --card-off-line: #2A231F;
 
-  /* Lines */
-  --border: rgba(197, 221, 255, 0.12);
-  --border-bright: rgba(141, 250, 255, 0.36);
+  /* --- Cream side ------------------------------------------------------- */
+  --cream: #F7EFE4;
+  --cream-track: #E3D8C8;
+  --cream-line: #D6C9B6;
+  --cream-hover: #EDE2D2;
+  --on-cream: #14100F;
+  --on-cream-soft: #6B6055;
+  --on-cream-dim: #A0968A;
 
-  /* Space scale */
-  --space-1: 4px;
-  --space-2: 8px;
-  --space-3: 12px;
-  --space-4: 16px;
-  --space-5: 24px;
-  --space-6: 32px;
-  --space-7: 48px;
+  /* --- Accents ---------------------------------------------------------- */
+  --hero: #FF5A36;
+  --hero-shadow: #C13F21;
+  --hero-muted: #7A4632;
+  --gold: #FFC53D;
+  --gold-deep: #C9A227;
+  --green: #3DDC84;
 
-  /* Radii */
-  --radius-sm: 10px;
-  --radius-md: 16px;
-  --radius-lg: 22px;
-  --radius-pill: 999px;
+  /* --- Text ------------------------------------------------------------- */
+  --text: #F7EFE4;
+  --text-soft: #A79C90;
+  --text-muted: #8A8078;
+  --text-dim: #6B6055;
+  --text-faint: #5A4E45;
+  --text-off: #C9BEB0;
 
-  /* Type */
-  --font: "Inter", "SF Pro Text", "Segoe UI", system-ui, -apple-system, sans-serif;
-  --font-mono: "JetBrains Mono", "SF Mono", ui-monospace, "Cascadia Code", monospace;
+  /* --- Timer status chips ----------------------------------------------- */
+  --run-bg: #FFE2D6;
+  --run-fg: #A0553F;
+  --hold-bg: #F0E4CF;
+  --idle-bg: #E9E0D3;
+  --idle-dot: #A0968A;
 
-  --text-xs: 11px;
-  --text-sm: 13px;
-  --text-md: 15px;
-  --text-lg: 19px;
-  --text-xl: 26px;
+  /* --- Globe (wire mode) ------------------------------------------------ */
+  --globe-ocean-0: #141B29;
+  --globe-ocean-1: #0C1119;
+  --globe-ocean-2: #080A0F;
+  --globe-land: #232733;
+  --globe-coast: #3B4252;
+  --globe-rim: #4A5262;
+  --globe-pin-dim: #3D4250;
+  --globe-pin-dim-fill: #2A2E38;
+  --globe-pin-dim-ink: #6C7280;
+  --globe-pin-sel: #F5F1EA;
+  --globe-pin-ink: #0B0B0C;
 
-  /* Effects */
-  --shadow-card: 0 18px 40px -24px rgba(0, 0, 0, 0.9);
-  --glow-cyan: 0 0 24px rgba(125, 250, 255, 0.35);
-  --glow-purple: 0 0 28px rgba(141, 109, 255, 0.4);
+  /* --- Type ------------------------------------------------------------- */
+  --font: Archivo, "Segoe UI", system-ui, -apple-system, sans-serif;
+  --font-display: "Baloo 2", Archivo, system-ui, sans-serif;
 
-  /* Layout */
-  --content-max: 460px;
-  --tab-bar-height: 62px;
-  --safe-bottom: env(safe-area-inset-bottom, 0px);
+  /* --- Layout ----------------------------------------------------------- */
+  --frame-w: 390px;
+  --frame-h: 844px;
+  --frame-radius: 48px;
+  --status-h: 52px;
+  --dock-h: 80px;
+  /* Clears the status strip, and no more - titles sat too far down at 60. */
+  --screen-pad-top: 40px;
+  --screen-pad-x: 18px;
+  --screen-pad-bottom: 100px;
+  --gap: 14px;
+
+  /*
+   * The Stats chart area. Bars, a month and a year are three different
+   * drawings of the same card, so they are all given this height - the
+   * card must not resize when the range chips are tapped.
+   */
+  --chart-h: 136px;
+
   --safe-top: env(safe-area-inset-top, 0px);
+  --safe-bottom: env(safe-area-inset-bottom, 0px);
 }
 
-/* Accent lookup used by data-accent attributes. */
-[data-accent="cyan"] { --accent: var(--cyan); }
-[data-accent="purple"] { --accent: var(--purple); }
-[data-accent="violet"] { --accent: var(--violet); }
-[data-accent="mint"] { --accent: var(--mint); }
+/*
+ * Pin tints. Exposed as custom properties so both the globe canvas and the
+ * profile swatches read the same eight values.
+ */
+:root {
+  --tint-1: #FFC53D;
+  --tint-2: #9BE8FF;
+  --tint-3: #FF9E7A;
+  --tint-4: #3DDC84;
+  --tint-5: #00E5D0;
+  --tint-6: #FFB3E1;
+  --tint-7: #D6D0FF;
+  --tint-8: #E8E2D4;
+}

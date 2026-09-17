@@ -1,0 +1,512 @@
+/*
+ * The desktop shell.
+ *
+ * Everything here is keyed off `html[data-view="desktop"]`, so the phone build
+ * in the other three stylesheets is left exactly as it was. The screens keep
+ * their markup: a screen is a vertical stack on a phone and a two-column grid
+ * here, which is the whole difference.
+ */
+
+/* --- Layout switch (top right, both shells) ------------------------------ */
+
+.view-switch {
+  position: fixed;
+  top: 14px;
+  right: 16px;
+  z-index: 40;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 4px 4px 4px 12px;
+  border-radius: 999px;
+  background: var(--frame);
+  border: 1px solid var(--frame-edge);
+  box-shadow: 0 12px 30px -18px #000;
+}
+
+.view-switch-label {
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  color: var(--text-dim);
+  text-transform: uppercase;
+}
+
+.view-switch-button {
+  min-height: 30px;
+  padding: 0 12px;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--text-muted);
+  transition: background 160ms ease, color 160ms ease;
+}
+
+.view-switch-button:hover {
+  color: var(--text);
+}
+
+.view-switch-button.is-active {
+  background: var(--card-hover);
+  color: var(--text);
+  box-shadow: inset 0 0 0 1px var(--card-line-soft);
+}
+
+/* No second device to preview on, and no room for the desktop shell. */
+@media (max-width: 1023px), (pointer: coarse) {
+  .view-switch {
+    display: none !important;
+  }
+}
+
+/* --- The rail belongs to the desktop shell only -------------------------- */
+
+.rail {
+  display: none;
+}
+
+[data-view="desktop"] .stage {
+  display: grid;
+  grid-template-columns: 248px minmax(0, 1fr);
+  align-items: stretch;
+  gap: 0;
+  padding: 0;
+  height: 100dvh;
+  min-height: 0;
+}
+
+[data-view="desktop"] .stage-main {
+  display: block;
+  min-width: 0;
+  gap: 0;
+}
+
+[data-view="desktop"] .stage-head {
+  display: none;
+}
+
+[data-view="desktop"] .rail {
+  display: flex;
+  flex-direction: column;
+  gap: 26px;
+  padding: 26px 18px 22px;
+  background: var(--frame);
+  border-right: 1px solid var(--frame-edge);
+  overflow-y: auto;
+}
+
+.rail-brand {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 0 8px;
+}
+
+.rail-mark {
+  width: 34px;
+  height: 34px;
+  flex: none;
+  display: grid;
+  place-items: center;
+  border-radius: 12px;
+  background: var(--hero);
+  box-shadow: 0 3px 0 var(--hero-shadow);
+  font-family: var(--font-display);
+  font-weight: 800;
+  font-size: 13px;
+  color: var(--page);
+}
+
+.rail-name {
+  font-family: var(--font-display);
+  font-weight: 800;
+  font-size: 17px;
+  letter-spacing: 0.02em;
+  color: var(--text);
+}
+
+.rail-nav {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.rail-tab {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-height: 44px;
+  padding: 0 12px;
+  border-radius: 14px;
+  text-align: left;
+  transition: background 160ms ease;
+}
+
+.rail-tab:hover {
+  background: var(--card);
+}
+
+.rail-pill {
+  width: 6px;
+  height: 6px;
+  flex: none;
+  border-radius: 999px;
+  background: var(--card-line-hover);
+  transition: height 240ms cubic-bezier(0.22, 0.9, 0.2, 1), background 200ms ease;
+}
+
+.rail-label {
+  font-family: var(--font-display);
+  font-weight: 800;
+  font-size: 13px;
+  letter-spacing: 0.06em;
+  color: var(--text-dim);
+  text-transform: uppercase;
+  transition: color 200ms ease;
+}
+
+.rail-tab.is-active {
+  background: var(--card);
+  box-shadow: inset 0 0 0 1px var(--card-line);
+}
+
+.rail-tab.is-active .rail-pill {
+  height: 20px;
+  background: var(--hero);
+}
+
+.rail-tab.is-active .rail-label {
+  color: var(--text);
+}
+
+.rail-foot {
+  margin-top: auto;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 12px;
+  border-radius: 14px;
+  background: var(--card-off);
+  border: 1px solid var(--card-off-line);
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text-muted);
+}
+
+.rail-status {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+}
+
+.rail-clock {
+  font-variant-numeric: tabular-nums;
+  color: var(--text-soft);
+}
+
+/* --- The frame stops being a phone --------------------------------------- */
+
+[data-view="desktop"] .frame {
+  box-sizing: border-box;
+  width: 100%;
+  height: 100dvh;
+  border: none;
+  border-radius: 0;
+  box-shadow: none;
+  background: var(--page);
+}
+
+[data-view="desktop"] .status-bar,
+[data-view="desktop"] .dock {
+  display: none;
+}
+
+/*
+ * One screen at a time, chosen by class rather than by sliding a six-wide
+ * track sideways.
+ */
+[data-view="desktop"] .track {
+  position: absolute;
+  inset: 0;
+  display: block;
+  width: auto;
+  touch-action: auto;
+  transform: none !important;
+}
+
+/*
+ * A desktop card is wider, and the month grid always has seven columns - so
+ * at the phone's height its cells would come out six times wider than tall.
+ * The box grows with the card; every range still shares it.
+ */
+[data-view="desktop"] .stage {
+  --chart-h: 190px;
+}
+
+[data-view="desktop"] .screen {
+  display: none;
+  width: 100%;
+  height: 100%;
+}
+
+[data-view="desktop"] .screen.is-current {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  align-content: start;
+  gap: 20px;
+  max-width: 1180px;
+  margin: 0 auto;
+  padding: 40px 40px 56px;
+  scrollbar-width: thin;
+  scrollbar-color: var(--card-line-hover) transparent;
+}
+
+/* A pointer that can hit a 10px target should get a scrollbar to hit. */
+[data-view="desktop"] .screen::-webkit-scrollbar {
+  width: 10px;
+}
+
+[data-view="desktop"] .screen::-webkit-scrollbar-thumb {
+  border: 3px solid transparent;
+  border-radius: 999px;
+  background: var(--card-line-hover);
+  background-clip: content-box;
+}
+
+/*
+ * What runs the full width rather than dropping into one of the two columns.
+ *
+ * Anything that reads as a band across the screen belongs here: the heading,
+ * a sentence, a row of filters, a titled section. Leaving one of them out is
+ * what makes a column edge look ragged - a sentence half as wide as the tiles
+ * above it, with the chips that filter it stranded alongside.
+ */
+[data-view="desktop"] .screen.is-current > :first-child,
+[data-view="desktop"] .screen > .screen-head,
+[data-view="desktop"] .screen > .grid-2,
+[data-view="desktop"] .screen > .chip-row,
+[data-view="desktop"] .screen > .stat-headline,
+[data-view="desktop"] .screen > .section,
+[data-view="desktop"] .screen > .hint,
+[data-view="desktop"] .screen > .note,
+[data-view="desktop"] .screen > .streak-card,
+[data-view="desktop"] .screen > .board {
+  grid-column: 1 / -1;
+}
+
+/*
+ * Tiles spread across the full row instead of staying paired - including the
+ * ones inside a section, which would otherwise sit two-up in half the width
+ * while an identical row of four spanned the top of the same screen.
+ */
+[data-view="desktop"] .screen > .grid-2,
+[data-view="desktop"] .screen > .section > .grid-2 {
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 14px;
+}
+
+/* Hover states are worth having once there is a cursor. */
+[data-view="desktop"] .card:hover {
+  border-color: var(--card-line-soft);
+}
+
+/* --- Per-screen composition ---------------------------------------------- */
+
+/*
+ * Wait: a hero timer down the left, the task and the day's tiles stacked
+ * beside it. Laying it out by source order left one short row of cards under a
+ * lot of nothing, so the blocks are placed instead: the phone reads
+ * timer -> task -> tiles -> hint top to bottom, and everything after the timer
+ * belongs in the right-hand column here.
+ *
+ * It used to centre its grid vertically (`align-content: safe center`) and sit
+ * 140px narrower than every other screen, so its title started lower down and
+ * further in than the rest - which is what made switching to this tab feel
+ * like a jump. It opens from the top, at the shared width, like the others.
+ */
+[data-view="desktop"] [data-screen="wait"].is-current {
+  grid-template-columns: minmax(0, 1.05fr) minmax(0, 0.95fr);
+  align-content: start;
+}
+
+[data-view="desktop"] [data-screen="wait"] > .card-cream {
+  grid-column: 1;
+  grid-row: 2 / span 3;
+  min-height: 380px;
+  padding: 26px;
+  justify-content: space-between;
+}
+
+[data-view="desktop"] [data-screen="wait"] > .card,
+[data-view="desktop"] [data-screen="wait"] > .grid-2,
+[data-view="desktop"] [data-screen="wait"] > .company {
+  grid-column: 2;
+}
+
+[data-view="desktop"] [data-screen="wait"] > .card {
+  grid-row: 2;
+  padding: 22px;
+}
+
+/* The task card grows with the hero beside it; its buttons stay at the foot. */
+[data-view="desktop"] [data-screen="wait"] .task-actions {
+  margin-top: auto;
+}
+
+[data-view="desktop"] [data-screen="wait"] .clock {
+  font-size: clamp(72px, 6vw, 96px);
+}
+
+[data-view="desktop"] [data-screen="wait"] .clock-row {
+  gap: 24px;
+}
+
+[data-view="desktop"] [data-screen="wait"] .btn-press {
+  width: 108px;
+  height: 108px;
+}
+
+[data-view="desktop"] [data-screen="wait"] .btn-press-glyph {
+  font-size: 28px;
+}
+
+[data-view="desktop"] [data-screen="wait"] .task-title {
+  font-size: 28px;
+}
+
+[data-view="desktop"] [data-screen="wait"] .tile {
+  padding: 18px;
+}
+
+[data-view="desktop"] [data-screen="wait"] .tile-value {
+  font-size: 34px;
+}
+
+/*
+ * Live: globe down the left, filters and ticker down the right. The panes are
+ * placed rather than flowed - the phone's reading order puts the filters first,
+ * and here the globe should be the thing at the top of the column.
+ */
+[data-view="desktop"] [data-screen="live"].is-current {
+  grid-template-columns: minmax(0, 1.15fr) minmax(0, 1fr);
+  align-items: start;
+}
+
+[data-view="desktop"] .pane-globe {
+  grid-column: 1;
+  grid-row: 2 / span 2;
+}
+
+[data-view="desktop"] .pane-filters {
+  grid-column: 2;
+  grid-row: 2;
+}
+
+[data-view="desktop"] .pane-ticker {
+  grid-column: 2;
+  grid-row: 3;
+}
+
+/*
+ * Cards paired across a row share a bottom edge rather than each ending
+ * wherever its content runs out. Top-aligning them left a ragged gap beside
+ * the shorter one, which changed size every time the range chips were tapped.
+ */
+[data-view="desktop"] [data-screen="stats"].is-current {
+  align-items: stretch;
+}
+
+/*
+ * Board: the table, and the note explaining it beside rather than beneath.
+ *
+ * Both this screen and You were pinned to a single 720px column, which left
+ * them visibly narrower than every other tab. A ranked row does not want the
+ * full 1180px either, so the table keeps the larger share and the note takes
+ * the rest.
+ */
+[data-view="desktop"] [data-screen="board"].is-current {
+  grid-template-columns: minmax(0, 1.7fr) minmax(0, 1fr);
+  align-items: start;
+}
+
+[data-view="desktop"] [data-screen="board"] > .board {
+  grid-column: 1;
+}
+
+/* Beats the full-width promotion above, which is what every other note wants. */
+[data-view="desktop"] [data-screen="board"] > .note {
+  grid-column: 2;
+  margin: 0;
+  padding: 16px 18px;
+  border-radius: 20px;
+  background: var(--card-off);
+  border: 1px solid var(--card-off-line);
+}
+
+/* You: who you are on the left, how the card looks and this device on the right. */
+[data-view="desktop"] [data-screen="you"].is-current {
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  align-items: start;
+}
+
+/*
+ * Panes are a desktop-only device: they collapse to `display: contents` on a
+ * phone, so the screen that uses them is still one flat stack there.
+ */
+.pane {
+  display: contents;
+}
+
+[data-view="desktop"] .screen.is-current > .pane {
+  display: flex;
+  flex-direction: column;
+  gap: var(--gap);
+  min-width: 0;
+}
+
+/* A wider card can afford a bigger globe; live.js sizes the canvas to match. */
+[data-view="desktop"] .globe-card {
+  padding: 16px;
+}
+
+/*
+ * A forced desktop shell in a narrow window: keep the rail, drop to one
+ * column. The live panes have to give up their explicit placement or they
+ * would keep reserving a second column that no longer exists.
+ */
+@media (max-width: 1120px) {
+  [data-view="desktop"] .stage {
+    grid-template-columns: 190px minmax(0, 1fr);
+  }
+
+  [data-view="desktop"] .screen.is-current,
+  [data-view="desktop"] [data-screen="wait"].is-current,
+  [data-view="desktop"] [data-screen="live"].is-current {
+    grid-template-columns: minmax(0, 1fr);
+    padding: 28px 24px 44px;
+  }
+
+  [data-view="desktop"] .pane-globe,
+  [data-view="desktop"] .pane-filters,
+  [data-view="desktop"] .pane-ticker {
+    grid-column: 1;
+    grid-row: auto;
+  }
+
+  /* `grid-column: 2` in a one-column grid would invent a second column. */
+  [data-view="desktop"] [data-screen="board"] > .board,
+  [data-view="desktop"] [data-screen="board"] > .note,
+  [data-view="desktop"] [data-screen="wait"] > .card-cream,
+  [data-view="desktop"] [data-screen="wait"] > .card,
+  [data-view="desktop"] [data-screen="wait"] > .grid-2,
+  [data-view="desktop"] [data-screen="wait"] > .company {
+    grid-column: 1;
+    grid-row: auto;
+  }
+
+  /* Stacked, the hero has the whole width and needs no floor under it. */
+  [data-view="desktop"] [data-screen="wait"] > .card-cream {
+    min-height: 0;
+  }
+}

@@ -1,9 +1,9 @@
 import { randomUUID } from 'node:crypto';
 import { config } from '../config.js';
-import { sessionStore } from '../db/index.js';
-import { ensureDevice } from './devices.js';
-import { resolveRegion } from './regions.js';
-import { clampInt, optionalText, requireDeviceId, requireIsoDate, requireNumber } from './validate.js';
+import { allSessionsFor, deleteSession as removeSession, insertSession, listSessionsFor } from '../db/sessions.repo.js';
+import { accountIdFor, ensureDevice } from './devices.js';
+import { resolveCity } from './cities.js';
+import { clampInt, optionalText, optionalUuid, requireDeviceId, requireIsoDate, requireNumber } from './validate.js';
 
 const DEFAULT_LABEL = 'Prompt run';
 
@@ -11,27 +11,26 @@ const DEFAULT_LABEL = 'Prompt run';
 function toPublicSession(record) {
   return {
     id: record.id,
+    waitId: record.waitId ?? null,
     label: record.label,
     durationSeconds: record.durationSeconds,
     startedAt: record.startedAt,
     endedAt: record.endedAt,
-    regionId: record.regionId
+    cityId: record.cityId ?? null,
+    tasksCleared: record.tasksCleared ?? 0
   };
 }
 
 export async function listSessions(rawDeviceId, { limit = 50 } = {}) {
-  const deviceId = requireDeviceId(rawDeviceId);
-  const records = await sessionStore.all((session) => session.deviceId === deviceId);
+  const accountId = await accountIdFor(rawDeviceId);
+  const records = await listSessionsFor(accountId, clampInt(limit, 50, { min: 1, max: 500 }));
 
-  return records
-    .sort((a, b) => new Date(b.startedAt) - new Date(a.startedAt))
-    .slice(0, clampInt(limit, 50, { min: 1, max: 500 }))
-    .map(toPublicSession);
+  return records.map(toPublicSession);
 }
 
 /** Raw records for the analytics layer - stays inside the server. */
-export function readSessionRecords(deviceId) {
-  return sessionStore.all((session) => session.deviceId === deviceId);
+export function readSessionRecords(accountId) {
+  return allSessionsFor(accountId);
 }
 
 export async function createSession(rawDeviceId, payload) {
@@ -47,28 +46,23 @@ export async function createSession(rawDeviceId, payload) {
 
   const record = {
     id: randomUUID(),
+    accountId: device.accountId,
+    // The client's id for this wait, which the tasks cleared during it also
+    // carry. That link is what ties a wait to what was done in it.
+    waitId: optionalUuid(payload.waitId, 'waitId'),
     deviceId,
     label: optionalText(payload.label, 'label', 80) ?? DEFAULT_LABEL,
     durationSeconds,
     startedAt,
     endedAt,
-    regionId: resolveRegion(payload.regionId ?? device.regionId).id,
-    createdAt: new Date().toISOString()
+    cityId: resolveCity(payload.cityId ?? device.cityId).id
   };
 
-  await sessionStore.insert(record, {
-    limit: config.maxSessionsPerDevice,
-    scope: (session) => session.deviceId === deviceId
-  });
-
+  await insertSession(record, { keep: config.maxSessionsPerDevice });
   return toPublicSession(record);
 }
 
 export async function deleteSession(rawDeviceId, sessionId) {
-  const deviceId = requireDeviceId(rawDeviceId);
-  const removed = await sessionStore.remove(
-    (session) => session.deviceId === deviceId && session.id === sessionId
-  );
-
-  return { removed };
+  const accountId = await accountIdFor(rawDeviceId);
+  return { removed: await removeSession(accountId, sessionId) };
 }

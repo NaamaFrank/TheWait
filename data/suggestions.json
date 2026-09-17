@@ -1,211 +1,1516 @@
 {
-  "version": 1,
+  "version": 3,
   "buckets": [
-    { "id": "micro",  "label": "Under a minute", "minSeconds": 0,   "maxSeconds": 60 },
-    { "id": "short",  "label": "1-5 minutes",    "minSeconds": 60,  "maxSeconds": 300 },
-    { "id": "medium", "label": "5-15 minutes",   "minSeconds": 300, "maxSeconds": 900 },
-    { "id": "long",   "label": "15 minutes+",    "minSeconds": 900, "maxSeconds": null }
+    {
+      "id": "micro",
+      "label": "Under a minute",
+      "minSeconds": 0,
+      "maxSeconds": 60,
+      "xp": 20
+    },
+    {
+      "id": "short",
+      "label": "1-5 minutes",
+      "minSeconds": 60,
+      "maxSeconds": 300,
+      "xp": 25
+    },
+    {
+      "id": "medium",
+      "label": "5-15 minutes",
+      "minSeconds": 300,
+      "maxSeconds": 900,
+      "xp": 30
+    },
+    {
+      "id": "long",
+      "label": "15 minutes+",
+      "minSeconds": 900,
+      "maxSeconds": null,
+      "xp": 40
+    }
   ],
   "categories": [
-    { "id": "body",    "label": "Body",    "accent": "mint",   "icon": "spark" },
-    { "id": "reset",   "label": "Reset",   "accent": "cyan",   "icon": "breath" },
-    { "id": "craft",   "label": "Craft",   "accent": "violet", "icon": "code" },
-    { "id": "learn",   "label": "Learn",   "accent": "purple", "icon": "book" },
-    { "id": "tidy",    "label": "Tidy",    "accent": "cyan",   "icon": "broom" },
-    { "id": "connect", "label": "Connect", "accent": "violet", "icon": "chat" },
-    { "id": "play",    "label": "Play",    "accent": "mint",   "icon": "dice" },
-    { "id": "reflect", "label": "Reflect", "accent": "purple", "icon": "moon" }
+    {
+      "id": "body",
+      "label": "Body",
+      "accent": "mint",
+      "icon": "spark"
+    },
+    {
+      "id": "reset",
+      "label": "Reset",
+      "accent": "cyan",
+      "icon": "breath"
+    },
+    {
+      "id": "craft",
+      "label": "Craft",
+      "accent": "violet",
+      "icon": "code"
+    },
+    {
+      "id": "learn",
+      "label": "Learn",
+      "accent": "purple",
+      "icon": "book"
+    },
+    {
+      "id": "tidy",
+      "label": "Tidy",
+      "accent": "cyan",
+      "icon": "broom"
+    },
+    {
+      "id": "connect",
+      "label": "Connect",
+      "accent": "violet",
+      "icon": "chat"
+    },
+    {
+      "id": "play",
+      "label": "Play",
+      "accent": "mint",
+      "icon": "dice"
+    },
+    {
+      "id": "reflect",
+      "label": "Reflect",
+      "accent": "purple",
+      "icon": "moon"
+    }
   ],
   "items": [
-    { "id": "s001", "bucket": "micro", "category": "body", "text": "Roll your shoulders back five times. Slowly." },
-    { "id": "s002", "bucket": "micro", "category": "body", "text": "Look at something 20 feet away for 20 seconds." },
-    { "id": "s003", "bucket": "micro", "category": "body", "text": "Unclench your jaw. It was clenched." },
-    { "id": "s004", "bucket": "micro", "category": "body", "text": "Drop your shoulders away from your ears." },
-    { "id": "s005", "bucket": "micro", "category": "body", "text": "Stretch your wrists in both directions." },
-    { "id": "s006", "bucket": "micro", "category": "body", "text": "Stand up. That is the whole task." },
-    { "id": "s007", "bucket": "micro", "category": "body", "text": "Take one sip of water. Then another." },
-    { "id": "s008", "bucket": "micro", "category": "body", "text": "Blink deliberately ten times to rehydrate your eyes." },
-    { "id": "s009", "bucket": "micro", "category": "body", "text": "Tilt your head to each side for a five count." },
-    { "id": "s010", "bucket": "micro", "category": "body", "text": "Press your palms together and stretch your forearms." },
-    { "id": "s011", "bucket": "micro", "category": "body", "text": "Point and flex your feet under the desk." },
-    { "id": "s012", "bucket": "micro", "category": "body", "text": "Straighten your spine one vertebra at a time." },
-    { "id": "s013", "bucket": "micro", "category": "body", "text": "Squeeze your shoulder blades together and hold." },
-    { "id": "s014", "bucket": "micro", "category": "body", "text": "Open and close your fists ten times." },
-    { "id": "s015", "bucket": "micro", "category": "reset", "text": "Breathe in for four, hold for four, out for four." },
-    { "id": "s016", "bucket": "micro", "category": "reset", "text": "Name three sounds you can hear right now." },
-    { "id": "s017", "bucket": "micro", "category": "reset", "text": "Close your eyes until the model finishes." },
-    { "id": "s018", "bucket": "micro", "category": "reset", "text": "Take one breath that is longer on the way out." },
-    { "id": "s019", "bucket": "micro", "category": "reset", "text": "Notice where your attention went. Bring it back." },
-    { "id": "s020", "bucket": "micro", "category": "reset", "text": "Put your phone face down." },
-    { "id": "s021", "bucket": "micro", "category": "reset", "text": "Look out a window. Any window." },
-    { "id": "s022", "bucket": "micro", "category": "reset", "text": "Let your eyes go soft and unfocused for ten seconds." },
-    { "id": "s023", "bucket": "micro", "category": "reset", "text": "Sigh out loud. It resets more than you think." },
-    { "id": "s024", "bucket": "micro", "category": "craft", "text": "Rename that one variable you keep squinting at." },
-    { "id": "s025", "bucket": "micro", "category": "craft", "text": "Stage the changes you already know are good." },
-    { "id": "s026", "bucket": "micro", "category": "craft", "text": "Delete a debug log you left behind." },
-    { "id": "s027", "bucket": "micro", "category": "craft", "text": "Write the commit message before you forget the why." },
-    { "id": "s028", "bucket": "micro", "category": "craft", "text": "Close one browser tab you will never read." },
-    { "id": "s029", "bucket": "micro", "category": "craft", "text": "Add the type annotation you skipped." },
-    { "id": "s030", "bucket": "micro", "category": "craft", "text": "Check which branch you are actually on." },
-    { "id": "s031", "bucket": "micro", "category": "craft", "text": "Save the file. Yes, that one." },
-    { "id": "s032", "bucket": "micro", "category": "craft", "text": "Scroll to the top of the file and read the imports." },
-    { "id": "s033", "bucket": "micro", "category": "tidy", "text": "Move one thing off your desk." },
-    { "id": "s034", "bucket": "micro", "category": "tidy", "text": "Throw away the nearest piece of rubbish." },
-    { "id": "s035", "bucket": "micro", "category": "tidy", "text": "Wipe a fingerprint off your screen." },
-    { "id": "s036", "bucket": "micro", "category": "tidy", "text": "Untangle one cable." },
-    { "id": "s037", "bucket": "micro", "category": "tidy", "text": "Put the pen back where the pen lives." },
-    { "id": "s038", "bucket": "micro", "category": "play", "text": "Guess how long this run will take. Check later." },
-    { "id": "s039", "bucket": "micro", "category": "play", "text": "Pick a colour and find five of it in the room." },
-    { "id": "s040", "bucket": "micro", "category": "play", "text": "Spin once in your chair. You earned it." },
-    { "id": "s041", "bucket": "micro", "category": "play", "text": "Invent a worse name for the function you just wrote." },
-    { "id": "s042", "bucket": "micro", "category": "reflect", "text": "Ask yourself what you are actually trying to ship." },
-    { "id": "s043", "bucket": "micro", "category": "reflect", "text": "Notice one thing that went right today." },
-    { "id": "s044", "bucket": "micro", "category": "reflect", "text": "Decide what the next single step is." },
-    { "id": "s045", "bucket": "micro", "category": "reflect", "text": "Say out loud what problem you are solving." },
-    { "id": "s046", "bucket": "micro", "category": "connect", "text": "React to a teammate message with something kind." },
-    { "id": "s047", "bucket": "micro", "category": "connect", "text": "Say good morning to whoever is nearby." },
-    { "id": "s048", "bucket": "micro", "category": "learn", "text": "Read one line of the changelog for your framework." },
-    { "id": "s049", "bucket": "micro", "category": "learn", "text": "Hover a symbol and read its actual type." },
-    { "id": "s050", "bucket": "micro", "category": "learn", "text": "Look up one flag on the command you just ran." },
-    { "id": "s051", "bucket": "short", "category": "body", "text": "Do a lap of the room. Two if it is small." },
-    { "id": "s052", "bucket": "short", "category": "body", "text": "Ten slow squats next to your chair." },
-    { "id": "s053", "bucket": "short", "category": "body", "text": "Hang forward and let your head dangle." },
-    { "id": "s054", "bucket": "short", "category": "body", "text": "Refill your water bottle properly." },
-    { "id": "s055", "bucket": "short", "category": "body", "text": "Do a doorway chest stretch on both sides." },
-    { "id": "s056", "bucket": "short", "category": "body", "text": "Stand on one leg until you wobble. Switch." },
-    { "id": "s057", "bucket": "short", "category": "body", "text": "Raise your desk and stand for this whole run." },
-    { "id": "s058", "bucket": "short", "category": "body", "text": "Twenty jumping jacks. Nobody is watching." },
-    { "id": "s059", "bucket": "short", "category": "body", "text": "Stretch your hip flexors. You sit too much." },
-    { "id": "s060", "bucket": "short", "category": "body", "text": "Walk to the furthest window and back." },
-    { "id": "s061", "bucket": "short", "category": "body", "text": "Hold a plank for as long as the spinner spins." },
-    { "id": "s062", "bucket": "short", "category": "body", "text": "Massage the base of your skull with both thumbs." },
-    { "id": "s063", "bucket": "short", "category": "reset", "text": "Box breathing: four in, four hold, four out, four hold. Five rounds." },
-    { "id": "s064", "bucket": "short", "category": "reset", "text": "Sit still and do absolutely nothing. On purpose." },
-    { "id": "s065", "bucket": "short", "category": "reset", "text": "Put on one song and just listen to it." },
-    { "id": "s066", "bucket": "short", "category": "reset", "text": "Step outside and feel the actual weather." },
-    { "id": "s067", "bucket": "short", "category": "reset", "text": "Make a cup of tea without checking anything." },
-    { "id": "s068", "bucket": "short", "category": "reset", "text": "Body scan from your scalp down to your feet." },
-    { "id": "s069", "bucket": "short", "category": "reset", "text": "Turn off every notification for the next hour." },
-    { "id": "s070", "bucket": "short", "category": "reset", "text": "Splash cold water on your face." },
-    { "id": "s071", "bucket": "short", "category": "reset", "text": "Stare at a plant. Plants are good for this." },
-    { "id": "s072", "bucket": "short", "category": "craft", "text": "Write the test you have been avoiding writing." },
-    { "id": "s073", "bucket": "short", "category": "craft", "text": "Read the diff you are about to commit. Actually read it." },
-    { "id": "s074", "bucket": "short", "category": "craft", "text": "Rewrite one function name so it says what it does." },
-    { "id": "s075", "bucket": "short", "category": "craft", "text": "Delete a chunk of commented-out code. Git remembers." },
-    { "id": "s076", "bucket": "short", "category": "craft", "text": "Add one line to the README that would have helped you." },
-    { "id": "s077", "bucket": "short", "category": "craft", "text": "Check whether that TODO is still true." },
-    { "id": "s078", "bucket": "short", "category": "craft", "text": "Prune your merged local branches." },
-    { "id": "s079", "bucket": "short", "category": "craft", "text": "Write down the bug you noticed but did not file." },
-    { "id": "s080", "bucket": "short", "category": "craft", "text": "Alias the command you type wrong every day." },
-    { "id": "s081", "bucket": "short", "category": "craft", "text": "Sketch the data flow on paper before the answer lands." },
-    { "id": "s082", "bucket": "short", "category": "craft", "text": "Improve one error message so it names the fix." },
-    { "id": "s083", "bucket": "short", "category": "craft", "text": "Pin the dependency version you have been getting away with." },
-    { "id": "s084", "bucket": "short", "category": "craft", "text": "Add a comment explaining the thing that surprised you." },
-    { "id": "s085", "bucket": "short", "category": "craft", "text": "Run the linter and fix only the honest complaints." },
-    { "id": "s086", "bucket": "short", "category": "craft", "text": "Reproduce the bug once more so you know it is real." },
-    { "id": "s087", "bucket": "short", "category": "learn", "text": "Read the docs page for the thing you are currently guessing at." },
-    { "id": "s088", "bucket": "short", "category": "learn", "text": "Look up one keyboard shortcut and use it three times." },
-    { "id": "s089", "bucket": "short", "category": "learn", "text": "Read the release notes of a tool you use daily." },
-    { "id": "s090", "bucket": "short", "category": "learn", "text": "Skim one file in the codebase you have never opened." },
-    { "id": "s091", "bucket": "short", "category": "learn", "text": "Find out what that acronym in the ticket actually means." },
-    { "id": "s092", "bucket": "short", "category": "learn", "text": "Read one man page top to bottom." },
-    { "id": "s093", "bucket": "short", "category": "learn", "text": "Learn what one environment variable in your config does." },
-    { "id": "s094", "bucket": "short", "category": "learn", "text": "Read the first paragraph of a spec you cite often." },
-    { "id": "s095", "bucket": "short", "category": "tidy", "text": "Clear your downloads folder of last week." },
-    { "id": "s096", "bucket": "short", "category": "tidy", "text": "Close every terminal tab you are not using." },
-    { "id": "s097", "bucket": "short", "category": "tidy", "text": "Archive the chat threads that are finished." },
-    { "id": "s098", "bucket": "short", "category": "tidy", "text": "Empty the mug graveyard on your desk." },
-    { "id": "s099", "bucket": "short", "category": "tidy", "text": "Rename the four screenshots on your desktop." },
-    { "id": "s100", "bucket": "short", "category": "tidy", "text": "Sort today inbox into reply, archive, ignore." },
-    { "id": "s101", "bucket": "short", "category": "tidy", "text": "Delete the branch you merged three weeks ago." },
-    { "id": "s102", "bucket": "short", "category": "connect", "text": "Send a teammate the answer you found yesterday." },
-    { "id": "s103", "bucket": "short", "category": "connect", "text": "Approve the pull request that has been sitting there." },
-    { "id": "s104", "bucket": "short", "category": "connect", "text": "Thank whoever unblocked you last week." },
-    { "id": "s105", "bucket": "short", "category": "connect", "text": "Reply to the message you keep marking unread." },
-    { "id": "s106", "bucket": "short", "category": "connect", "text": "Leave one genuinely useful code review comment." },
-    { "id": "s107", "bucket": "short", "category": "connect", "text": "Ask someone what they are stuck on." },
-    { "id": "s108", "bucket": "short", "category": "play", "text": "Try to beat your own typing speed record." },
-    { "id": "s109", "bucket": "short", "category": "play", "text": "Give your branch a ridiculous but accurate name." },
-    { "id": "s110", "bucket": "short", "category": "play", "text": "Doodle the architecture as if it were a city." },
-    { "id": "s111", "bucket": "short", "category": "play", "text": "Read the funniest commit message in your repo history." },
-    { "id": "s112", "bucket": "short", "category": "play", "text": "Write a haiku about the bug you are fixing." },
-    { "id": "s113", "bucket": "short", "category": "reflect", "text": "Write one sentence about what you learned this morning." },
-    { "id": "s114", "bucket": "short", "category": "reflect", "text": "Ask whether this task is still worth finishing." },
-    { "id": "s115", "bucket": "short", "category": "reflect", "text": "Check your calendar for the thing you forgot." },
-    { "id": "s116", "bucket": "short", "category": "reflect", "text": "Write tomorrow first task on a sticky note." },
-    { "id": "s117", "bucket": "short", "category": "reflect", "text": "Name the assumption you have not tested yet." },
-    { "id": "s118", "bucket": "medium", "category": "body", "text": "Go for a proper walk around the block." },
-    { "id": "s119", "bucket": "medium", "category": "body", "text": "Do a short mobility routine for your spine and hips." },
-    { "id": "s120", "bucket": "medium", "category": "body", "text": "Make real food instead of the snack you were going to have." },
-    { "id": "s121", "bucket": "medium", "category": "body", "text": "Stretch everything that hurts, gently, one at a time." },
-    { "id": "s122", "bucket": "medium", "category": "body", "text": "Climb the stairs in your building to the top." },
-    { "id": "s123", "bucket": "medium", "category": "body", "text": "Fix your chair height, monitor height, and keyboard angle." },
-    { "id": "s124", "bucket": "medium", "category": "reset", "text": "Lie on the floor with your legs up a wall." },
-    { "id": "s125", "bucket": "medium", "category": "reset", "text": "Do a ten minute guided meditation." },
-    { "id": "s126", "bucket": "medium", "category": "reset", "text": "Sit somewhere different in your home and look around." },
-    { "id": "s127", "bucket": "medium", "category": "reset", "text": "Take a shower. Genuinely the best debugger available." },
-    { "id": "s128", "bucket": "medium", "category": "reset", "text": "Eat lunch away from every screen you own." },
-    { "id": "s129", "bucket": "medium", "category": "reset", "text": "Nap for ten minutes with an alarm set." },
-    { "id": "s130", "bucket": "medium", "category": "craft", "text": "Refactor one file you keep apologising for." },
-    { "id": "s131", "bucket": "medium", "category": "craft", "text": "Write the design note for the thing you are about to build." },
-    { "id": "s132", "bucket": "medium", "category": "craft", "text": "Add tests around the code you are least confident in." },
-    { "id": "s133", "bucket": "medium", "category": "craft", "text": "Clean up your git history before you open the PR." },
-    { "id": "s134", "bucket": "medium", "category": "craft", "text": "Trace one request end to end through the system." },
-    { "id": "s135", "bucket": "medium", "category": "craft", "text": "Profile the slow endpoint you have been ignoring." },
-    { "id": "s136", "bucket": "medium", "category": "craft", "text": "Write the runbook entry for the incident you handled." },
-    { "id": "s137", "bucket": "medium", "category": "craft", "text": "Set up the local script that saves you five minutes daily." },
-    { "id": "s138", "bucket": "medium", "category": "craft", "text": "Split the giant function into the three things it actually does." },
-    { "id": "s139", "bucket": "medium", "category": "learn", "text": "Read a whole blog post instead of skimming three." },
-    { "id": "s140", "bucket": "medium", "category": "learn", "text": "Work through one exercise in a language you are learning." },
-    { "id": "s141", "bucket": "medium", "category": "learn", "text": "Read the source of a library you depend on." },
-    { "id": "s142", "bucket": "medium", "category": "learn", "text": "Watch a conference talk at 1.5x and take one note." },
-    { "id": "s143", "bucket": "medium", "category": "learn", "text": "Read the RFC behind the protocol you use every day." },
-    { "id": "s144", "bucket": "medium", "category": "learn", "text": "Reimplement a small utility from scratch to see how it works." },
-    { "id": "s145", "bucket": "medium", "category": "tidy", "text": "Triage your issue tracker down to what is actually real." },
-    { "id": "s146", "bucket": "medium", "category": "tidy", "text": "Reorganise your project folder the way you always meant to." },
-    { "id": "s147", "bucket": "medium", "category": "tidy", "text": "Clean your keyboard properly. It is worse than you think." },
-    { "id": "s148", "bucket": "medium", "category": "tidy", "text": "Update your dotfiles and commit them." },
-    { "id": "s149", "bucket": "medium", "category": "tidy", "text": "Back up the thing you would cry about losing." },
-    { "id": "s150", "bucket": "medium", "category": "connect", "text": "Review a colleague pull request properly, not just approve it." },
-    { "id": "s151", "bucket": "medium", "category": "connect", "text": "Write the status update nobody asked for but everyone wants." },
-    { "id": "s152", "bucket": "medium", "category": "connect", "text": "Pair with someone for the length of one model run." },
-    { "id": "s153", "bucket": "medium", "category": "connect", "text": "Answer a question in a community forum." },
-    { "id": "s154", "bucket": "medium", "category": "connect", "text": "Call someone who is not a coworker." },
-    { "id": "s155", "bucket": "medium", "category": "play", "text": "Play one round of a game you can quit instantly." },
-    { "id": "s156", "bucket": "medium", "category": "play", "text": "Learn one card trick badly." },
-    { "id": "s157", "bucket": "medium", "category": "play", "text": "Build something small and pointless in CSS." },
-    { "id": "s158", "bucket": "medium", "category": "play", "text": "Solve one puzzle from an advent-of-code style set." },
-    { "id": "s159", "bucket": "medium", "category": "reflect", "text": "Journal about what actually slowed you down this week." },
-    { "id": "s160", "bucket": "medium", "category": "reflect", "text": "Review your last five commits and grade them honestly." },
-    { "id": "s161", "bucket": "medium", "category": "reflect", "text": "Write the plan for the rest of the day in three bullets." },
-    { "id": "s162", "bucket": "medium", "category": "reflect", "text": "Ask what you would tell a junior engineer to do here." },
-    { "id": "s163", "bucket": "long", "category": "body", "text": "Go outside for a real walk. Leave the laptop." },
-    { "id": "s164", "bucket": "long", "category": "body", "text": "Do a full workout. The run will still be running." },
-    { "id": "s165", "bucket": "long", "category": "body", "text": "Cook something that takes attention." },
-    { "id": "s166", "bucket": "long", "category": "body", "text": "Go to the gym. This is a long one." },
-    { "id": "s167", "bucket": "long", "category": "reset", "text": "Take a real break. Set a timer and step fully away." },
-    { "id": "s168", "bucket": "long", "category": "reset", "text": "Read a chapter of a physical book." },
-    { "id": "s169", "bucket": "long", "category": "reset", "text": "Go and sit somewhere with no screens at all." },
-    { "id": "s170", "bucket": "long", "category": "reset", "text": "Do the errand you have been postponing for two weeks." },
-    { "id": "s171", "bucket": "long", "category": "craft", "text": "Start the side project file you keep thinking about." },
-    { "id": "s172", "bucket": "long", "category": "craft", "text": "Write the architecture doc properly, with diagrams." },
-    { "id": "s173", "bucket": "long", "category": "craft", "text": "Pay down the technical debt item at the top of the list." },
-    { "id": "s174", "bucket": "long", "category": "craft", "text": "Set up the CI check that would have caught last week bug." },
-    { "id": "s175", "bucket": "long", "category": "craft", "text": "Migrate one module off the deprecated API." },
-    { "id": "s176", "bucket": "long", "category": "learn", "text": "Work through a full tutorial start to finish." },
-    { "id": "s177", "bucket": "long", "category": "learn", "text": "Read a paper you have had open in a tab for a month." },
-    { "id": "s178", "bucket": "long", "category": "learn", "text": "Build a toy version of the system you are trying to understand." },
-    { "id": "s179", "bucket": "long", "category": "learn", "text": "Take the course module you bought and never opened." },
-    { "id": "s180", "bucket": "long", "category": "tidy", "text": "Do a proper inbox zero pass." },
-    { "id": "s181", "bucket": "long", "category": "tidy", "text": "Clean your whole desk setup, cables included." },
-    { "id": "s182", "bucket": "long", "category": "tidy", "text": "Audit and delete the cloud resources nobody is using." },
-    { "id": "s183", "bucket": "long", "category": "connect", "text": "Write the long reply to the person who deserves one." },
-    { "id": "s184", "bucket": "long", "category": "connect", "text": "Mentor someone for half an hour." },
-    { "id": "s185", "bucket": "long", "category": "connect", "text": "Write up what you learned so the next person does not have to." },
-    { "id": "s186", "bucket": "long", "category": "play", "text": "Build the silly demo you described to someone last month." },
-    { "id": "s187", "bucket": "long", "category": "play", "text": "Learn the first sixteen bars of something on an instrument." },
-    { "id": "s188", "bucket": "long", "category": "reflect", "text": "Do a personal retro on the last two weeks of work." },
-    { "id": "s189", "bucket": "long", "category": "reflect", "text": "Rewrite your task list from scratch instead of editing it." },
-    { "id": "s190", "bucket": "long", "category": "reflect", "text": "Decide what you are going to stop doing." }
+    {
+      "id": "s001",
+      "bucket": "micro",
+      "category": "body",
+      "title": "Roll your shoulders back five times. Slowly.",
+      "sub": "Slower than that. You rushed it just reading this."
+    },
+    {
+      "id": "s002",
+      "bucket": "micro",
+      "category": "body",
+      "title": "Look at something 20 feet away for 20 seconds.",
+      "sub": "Twenty feet, twenty seconds. Your eyes have been at arm's length all morning."
+    },
+    {
+      "id": "s003",
+      "bucket": "micro",
+      "category": "body",
+      "title": "Unclench your jaw. It was clenched.",
+      "sub": "It was. It has been since the last prompt."
+    },
+    {
+      "id": "s004",
+      "bucket": "micro",
+      "category": "body",
+      "title": "Drop your shoulders away from your ears.",
+      "sub": "They crept up again somewhere around the third retry."
+    },
+    {
+      "id": "s005",
+      "bucket": "micro",
+      "category": "body",
+      "title": "Stretch your wrists in both directions.",
+      "sub": "Both directions, ten seconds each. They have typed a lot today."
+    },
+    {
+      "id": "s006",
+      "bucket": "micro",
+      "category": "body",
+      "title": "Stand up. That is the whole task.",
+      "sub": "No stretch, no walk. Just be a standing person for a moment."
+    },
+    {
+      "id": "s007",
+      "bucket": "micro",
+      "category": "body",
+      "title": "Take one sip of water. Then another.",
+      "sub": "You have had coffee and nothing else since breakfast."
+    },
+    {
+      "id": "s008",
+      "bucket": "micro",
+      "category": "body",
+      "title": "Blink deliberately ten times to rehydrate your eyes.",
+      "sub": "Staring at a screen halves your blink rate. This is the fix."
+    },
+    {
+      "id": "s009",
+      "bucket": "micro",
+      "category": "body",
+      "title": "Tilt your head to each side for a five count.",
+      "sub": "Ear toward shoulder, no forcing. Five slow counts a side."
+    },
+    {
+      "id": "s010",
+      "bucket": "micro",
+      "category": "body",
+      "title": "Press your palms together and stretch your forearms.",
+      "sub": "Prayer position, elbows out, press down. Ten seconds."
+    },
+    {
+      "id": "s011",
+      "bucket": "micro",
+      "category": "body",
+      "title": "Point and flex your feet under the desk.",
+      "sub": "Nobody can see. Twenty each way gets the blood moving."
+    },
+    {
+      "id": "s012",
+      "bucket": "micro",
+      "category": "body",
+      "title": "Straighten your spine one vertebra at a time.",
+      "sub": "Start at the tailbone and stack upward. It takes about ten seconds."
+    },
+    {
+      "id": "s013",
+      "bucket": "micro",
+      "category": "body",
+      "title": "Squeeze your shoulder blades together and hold.",
+      "sub": "Like you are holding a pencil between them. Hold for five."
+    },
+    {
+      "id": "s014",
+      "bucket": "micro",
+      "category": "body",
+      "title": "Open and close your fists ten times.",
+      "sub": "Wakes the hands up better than shaking them out does."
+    },
+    {
+      "id": "s015",
+      "bucket": "micro",
+      "category": "reset",
+      "title": "Breathe in for four, hold for four, out for four.",
+      "sub": "Three rounds. The count matters more than the depth."
+    },
+    {
+      "id": "s016",
+      "bucket": "micro",
+      "category": "reset",
+      "title": "Name three sounds you can hear right now.",
+      "sub": "One far away, one close, one you are making yourself."
+    },
+    {
+      "id": "s017",
+      "bucket": "micro",
+      "category": "reset",
+      "title": "Close your eyes until the model finishes.",
+      "sub": "Nothing to watch. The spinner is not a progress bar."
+    },
+    {
+      "id": "s018",
+      "bucket": "micro",
+      "category": "reset",
+      "title": "Take one breath that is longer on the way out.",
+      "sub": "In for four, out for six. That ratio is the whole trick."
+    },
+    {
+      "id": "s019",
+      "bucket": "micro",
+      "category": "reset",
+      "title": "Notice where your attention went. Bring it back.",
+      "sub": "No judgement about where it went. Just notice, then return."
+    },
+    {
+      "id": "s020",
+      "bucket": "micro",
+      "category": "reset",
+      "title": "Put your phone face down.",
+      "sub": "It will still be there. That is rather the point."
+    },
+    {
+      "id": "s021",
+      "bucket": "micro",
+      "category": "reset",
+      "title": "Look out a window. Any window.",
+      "sub": "Distance is the thing your eyes are missing, not scenery."
+    },
+    {
+      "id": "s022",
+      "bucket": "micro",
+      "category": "reset",
+      "title": "Let your eyes go soft and unfocused for ten seconds.",
+      "sub": "Let the screen blur. Focusing muscles get tired too."
+    },
+    {
+      "id": "s023",
+      "bucket": "micro",
+      "category": "reset",
+      "title": "Sigh out loud. It resets more than you think.",
+      "sub": "Out loud. A real one. Your nervous system reads it as safety."
+    },
+    {
+      "id": "s024",
+      "bucket": "micro",
+      "category": "craft",
+      "title": "Rename that one variable you keep squinting at.",
+      "sub": "The one you re-read every time because the name lies."
+    },
+    {
+      "id": "s025",
+      "bucket": "micro",
+      "category": "craft",
+      "title": "Stage the changes you already know are good.",
+      "sub": "The good half of the diff, before you forget which half that was."
+    },
+    {
+      "id": "s026",
+      "bucket": "micro",
+      "category": "craft",
+      "title": "Delete a debug log you left behind.",
+      "sub": "There is one. There is always one."
+    },
+    {
+      "id": "s027",
+      "bucket": "micro",
+      "category": "craft",
+      "title": "Write the commit message before you forget the why.",
+      "sub": "The what is in the diff. The why only exists in your head right now."
+    },
+    {
+      "id": "s028",
+      "bucket": "micro",
+      "category": "craft",
+      "title": "Close one browser tab you will never read.",
+      "sub": "You opened it four days ago with real intentions."
+    },
+    {
+      "id": "s029",
+      "bucket": "micro",
+      "category": "craft",
+      "title": "Add the type annotation you skipped.",
+      "sub": "Thirty seconds now, or a confused hour in November."
+    },
+    {
+      "id": "s030",
+      "bucket": "micro",
+      "category": "craft",
+      "title": "Check which branch you are actually on.",
+      "sub": "Worth confirming before the answer arrives and you commit."
+    },
+    {
+      "id": "s031",
+      "bucket": "micro",
+      "category": "craft",
+      "title": "Save the file. Yes, that one.",
+      "sub": "The one the watcher has not picked up. That is why it is not rebuilding."
+    },
+    {
+      "id": "s032",
+      "bucket": "micro",
+      "category": "craft",
+      "title": "Scroll to the top of the file and read the imports.",
+      "sub": "You learn a surprising amount about a file from what it pulls in."
+    },
+    {
+      "id": "s033",
+      "bucket": "micro",
+      "category": "tidy",
+      "title": "Move one thing off your desk.",
+      "sub": "One thing. Whichever one you keep moving out of the way."
+    },
+    {
+      "id": "s034",
+      "bucket": "micro",
+      "category": "tidy",
+      "title": "Throw away the nearest piece of rubbish.",
+      "sub": "It is within arm's reach and you have stopped seeing it."
+    },
+    {
+      "id": "s035",
+      "bucket": "micro",
+      "category": "tidy",
+      "title": "Wipe a fingerprint off your screen.",
+      "sub": "You have been reading through it for a week."
+    },
+    {
+      "id": "s036",
+      "bucket": "micro",
+      "category": "tidy",
+      "title": "Untangle one cable.",
+      "sub": "The one behind the monitor that is knotted around two others."
+    },
+    {
+      "id": "s037",
+      "bucket": "micro",
+      "category": "tidy",
+      "title": "Put the pen back where the pen lives.",
+      "sub": "Wherever that is. You know where that is."
+    },
+    {
+      "id": "s038",
+      "bucket": "micro",
+      "category": "play",
+      "title": "Guess how long this run will take. Check later.",
+      "sub": "Write the number down. Being wrong is the fun part."
+    },
+    {
+      "id": "s039",
+      "bucket": "micro",
+      "category": "play",
+      "title": "Pick a colour and find five of it in the room.",
+      "sub": "You will find seven. Rooms are more colourful than they look."
+    },
+    {
+      "id": "s040",
+      "bucket": "micro",
+      "category": "play",
+      "title": "Spin once in your chair. You earned it.",
+      "sub": "A full rotation. Chairs that spin should be spun."
+    },
+    {
+      "id": "s041",
+      "bucket": "micro",
+      "category": "play",
+      "title": "Invent a worse name for the function you just wrote.",
+      "sub": "The worse it is, the better you will remember what the function does."
+    },
+    {
+      "id": "s042",
+      "bucket": "micro",
+      "category": "reflect",
+      "title": "Ask yourself what you are actually trying to ship.",
+      "sub": "Not the ticket. The actual thing it is meant to make possible."
+    },
+    {
+      "id": "s043",
+      "bucket": "micro",
+      "category": "reflect",
+      "title": "Notice one thing that went right today.",
+      "sub": "Small counts. The bar is genuinely on the floor here."
+    },
+    {
+      "id": "s044",
+      "bucket": "micro",
+      "category": "reflect",
+      "title": "Decide what the next single step is.",
+      "sub": "One step. Not the plan, not the epic. The next step."
+    },
+    {
+      "id": "s045",
+      "bucket": "micro",
+      "category": "reflect",
+      "title": "Say out loud what problem you are solving.",
+      "sub": "Saying it out loud finds the hole in it faster than thinking does."
+    },
+    {
+      "id": "s046",
+      "bucket": "micro",
+      "category": "connect",
+      "title": "React to a teammate message with something kind.",
+      "sub": "Costs nothing, lands better than you expect."
+    },
+    {
+      "id": "s047",
+      "bucket": "micro",
+      "category": "connect",
+      "title": "Say good morning to whoever is nearby.",
+      "sub": "If nobody is nearby, this one is a free skip."
+    },
+    {
+      "id": "s048",
+      "bucket": "micro",
+      "category": "learn",
+      "title": "Read one line of the changelog for your framework.",
+      "sub": "One line. You have been on this version for eight months."
+    },
+    {
+      "id": "s049",
+      "bucket": "micro",
+      "category": "learn",
+      "title": "Hover a symbol and read its actual type.",
+      "sub": "The inferred one, not the one you assume it is."
+    },
+    {
+      "id": "s050",
+      "bucket": "micro",
+      "category": "learn",
+      "title": "Look up one flag on the command you just ran.",
+      "sub": "The flag you copied from a blog post in 2022."
+    },
+    {
+      "id": "s051",
+      "bucket": "short",
+      "category": "body",
+      "title": "Do a lap of the room. Two if it is small.",
+      "sub": "Perimeter only. The point is the moving, not the distance."
+    },
+    {
+      "id": "s052",
+      "bucket": "short",
+      "category": "body",
+      "title": "Ten slow squats next to your chair.",
+      "sub": "Slow down means slow. Two seconds down, two seconds up."
+    },
+    {
+      "id": "s053",
+      "bucket": "short",
+      "category": "body",
+      "title": "Hang forward and let your head dangle.",
+      "sub": "Knees soft, arms heavy. Come up one vertebra at a time."
+    },
+    {
+      "id": "s054",
+      "bucket": "short",
+      "category": "body",
+      "title": "Refill your water bottle properly.",
+      "sub": "Not a top-up. Walk to the tap and fill the whole thing."
+    },
+    {
+      "id": "s055",
+      "bucket": "short",
+      "category": "body",
+      "title": "Do a doorway chest stretch on both sides.",
+      "sub": "Forearm on the frame, step through, turn away. Thirty seconds a side."
+    },
+    {
+      "id": "s056",
+      "bucket": "short",
+      "category": "body",
+      "title": "Stand on one leg until you wobble. Switch.",
+      "sub": "Then close your eyes and try again. Much harder."
+    },
+    {
+      "id": "s057",
+      "bucket": "short",
+      "category": "body",
+      "title": "Raise your desk and stand for this whole run.",
+      "sub": "If it goes up, put it up. One run standing is a fair trade."
+    },
+    {
+      "id": "s058",
+      "bucket": "short",
+      "category": "body",
+      "title": "Twenty jumping jacks. Nobody is watching.",
+      "sub": "And if they are, they are also waiting on a model."
+    },
+    {
+      "id": "s059",
+      "bucket": "short",
+      "category": "body",
+      "title": "Stretch your hip flexors. You sit too much.",
+      "sub": "Half kneeling, tuck the pelvis, lean forward. It will complain."
+    },
+    {
+      "id": "s060",
+      "bucket": "short",
+      "category": "body",
+      "title": "Walk to the furthest window and back.",
+      "sub": "Furthest one, not the nearest one. Make it an actual trip."
+    },
+    {
+      "id": "s061",
+      "bucket": "short",
+      "category": "body",
+      "title": "Hold a plank for as long as the spinner spins.",
+      "sub": "Rough and honest. Down when the shaking starts."
+    },
+    {
+      "id": "s062",
+      "bucket": "short",
+      "category": "body",
+      "title": "Massage the base of your skull with both thumbs.",
+      "sub": "Where the skull meets the neck. Small circles, real pressure."
+    },
+    {
+      "id": "s063",
+      "bucket": "short",
+      "category": "reset",
+      "title": "Box breathing: four in, four hold, four out, four hold. Five rounds.",
+      "sub": "Five rounds is about ninety seconds. Count them properly."
+    },
+    {
+      "id": "s064",
+      "bucket": "short",
+      "category": "reset",
+      "title": "Sit still and do absolutely nothing. On purpose.",
+      "sub": "Not scrolling. Not planning. The doing-nothing is the exercise."
+    },
+    {
+      "id": "s065",
+      "bucket": "short",
+      "category": "reset",
+      "title": "Put on one song and just listen to it.",
+      "sub": "The whole song, start to finish, without a second tab."
+    },
+    {
+      "id": "s066",
+      "bucket": "short",
+      "category": "reset",
+      "title": "Step outside and feel the actual weather.",
+      "sub": "Whatever it is doing out there, go and be in it briefly."
+    },
+    {
+      "id": "s067",
+      "bucket": "short",
+      "category": "reset",
+      "title": "Make a cup of tea without checking anything.",
+      "sub": "The kettle is a legitimate use of a two minute wait."
+    },
+    {
+      "id": "s068",
+      "bucket": "short",
+      "category": "reset",
+      "title": "Body scan from your scalp down to your feet.",
+      "sub": "Scalp, jaw, shoulders, hands, hips, feet. Notice, do not fix."
+    },
+    {
+      "id": "s069",
+      "bucket": "short",
+      "category": "reset",
+      "title": "Turn off every notification for the next hour.",
+      "sub": "One hour. You can turn them back on afterwards."
+    },
+    {
+      "id": "s070",
+      "bucket": "short",
+      "category": "reset",
+      "title": "Splash cold water on your face.",
+      "sub": "Works on tiredness far better than the fourth coffee will."
+    },
+    {
+      "id": "s071",
+      "bucket": "short",
+      "category": "reset",
+      "title": "Stare at a plant. Plants are good for this.",
+      "sub": "No task attached. Just look at the plant."
+    },
+    {
+      "id": "s072",
+      "bucket": "short",
+      "category": "craft",
+      "title": "Write the test you have been avoiding writing.",
+      "sub": "The one you have been describing as hard to test since Tuesday."
+    },
+    {
+      "id": "s073",
+      "bucket": "short",
+      "category": "craft",
+      "title": "Read the diff you are about to commit. Actually read it.",
+      "sub": "Line by line. You will find one thing, you always do."
+    },
+    {
+      "id": "s074",
+      "bucket": "short",
+      "category": "craft",
+      "title": "Rewrite one function name so it says what it does.",
+      "sub": "If you needed a comment to explain the name, rename it instead."
+    },
+    {
+      "id": "s075",
+      "bucket": "short",
+      "category": "craft",
+      "title": "Delete a chunk of commented-out code. Git remembers.",
+      "sub": "It has been dead since March and nobody will resurrect it."
+    },
+    {
+      "id": "s076",
+      "bucket": "short",
+      "category": "craft",
+      "title": "Add one line to the README that would have helped you.",
+      "sub": "The thing you had to work out yourself last Thursday."
+    },
+    {
+      "id": "s077",
+      "bucket": "short",
+      "category": "craft",
+      "title": "Check whether that TODO is still true.",
+      "sub": "Half of them were resolved by other changes and nobody deleted them."
+    },
+    {
+      "id": "s078",
+      "bucket": "short",
+      "category": "craft",
+      "title": "Prune your merged local branches.",
+      "sub": "Your branch list is a museum of finished work."
+    },
+    {
+      "id": "s079",
+      "bucket": "short",
+      "category": "craft",
+      "title": "Write down the bug you noticed but did not file.",
+      "sub": "The one you told yourself you would definitely remember."
+    },
+    {
+      "id": "s080",
+      "bucket": "short",
+      "category": "craft",
+      "title": "Alias the command you type wrong every day.",
+      "sub": "You have typed it wrong eleven times this week."
+    },
+    {
+      "id": "s081",
+      "bucket": "short",
+      "category": "craft",
+      "title": "Sketch the data flow on paper before the answer lands.",
+      "sub": "Paper. Boxes and arrows. It is faster than the tool."
+    },
+    {
+      "id": "s082",
+      "bucket": "short",
+      "category": "craft",
+      "title": "Improve one error message so it names the fix.",
+      "sub": "The best error messages say what happened and what to do next."
+    },
+    {
+      "id": "s083",
+      "bucket": "short",
+      "category": "craft",
+      "title": "Pin the dependency version you have been getting away with.",
+      "sub": "It works today because nobody has published a breaking change yet."
+    },
+    {
+      "id": "s084",
+      "bucket": "short",
+      "category": "craft",
+      "title": "Add a comment explaining the thing that surprised you.",
+      "sub": "Future you will hit the same surprise and have no idea why."
+    },
+    {
+      "id": "s085",
+      "bucket": "short",
+      "category": "craft",
+      "title": "Run the linter and fix only the honest complaints.",
+      "sub": "Fix the real ones, silence the pedantic ones, move on."
+    },
+    {
+      "id": "s086",
+      "bucket": "short",
+      "category": "craft",
+      "title": "Reproduce the bug once more so you know it is real.",
+      "sub": "Before you fix it, confirm you can still make it happen on demand."
+    },
+    {
+      "id": "s087",
+      "bucket": "short",
+      "category": "learn",
+      "title": "Read the docs page for the thing you are currently guessing at.",
+      "sub": "The page you have been substituting with confident guessing."
+    },
+    {
+      "id": "s088",
+      "bucket": "short",
+      "category": "learn",
+      "title": "Look up one keyboard shortcut and use it three times.",
+      "sub": "Three uses is roughly where it starts to stick."
+    },
+    {
+      "id": "s089",
+      "bucket": "short",
+      "category": "learn",
+      "title": "Read the release notes of a tool you use daily.",
+      "sub": "You upgraded it without reading them. Everyone does."
+    },
+    {
+      "id": "s090",
+      "bucket": "short",
+      "category": "learn",
+      "title": "Skim one file in the codebase you have never opened.",
+      "sub": "Every codebase has one. Pick it and read the top half."
+    },
+    {
+      "id": "s091",
+      "bucket": "short",
+      "category": "learn",
+      "title": "Find out what that acronym in the ticket actually means.",
+      "sub": "Everyone in the thread is also quietly unsure."
+    },
+    {
+      "id": "s092",
+      "bucket": "short",
+      "category": "learn",
+      "title": "Read one man page top to bottom.",
+      "sub": "Actually to the bottom. There are options down there you will want."
+    },
+    {
+      "id": "s093",
+      "bucket": "short",
+      "category": "learn",
+      "title": "Learn what one environment variable in your config does.",
+      "sub": "You inherited it and have never touched it out of respect."
+    },
+    {
+      "id": "s094",
+      "bucket": "short",
+      "category": "learn",
+      "title": "Read the first paragraph of a spec you cite often.",
+      "sub": "Just the first paragraph. Specs are less hostile than they look."
+    },
+    {
+      "id": "s095",
+      "bucket": "short",
+      "category": "tidy",
+      "title": "Clear your downloads folder of last week.",
+      "sub": "Everything from before Monday can go without ceremony."
+    },
+    {
+      "id": "s096",
+      "bucket": "short",
+      "category": "tidy",
+      "title": "Close every terminal tab you are not using.",
+      "sub": "You have nine open and you are using two of them."
+    },
+    {
+      "id": "s097",
+      "bucket": "short",
+      "category": "tidy",
+      "title": "Archive the chat threads that are finished.",
+      "sub": "The decision was made. The thread does not need to stay open."
+    },
+    {
+      "id": "s098",
+      "bucket": "short",
+      "category": "tidy",
+      "title": "Empty the mug graveyard on your desk.",
+      "sub": "There are at least two. Take them all in one trip."
+    },
+    {
+      "id": "s099",
+      "bucket": "short",
+      "category": "tidy",
+      "title": "Rename the four screenshots on your desktop.",
+      "sub": "Screenshot 2026-08-14 at 11.42.07 tells you nothing."
+    },
+    {
+      "id": "s100",
+      "bucket": "short",
+      "category": "tidy",
+      "title": "Sort today inbox into reply, archive, ignore.",
+      "sub": "Three piles, no fourth. The fourth pile is how inboxes die."
+    },
+    {
+      "id": "s101",
+      "bucket": "short",
+      "category": "tidy",
+      "title": "Delete the branch you merged three weeks ago.",
+      "sub": "It merged cleanly and has been loitering ever since."
+    },
+    {
+      "id": "s102",
+      "bucket": "short",
+      "category": "connect",
+      "title": "Send a teammate the answer you found yesterday.",
+      "sub": "You solved it and then said nothing. Send them the answer."
+    },
+    {
+      "id": "s103",
+      "bucket": "short",
+      "category": "connect",
+      "title": "Approve the pull request that has been sitting there.",
+      "sub": "It is small, you already skimmed it, and they are blocked."
+    },
+    {
+      "id": "s104",
+      "bucket": "short",
+      "category": "connect",
+      "title": "Thank whoever unblocked you last week.",
+      "sub": "They will have forgotten. It will still land well."
+    },
+    {
+      "id": "s105",
+      "bucket": "short",
+      "category": "connect",
+      "title": "Reply to the message you keep marking unread.",
+      "sub": "One sentence is a complete reply. They are not expecting an essay."
+    },
+    {
+      "id": "s106",
+      "bucket": "short",
+      "category": "connect",
+      "title": "Leave one genuinely useful code review comment.",
+      "sub": "One that helps. Not a nit about a space before a brace."
+    },
+    {
+      "id": "s107",
+      "bucket": "short",
+      "category": "connect",
+      "title": "Ask someone what they are stuck on.",
+      "sub": "Best question on any team. Costs you thirty seconds."
+    },
+    {
+      "id": "s108",
+      "bucket": "short",
+      "category": "play",
+      "title": "Try to beat your own typing speed record.",
+      "sub": "Loser buys nobody anything. Purely for the numbers."
+    },
+    {
+      "id": "s109",
+      "bucket": "short",
+      "category": "play",
+      "title": "Give your branch a ridiculous but accurate name.",
+      "sub": "Accurate first, ridiculous second. Both are achievable."
+    },
+    {
+      "id": "s110",
+      "bucket": "short",
+      "category": "play",
+      "title": "Doodle the architecture as if it were a city.",
+      "sub": "Services become districts, queues become roads. It clarifies more than it should."
+    },
+    {
+      "id": "s111",
+      "bucket": "short",
+      "category": "play",
+      "title": "Read the funniest commit message in your repo history.",
+      "sub": "Search the log for a swear word. Start there."
+    },
+    {
+      "id": "s112",
+      "bucket": "short",
+      "category": "play",
+      "title": "Write a haiku about the bug you are fixing.",
+      "sub": "Five, seven, five. The bug deserves the formality."
+    },
+    {
+      "id": "s113",
+      "bucket": "short",
+      "category": "reflect",
+      "title": "Write one sentence about what you learned this morning.",
+      "sub": "One sentence. If nothing comes, that is also information."
+    },
+    {
+      "id": "s114",
+      "bucket": "short",
+      "category": "reflect",
+      "title": "Ask whether this task is still worth finishing.",
+      "sub": "Sunk cost is not a reason. It is allowed to be no."
+    },
+    {
+      "id": "s115",
+      "bucket": "short",
+      "category": "reflect",
+      "title": "Check your calendar for the thing you forgot.",
+      "sub": "There is something in there you have not looked at properly."
+    },
+    {
+      "id": "s116",
+      "bucket": "short",
+      "category": "reflect",
+      "title": "Write tomorrow first task on a sticky note.",
+      "sub": "Tomorrow morning you will be extremely grateful for that note."
+    },
+    {
+      "id": "s117",
+      "bucket": "short",
+      "category": "reflect",
+      "title": "Name the assumption you have not tested yet.",
+      "sub": "There is one. Write it down before the answer arrives."
+    },
+    {
+      "id": "s118",
+      "bucket": "medium",
+      "category": "body",
+      "title": "Go for a proper walk around the block.",
+      "sub": "Coat on, door shut, actual pavement. Ten minutes is plenty."
+    },
+    {
+      "id": "s119",
+      "bucket": "medium",
+      "category": "body",
+      "title": "Do a short mobility routine for your spine and hips.",
+      "sub": "Cat-cow, hip circles, thoracic rotations. Whatever you remember."
+    },
+    {
+      "id": "s120",
+      "bucket": "medium",
+      "category": "body",
+      "title": "Make real food instead of the snack you were going to have.",
+      "sub": "You were going to eat crisps standing up over the sink."
+    },
+    {
+      "id": "s121",
+      "bucket": "medium",
+      "category": "body",
+      "title": "Stretch everything that hurts, gently, one at a time.",
+      "sub": "One at a time, and stop before it becomes interesting."
+    },
+    {
+      "id": "s122",
+      "bucket": "medium",
+      "category": "body",
+      "title": "Climb the stairs in your building to the top.",
+      "sub": "All the way up. The lift is not part of this task."
+    },
+    {
+      "id": "s123",
+      "bucket": "medium",
+      "category": "body",
+      "title": "Fix your chair height, monitor height, and keyboard angle.",
+      "sub": "Ten minutes now against the neck you will have at forty."
+    },
+    {
+      "id": "s124",
+      "bucket": "medium",
+      "category": "reset",
+      "title": "Lie on the floor with your legs up a wall.",
+      "sub": "Legs vertical, five minutes. Absurdly effective on tired legs."
+    },
+    {
+      "id": "s125",
+      "bucket": "medium",
+      "category": "reset",
+      "title": "Do a ten minute guided meditation.",
+      "sub": "Pick any one. The picking is not the important part."
+    },
+    {
+      "id": "s126",
+      "bucket": "medium",
+      "category": "reset",
+      "title": "Sit somewhere different in your home and look around.",
+      "sub": "A different chair genuinely changes what you notice."
+    },
+    {
+      "id": "s127",
+      "bucket": "medium",
+      "category": "reset",
+      "title": "Take a shower. Genuinely the best debugger available.",
+      "sub": "Nobody knows why it works. It reliably works."
+    },
+    {
+      "id": "s128",
+      "bucket": "medium",
+      "category": "reset",
+      "title": "Eat lunch away from every screen you own.",
+      "sub": "Every screen. The phone counts as a screen."
+    },
+    {
+      "id": "s129",
+      "bucket": "medium",
+      "category": "reset",
+      "title": "Nap for ten minutes with an alarm set.",
+      "sub": "Set the alarm first. Ten minutes, not forty."
+    },
+    {
+      "id": "s130",
+      "bucket": "medium",
+      "category": "craft",
+      "title": "Refactor one file you keep apologising for.",
+      "sub": "You know the file. You said sorry about it in review last week."
+    },
+    {
+      "id": "s131",
+      "bucket": "medium",
+      "category": "craft",
+      "title": "Write the design note for the thing you are about to build.",
+      "sub": "A page is enough. It will change what you build."
+    },
+    {
+      "id": "s132",
+      "bucket": "medium",
+      "category": "craft",
+      "title": "Add tests around the code you are least confident in.",
+      "sub": "The code you would not want to be paged about at 3am."
+    },
+    {
+      "id": "s133",
+      "bucket": "medium",
+      "category": "craft",
+      "title": "Clean up your git history before you open the PR.",
+      "sub": "Squash the six commits called wip into one that explains itself."
+    },
+    {
+      "id": "s134",
+      "bucket": "medium",
+      "category": "craft",
+      "title": "Trace one request end to end through the system.",
+      "sub": "Click to database and back. You will find something surprising."
+    },
+    {
+      "id": "s135",
+      "bucket": "medium",
+      "category": "craft",
+      "title": "Profile the slow endpoint you have been ignoring.",
+      "sub": "It has been slow for a month and you have been calling it fine."
+    },
+    {
+      "id": "s136",
+      "bucket": "medium",
+      "category": "craft",
+      "title": "Write the runbook entry for the incident you handled.",
+      "sub": "While you still remember the order things happened in."
+    },
+    {
+      "id": "s137",
+      "bucket": "medium",
+      "category": "craft",
+      "title": "Set up the local script that saves you five minutes daily.",
+      "sub": "Five minutes a day is twenty hours a year."
+    },
+    {
+      "id": "s138",
+      "bucket": "medium",
+      "category": "craft",
+      "title": "Split the giant function into the three things it actually does.",
+      "sub": "You already know what the three things are. That is the hard part done."
+    },
+    {
+      "id": "s139",
+      "bucket": "medium",
+      "category": "learn",
+      "title": "Read a whole blog post instead of skimming three.",
+      "sub": "All the way through, one tab, no skimming."
+    },
+    {
+      "id": "s140",
+      "bucket": "medium",
+      "category": "learn",
+      "title": "Work through one exercise in a language you are learning.",
+      "sub": "One exercise beats another hour of tutorial video."
+    },
+    {
+      "id": "s141",
+      "bucket": "medium",
+      "category": "learn",
+      "title": "Read the source of a library you depend on.",
+      "sub": "You import it daily and have never opened it. Go and look."
+    },
+    {
+      "id": "s142",
+      "bucket": "medium",
+      "category": "learn",
+      "title": "Watch a conference talk at 1.5x and take one note.",
+      "sub": "One note. If you cannot find one, the talk was not for you."
+    },
+    {
+      "id": "s143",
+      "bucket": "medium",
+      "category": "learn",
+      "title": "Read the RFC behind the protocol you use every day.",
+      "sub": "It is drier than the blog posts and about four times more correct."
+    },
+    {
+      "id": "s144",
+      "bucket": "medium",
+      "category": "learn",
+      "title": "Reimplement a small utility from scratch to see how it works.",
+      "sub": "Sixty lines will teach you more than the docs did."
+    },
+    {
+      "id": "s145",
+      "bucket": "medium",
+      "category": "tidy",
+      "title": "Triage your issue tracker down to what is actually real.",
+      "sub": "Close anything nobody has mentioned in three months."
+    },
+    {
+      "id": "s146",
+      "bucket": "medium",
+      "category": "tidy",
+      "title": "Reorganise your project folder the way you always meant to.",
+      "sub": "You have known the right structure since about week two."
+    },
+    {
+      "id": "s147",
+      "bucket": "medium",
+      "category": "tidy",
+      "title": "Clean your keyboard properly. It is worse than you think.",
+      "sub": "Turn it over first. Try not to look directly at what falls out."
+    },
+    {
+      "id": "s148",
+      "bucket": "medium",
+      "category": "tidy",
+      "title": "Update your dotfiles and commit them.",
+      "sub": "The change you made in a hurry is still uncommitted."
+    },
+    {
+      "id": "s149",
+      "bucket": "medium",
+      "category": "tidy",
+      "title": "Back up the thing you would cry about losing.",
+      "sub": "You know exactly which thing that is."
+    },
+    {
+      "id": "s150",
+      "bucket": "medium",
+      "category": "connect",
+      "title": "Review a colleague pull request properly, not just approve it.",
+      "sub": "Read it to understand it, not to make the badge go away."
+    },
+    {
+      "id": "s151",
+      "bucket": "medium",
+      "category": "connect",
+      "title": "Write the status update nobody asked for but everyone wants.",
+      "sub": "Three bullets: shipped, stuck, next. That is the whole format."
+    },
+    {
+      "id": "s152",
+      "bucket": "medium",
+      "category": "connect",
+      "title": "Pair with someone for the length of one model run.",
+      "sub": "One run's worth. Long enough to be useful, short enough to commit to."
+    },
+    {
+      "id": "s153",
+      "bucket": "medium",
+      "category": "connect",
+      "title": "Answer a question in a community forum.",
+      "sub": "You know something that somebody is currently stuck on."
+    },
+    {
+      "id": "s154",
+      "bucket": "medium",
+      "category": "connect",
+      "title": "Call someone who is not a coworker.",
+      "sub": "No agenda, no purpose. That is what makes it work."
+    },
+    {
+      "id": "s155",
+      "bucket": "medium",
+      "category": "play",
+      "title": "Play one round of a game you can quit instantly.",
+      "sub": "Quit instantly is the key requirement here."
+    },
+    {
+      "id": "s156",
+      "bucket": "medium",
+      "category": "play",
+      "title": "Learn one card trick badly.",
+      "sub": "Badly is the correct standard for a first attempt."
+    },
+    {
+      "id": "s157",
+      "bucket": "medium",
+      "category": "play",
+      "title": "Build something small and pointless in CSS.",
+      "sub": "No purpose, no ticket, no users. Just a nice gradient."
+    },
+    {
+      "id": "s158",
+      "bucket": "medium",
+      "category": "play",
+      "title": "Solve one puzzle from an advent-of-code style set.",
+      "sub": "One of the early ones. The late ones are not a break."
+    },
+    {
+      "id": "s159",
+      "bucket": "medium",
+      "category": "reflect",
+      "title": "Journal about what actually slowed you down this week.",
+      "sub": "Not what you did. What got in the way of what you did."
+    },
+    {
+      "id": "s160",
+      "bucket": "medium",
+      "category": "reflect",
+      "title": "Review your last five commits and grade them honestly.",
+      "sub": "Would you approve them from someone else? Be honest."
+    },
+    {
+      "id": "s161",
+      "bucket": "medium",
+      "category": "reflect",
+      "title": "Write the plan for the rest of the day in three bullets.",
+      "sub": "Three. Not eight. Three is a plan, eight is a wish."
+    },
+    {
+      "id": "s162",
+      "bucket": "medium",
+      "category": "reflect",
+      "title": "Ask what you would tell a junior engineer to do here.",
+      "sub": "You always give better advice when it is not your problem."
+    },
+    {
+      "id": "s163",
+      "bucket": "long",
+      "category": "body",
+      "title": "Go outside for a real walk. Leave the laptop.",
+      "sub": "Phone in the pocket, laptop on the desk. It stays there."
+    },
+    {
+      "id": "s164",
+      "bucket": "long",
+      "category": "body",
+      "title": "Do a full workout. The run will still be running.",
+      "sub": "It will. That is the strange luxury of a long generation."
+    },
+    {
+      "id": "s165",
+      "bucket": "long",
+      "category": "body",
+      "title": "Cook something that takes attention.",
+      "sub": "Something with chopping in it. Chopping is the point."
+    },
+    {
+      "id": "s166",
+      "bucket": "long",
+      "category": "body",
+      "title": "Go to the gym. This is a long one.",
+      "sub": "Genuinely long enough. Go."
+    },
+    {
+      "id": "s167",
+      "bucket": "long",
+      "category": "reset",
+      "title": "Take a real break. Set a timer and step fully away.",
+      "sub": "Timer first, then leave. Without the timer you will hover."
+    },
+    {
+      "id": "s168",
+      "bucket": "long",
+      "category": "reset",
+      "title": "Read a chapter of a physical book.",
+      "sub": "Paper. A chapter is about the right size for a long one."
+    },
+    {
+      "id": "s169",
+      "bucket": "long",
+      "category": "reset",
+      "title": "Go and sit somewhere with no screens at all.",
+      "sub": "No screens at all. Take a drink and sit there."
+    },
+    {
+      "id": "s170",
+      "bucket": "long",
+      "category": "reset",
+      "title": "Do the errand you have been postponing for two weeks.",
+      "sub": "Fourteen days of thinking about it, twenty minutes to do it."
+    },
+    {
+      "id": "s171",
+      "bucket": "long",
+      "category": "craft",
+      "title": "Start the side project file you keep thinking about.",
+      "sub": "Just the first file. The first file is the whole hurdle."
+    },
+    {
+      "id": "s172",
+      "bucket": "long",
+      "category": "craft",
+      "title": "Write the architecture doc properly, with diagrams.",
+      "sub": "Boxes and arrows included. The diagram finds the holes."
+    },
+    {
+      "id": "s173",
+      "bucket": "long",
+      "category": "craft",
+      "title": "Pay down the technical debt item at the top of the list.",
+      "sub": "The top item. Not the fun item three rows down."
+    },
+    {
+      "id": "s174",
+      "bucket": "long",
+      "category": "craft",
+      "title": "Set up the CI check that would have caught last week bug.",
+      "sub": "It would have. Write it now while you still resent the bug."
+    },
+    {
+      "id": "s175",
+      "bucket": "long",
+      "category": "craft",
+      "title": "Migrate one module off the deprecated API.",
+      "sub": "One module. The deprecation date is closer than you think."
+    },
+    {
+      "id": "s176",
+      "bucket": "long",
+      "category": "learn",
+      "title": "Work through a full tutorial start to finish.",
+      "sub": "Start to finish, including the boring setup section."
+    },
+    {
+      "id": "s177",
+      "bucket": "long",
+      "category": "learn",
+      "title": "Read a paper you have had open in a tab for a month.",
+      "sub": "It has survived four browser restarts. Read it or close it."
+    },
+    {
+      "id": "s178",
+      "bucket": "long",
+      "category": "learn",
+      "title": "Build a toy version of the system you are trying to understand.",
+      "sub": "Building a bad version teaches you what the good one is for."
+    },
+    {
+      "id": "s179",
+      "bucket": "long",
+      "category": "learn",
+      "title": "Take the course module you bought and never opened.",
+      "sub": "One module. You already paid for the whole thing."
+    },
+    {
+      "id": "s180",
+      "bucket": "long",
+      "category": "tidy",
+      "title": "Do a proper inbox zero pass.",
+      "sub": "Every message gets a decision. No message gets read twice."
+    },
+    {
+      "id": "s181",
+      "bucket": "long",
+      "category": "tidy",
+      "title": "Clean your whole desk setup, cables included.",
+      "sub": "Under the desk too. That is where the real situation is."
+    },
+    {
+      "id": "s182",
+      "bucket": "long",
+      "category": "tidy",
+      "title": "Audit and delete the cloud resources nobody is using.",
+      "sub": "Somebody is paying for those. It is you."
+    },
+    {
+      "id": "s183",
+      "bucket": "long",
+      "category": "connect",
+      "title": "Write the long reply to the person who deserves one.",
+      "sub": "They wrote you something thoughtful. Match it."
+    },
+    {
+      "id": "s184",
+      "bucket": "long",
+      "category": "connect",
+      "title": "Mentor someone for half an hour.",
+      "sub": "Half an hour, a real question, no slides."
+    },
+    {
+      "id": "s185",
+      "bucket": "long",
+      "category": "connect",
+      "title": "Write up what you learned so the next person does not have to.",
+      "sub": "You worked it out the hard way. Write down the short way."
+    },
+    {
+      "id": "s186",
+      "bucket": "long",
+      "category": "play",
+      "title": "Build the silly demo you described to someone last month.",
+      "sub": "You described it with your hands. That is usually a good sign."
+    },
+    {
+      "id": "s187",
+      "bucket": "long",
+      "category": "play",
+      "title": "Learn the first sixteen bars of something on an instrument.",
+      "sub": "Sixteen bars is a real, finishable amount of music."
+    },
+    {
+      "id": "s188",
+      "bucket": "long",
+      "category": "reflect",
+      "title": "Do a personal retro on the last two weeks of work.",
+      "sub": "Two weeks is long enough to see a pattern and short enough to remember."
+    },
+    {
+      "id": "s189",
+      "bucket": "long",
+      "category": "reflect",
+      "title": "Rewrite your task list from scratch instead of editing it.",
+      "sub": "The ones that survive being retyped are the ones that matter."
+    },
+    {
+      "id": "s190",
+      "bucket": "long",
+      "category": "reflect",
+      "title": "Decide what you are going to stop doing.",
+      "sub": "Stopping something is a decision. Make it deliberately."
+    }
+  ],
+  "chains": [
+    {
+      "id": "c001",
+      "bucket": "long",
+      "category": "tidy",
+      "title": "Reset the desk",
+      "sub": "Four small things. Stop wherever the answer lands.",
+      "steps": [
+        "Clear everything off the desk that does not live there.",
+        "Wipe the surface. Yes, properly, with the thing you never use.",
+        "Untangle the cable that has been annoying you for a month.",
+        "Put one object back deliberately, where you actually want it."
+      ]
+    },
+    {
+      "id": "c002",
+      "bucket": "long",
+      "category": "body",
+      "title": "Unstick your shoulders",
+      "sub": "Four minutes of undoing a morning at a keyboard.",
+      "steps": [
+        "Roll your shoulders backwards ten times, slower than feels useful.",
+        "Clasp your hands behind your back and open your chest. Thirty seconds.",
+        "Drop one ear towards one shoulder and breathe. Then the other side.",
+        "Stand up and reach for the ceiling as if you meant it."
+      ]
+    },
+    {
+      "id": "c003",
+      "bucket": "long",
+      "category": "reset",
+      "title": "Come back down",
+      "sub": "For when the last hour has been a lot.",
+      "steps": [
+        "Box breathing: four in, four hold, four out, four hold. Five rounds.",
+        "Name five things you can see without moving your head.",
+        "Drink a full glass of water. All of it.",
+        "Look at something more than twenty feet away for a minute."
+      ]
+    },
+    {
+      "id": "c004",
+      "bucket": "long",
+      "category": "craft",
+      "title": "Leave the code better",
+      "sub": "Three small repayments on the debt.",
+      "steps": [
+        "Delete a block of commented-out code. Git remembers it.",
+        "Rename one thing so it says what it actually does.",
+        "Write the comment explaining the bit you had to think about twice."
+      ]
+    },
+    {
+      "id": "c005",
+      "bucket": "long",
+      "category": "tidy",
+      "title": "Empty the inbox a bit",
+      "sub": "Three passes. Not to zero, just to less.",
+      "steps": [
+        "Archive everything you will obviously never read.",
+        "Reply to the one that takes under a minute.",
+        "Move the one you are avoiding to tomorrow, on purpose, with a time."
+      ]
+    },
+    {
+      "id": "c006",
+      "bucket": "medium",
+      "category": "body",
+      "title": "Actually move",
+      "sub": "Three bursts. Your legs have been folded for hours.",
+      "steps": [
+        "Ten slow squats next to the chair.",
+        "Walk to the furthest window in the building and look out of it.",
+        "Shake out your hands and wrists for thirty seconds."
+      ]
+    },
+    {
+      "id": "c007",
+      "bucket": "medium",
+      "category": "reflect",
+      "title": "Work out what you are doing",
+      "sub": "Three questions, out loud if nobody is listening.",
+      "steps": [
+        "Say what problem you are actually solving. Out loud.",
+        "Say what you would try next if this approach fails.",
+        "Write the one sentence you would put in the pull request."
+      ]
+    },
+    {
+      "id": "c008",
+      "bucket": "long",
+      "category": "connect",
+      "title": "Be a person for five minutes",
+      "sub": "Three things that are not work.",
+      "steps": [
+        "Message someone you have been meaning to message.",
+        "Say something specific and nice to a colleague about their work.",
+        "Make a plan with an actual date in it."
+      ]
+    }
   ]
 }

@@ -3,8 +3,8 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-  <meta name="theme-color" content="#07111e" />
-  <meta name="description" content="Turn the wait for your model into something useful. Track LLM latency and see who else is waiting worldwide." />
+  <meta name="theme-color" content="#14100F" />
+  <meta name="description" content="Turn the wait for your model into something useful. Time your waits, clear a small task, and see who else is stuck with you." />
   <title>The Wait</title>
 
   <link rel="manifest" href="/manifest.webmanifest" />
@@ -15,20 +15,80 @@
   <meta name="apple-mobile-web-app-title" content="The Wait" />
   <meta name="mobile-web-app-capable" content="yes" />
 
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;500;600;700&family=Baloo+2:wght@700;800&display=swap" />
+
   <link rel="stylesheet" href="styles/tokens.css" />
   <link rel="stylesheet" href="styles/base.css" />
   <link rel="stylesheet" href="styles/components.css" />
   <link rel="stylesheet" href="styles/screens.css" />
+  <link rel="stylesheet" href="styles/desktop.css" />
+
+  <script>
+    /*
+     * Picks the shell before first paint, so a desktop load never flashes the
+     * phone mockup. Kept in sync with js/core/view-mode.js, which reads the
+     * attribute this leaves behind.
+     */
+    (function () {
+      var saved = null;
+      try { saved = localStorage.getItem('thewait.view'); } catch (error) { saved = null; }
+      var wide = matchMedia('(min-width: 1024px) and (pointer: fine)').matches;
+      document.documentElement.dataset.view =
+        saved === 'phone' || saved === 'desktop' ? saved : wide ? 'desktop' : 'phone';
+    })();
+  </script>
 </head>
 <body>
-  <div class="app-shell" id="shell">
-    <header class="app-bar">
-      <span class="app-mark" aria-hidden="true"></span>
-      <span class="app-name">The Wait</span>
-      <span class="device-tag" id="deviceTag" title="Your anonymous device id">…</span>
-    </header>
+  <div class="stage">
+    <aside class="rail" aria-label="The Wait">
+      <div class="rail-brand">
+        <span class="rail-mark">TW</span>
+        <span class="rail-name">The Wait</span>
+      </div>
 
-    <main class="screens" id="screens"></main>
+      <nav class="rail-nav" id="railNav" aria-label="Screens"></nav>
+
+      <div class="rail-foot">
+        <span class="rail-status">
+          <span class="pulse-dot js-dot is-offline"></span>
+          <span class="js-word">connecting</span>
+        </span>
+
+        <button class="wait-flag js-waitflag" type="button" hidden>
+          <span class="wait-flag-dot"></span>
+          <span class="wait-flag-time js-waittime">0:00</span>
+        </button>
+      </div>
+    </aside>
+
+    <div class="stage-main">
+      <div class="stage-head">
+        <div class="stage-title">The Wait · Soft Toy</div>
+        <div class="stage-sub">Swipe between screens · drag and scroll the globe · tap a pin</div>
+      </div>
+
+      <div class="frame" id="frame">
+        <div class="status-bar">
+          <span class="status-live">
+            <span class="pulse-dot js-dot is-offline"></span>
+            <span class="js-word">connecting</span>
+          </span>
+
+          <button class="wait-flag js-waitflag" type="button" hidden>
+            <span class="wait-flag-dot"></span>
+            <span class="wait-flag-time js-waittime">0:00</span>
+          </button>
+        </div>
+
+        <div class="track" id="track"></div>
+
+        <nav class="dock" id="dock" aria-label="Screens"></nav>
+      </div>
+    </div>
+
+    <div class="view-switch" id="viewSwitch" role="group" aria-label="Layout" hidden></div>
   </div>
 
   <noscript>
