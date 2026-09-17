@@ -28,7 +28,9 @@ export function createWaitTimer({ onChange } = {}) {
     state = {
       phase: wait?.phase ?? 'idle',
       waitId: wait?.waitId ?? null,
-      baseMs: (wait?.elapsedSeconds ?? 0) * 1000,
+      // The exact figure where the server sends one; whole seconds from an
+      // older server, which is only ever up to a second behind.
+      baseMs: Number.isFinite(wait?.elapsedMs) ? wait.elapsedMs : (wait?.elapsedSeconds ?? 0) * 1000,
       since: Date.now(),
       // Set when the clock ran on with nobody looking; the screen asks about it.
       stale: wait?.stale ?? null

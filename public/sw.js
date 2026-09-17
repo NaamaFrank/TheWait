@@ -13,7 +13,7 @@
  * every older cache.
  */
 
-const CACHE_VERSION = 'v40';
+const CACHE_VERSION = 'v41';
 const SHELL_CACHE = `thewait-shell-${CACHE_VERSION}`;
 const DATA_CACHE = `thewait-data-${CACHE_VERSION}`;
 
@@ -39,6 +39,7 @@ const SHELL_ASSETS = [
   '/js/main.js',
   '/js/core/api.js',
   '/js/core/carousel.js',
+  '/js/core/live-updates.js',
   '/js/core/dom.js',
   '/js/core/format.js',
   '/js/core/identity.js',
@@ -158,6 +159,10 @@ self.addEventListener('fetch', (event) => {
   // The worker itself must always come from the network, or an update can
   // never be picked up.
   if (url.pathname === '/sw.js') return;
+
+  // A stream that never ends. Routed through the worker it would live only as
+  // long as the worker does, and the browser stops idle workers freely.
+  if (url.pathname === '/api/events') return;
 
   if (url.pathname.startsWith('/api/')) {
     event.respondWith(networkFirst(request));

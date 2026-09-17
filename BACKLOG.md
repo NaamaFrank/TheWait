@@ -92,9 +92,11 @@ Flagged during the work, never turned into a task.
 - **Non-Latin city search.** The GeoNames catalogue ships alternate names and
   the importer drops them, so searching for a city in its own script finds
   nothing.
-- **Presence is in-process.** `server/domain/presence.js` holds live waiters in
-  a `Map`, so a second instance would show a different globe. Needs Redis or
-  equivalent before running more than one.
+- **Presence and live updates are in-process.** `server/domain/presence.js`
+  holds live waiters in a `Map`, and `server/domain/events.js` holds the open
+  screens the same way, so a second instance would show a different globe and
+  miss half the pushed changes. Both need Redis or equivalent (pub/sub for the
+  events) before running more than one.
 - **"My country" uses a point, not an extent.** Focusing a country frames it
   from its centroid at a fixed zoom rather than fitting its actual bounds, so
   Chile and Luxembourg get the same treatment.

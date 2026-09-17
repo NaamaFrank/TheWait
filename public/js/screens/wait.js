@@ -663,18 +663,33 @@ export function createWaitScreen({ store, onWaitLogged, onProgress, onShowLive }
 
   // A running wait keeps ticking whichever screen is on top, so this interval
   // is tied to the app rather than to `enter`/`leave`.
-  let sinceSync = 0;
+  /*
+   * A quarter-second tick, repainting only when the face would change.
+   *
+   * A one-second interval runs on its own phase, unrelated to when the wait
+   * began, so the clock could sit on the old second for most of a second after
+   * it had passed - together with the server rounding down, a wait an editor
+   * hook had just opened read 0:00 for two seconds. Ticking faster and
+   * comparing the text keeps it within a quarter second for the price of a
+   * string compare.
+   */
+  let lastFace = '';
+  let lastSync = Date.now();
 
   ticker = setInterval(() => {
-    // A wait can be started or ended elsewhere, so check even while idle -
-    // just rarely, since the common case is nothing having changed.
-    sinceSync += 1;
-    if (sinceSync >= (timer.phase === 'idle' ? 30 : 15)) {
-      sinceSync = 0;
+    // The server pushes changes now, so this is only the backstop for a
+    // stream that is down - and rare, since the common case is nothing new.
+    const quiet = timer.phase === 'idle' ? 30_000 : 15_000;
+    if (Date.now() - lastSync >= quiet) {
+      lastSync = Date.now();
       timer.sync().then(paint);
     }
 
     if (timer.phase !== 'running') return;
+
+    const face = clockFace(timer.elapsedSeconds);
+    if (face === lastFace) return;
+    lastFace = face;
 
     paint();
 
@@ -687,7 +702,7 @@ export function createWaitScreen({ store, onWaitLogged, onProgress, onShowLive }
      */
     const bucket = bucketFor(timer.elapsedSeconds);
     if (bucket && queueBucket && bucket !== queueBucket) pendingBucket = bucket;
-  }, 1000);
+  }, 250);
 
   store.subscribe(() => paint(), ['progress', 'analytics', 'device']);
 
@@ -706,6 +721,37 @@ export function createWaitScreen({ store, onWaitLogged, onProgress, onShowLive }
     async refresh() {
       await loadQueue();
       paint();
+    },
+
+    /**
+     * The server says the wait changed somewhere else - another device, or an
+     * editor hook - so read it again now rather than at the next poll.
+     *
+     * `logged` means a wait was banked, which moves the numbers as well as
+     * the clock. Acted on only when this screen still thought a wait was
+     * going: when it was this device that ended it, the numbers were already
+     * refreshed on the way out and doing it again is just more requests.
+     */
+    async syncFromServer({ logged = false } = {}) {
+      const wasActive = timer.phase !== 'idle';
+
+      await timer.sync();
+      syncPresence();
+
+      // A wait that starts elsewhere is a new one here too: the tasks on
+      // screen were sized for whatever this one was doing before.
+      if (!wasActive && timer.phase === 'running') loadQueue();
+
+      paint();
+
+      if (logged && wasActive) {
+        onWaitLogged?.();
+        try {
+          store.set({ progress: await api.getProgress() });
+        } catch {
+          // The next read picks it up.
+        }
+      }
     },
 
     /** Called once the device and reference data are in the store. */

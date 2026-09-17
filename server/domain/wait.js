@@ -10,6 +10,19 @@ import {
 } from '../db/waits.repo.js';
 import { accountIdFor } from './devices.js';
 import { createSessionForAccount } from './sessions.js';
+import { publish } from './events.js';
+
+/**
+ * Tells every open screen on the account what the wait just became.
+ *
+ * Only the phase travels, not the numbers: a screen that hears this asks for
+ * the wait itself, so there is one way a screen learns the clock and it cannot
+ * drift from the one the server keeps.
+ */
+function announce(accountId, wait, { logged = false } = {}) {
+  publish(accountId, { type: 'wait', phase: wait.phase, logged });
+  return wait;
+}
 
 /**
  * The wait in progress.
@@ -46,6 +59,11 @@ function toPublicWait(wait, stale = null) {
     startedAt: wait.startedAt,
     // What the clock reads right now, so a device can display it immediately.
     elapsedSeconds: Math.max(0, Math.floor((wait.accumulatedMs + live) / 1000)),
+    // The same, unrounded. A screen that counts on from the whole seconds
+    // starts up to a second behind, which on a wait an editor hook has just
+    // opened reads as the clock not having started. Still a duration measured
+    // here, so a device with its clock set wrong cannot skew it.
+    elapsedMs: Math.max(0, Math.round(wait.accumulatedMs + live)),
     // The pieces a client needs to keep counting without asking again.
     accumulatedMs: wait.accumulatedMs,
     resumedAt: wait.resumedAt,
@@ -114,7 +132,7 @@ export async function beginWait(rawDeviceId) {
  * not a device that anyone paired.
  */
 export async function beginWaitForAccount(accountId) {
-  return toPublicWait(await startWait(accountId, randomUUID()));
+  return announce(accountId, toPublicWait(await startWait(accountId, randomUUID())));
 }
 
 /**
@@ -124,13 +142,13 @@ export async function beginWaitForAccount(accountId) {
 export async function holdWait(rawDeviceId) {
   const accountId = await accountIdFor(rawDeviceId);
   await pauseWait(accountId);
-  return toPublicWait(await findActiveWait(accountId));
+  return announce(accountId, toPublicWait(await findActiveWait(accountId)));
 }
 
 export async function continueWait(rawDeviceId) {
   const accountId = await accountIdFor(rawDeviceId);
   await resumeWait(accountId);
-  return toPublicWait(await findActiveWait(accountId));
+  return announce(accountId, toPublicWait(await findActiveWait(accountId)));
 }
 
 /**
@@ -163,7 +181,8 @@ export async function finishWaitForAccount(accountId, { endAt = null, deviceId =
     label
   });
 
-  return { session, wait: toPublicWait(null) };
+  // `logged` so a screen knows its numbers moved, not just its clock.
+  return { session, wait: announce(accountId, toPublicWait(null), { logged: true }) };
 }
 
 /**
@@ -181,7 +200,8 @@ export async function resolveStaleWait(rawDeviceId, { keep = false } = {}) {
   // Someone is demonstrably here now, so the gap ends and the asking stops.
   if (keep) {
     await markSeen(accountId);
-    return { session: null, wait: toPublicWait(wait, null) };
+    // Every other screen showing the question can take it down.
+    return { session: null, wait: announce(accountId, toPublicWait(wait, null)) };
   }
 
   const stale = await assessStaleness(accountId, wait);

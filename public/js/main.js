@@ -1,5 +1,6 @@
 import { api, onReachability } from './core/api.js';
 import { createCarousel } from './core/carousel.js';
+import { connectLiveUpdates } from './core/live-updates.js';
 import { el, qs, qsa, render } from './core/dom.js';
 import { clockFace } from './core/format.js';
 import { registerServiceWorker, watchInstallPrompt } from './core/pwa.js';
@@ -139,6 +140,33 @@ async function bootstrap() {
   wait.ready();
   setupInstallBanner(frame);
   offerLinking(frame, store, wait);
+  listenForChanges(wait);
+}
+
+/**
+ * Keeps the screen in step with changes made anywhere else.
+ *
+ * An editor hook starts a wait the moment a prompt is sent and ends it when
+ * the turn comes back - often inside the old polling interval, so the screen
+ * never showed it until it was refreshed. The server now says so as it
+ * happens, and the screen re-reads.
+ *
+ * Two backstops, because a pushed event can still be missed: the stream
+ * re-reads every time it reconnects, since anything said while it was down
+ * was not heard; and a tab brought back into view re-reads, since browsers
+ * throttle background pages and the polling timer with them.
+ */
+function listenForChanges(wait) {
+  connectLiveUpdates({
+    onOpen: () => wait.syncFromServer(),
+    onEvent: (event) => {
+      if (event?.type === 'wait') wait.syncFromServer({ logged: event.logged === true });
+    }
+  });
+
+  document.addEventListener('visibilitychange', () => {
+    if (document.visibilityState === 'visible') wait.syncFromServer();
+  });
 }
 
 /**
