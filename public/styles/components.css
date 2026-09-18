@@ -1714,3 +1714,59 @@ select.input option {
   font-size: 11px;
   color: var(--text-soft);
 }
+
+/* --- Adding your own, from the task card --------------------------------- */
+
+.task-add {
+  border: 0;
+  background: none;
+  padding: 2px 0;
+  font-family: var(--font);
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--text-soft);
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.task-add:hover {
+  color: var(--hero);
+}
+
+/* Pushes the two apart: one is an offer, the other is a refusal. */
+.task-foot {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.own-inline {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 12px;
+  border-radius: 18px;
+  background: var(--card-inset);
+}
+
+.own-inline[hidden] {
+  display: none;
+}
+
+/*
+ * On a short screen the invitation to install must not cost more than it
+ * offers - at 390px tall the full banner took a quarter of the screen, so the
+ * second line goes and the rest tightens.
+ */
+@media (max-height: 520px) {
+  .install-banner {
+    padding: 8px 12px;
+    border-radius: 16px;
+  }
+
+  .install-sub {
+    display: none;
+  }
+}

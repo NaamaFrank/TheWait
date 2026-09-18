@@ -265,10 +265,17 @@ a:hover {
 }
 
 /*
- * On a real phone the mockup chrome is noise: the app becomes the whole
- * viewport and the frame's border, radius and shadow all go away.
+ * Anywhere the desktop shell is not in play, the app is the whole viewport and
+ * the mockup chrome - border, radius, shadow, the caption above it - goes.
+ *
+ * Exactly the inverse of the desktop's own condition, deliberately: the rule
+ * used to be "narrower than 460px, or short and touched", which a tablet at
+ * 768 by 1024 matched neither of. It got the presentation mockup instead -
+ * a 390px phone floating in the middle of its screen, most of the display
+ * black. A desktop with a mouse still gets the bezel when the view switch
+ * asks for the phone build, because there it really is a preview.
  */
-@media (max-width: 460px), (max-height: 900px) and (pointer: coarse) {
+@media (max-width: 1023px), (pointer: coarse) {
   :root {
     --frame-w: 100vw;
     --frame-h: 100dvh;
@@ -288,6 +295,77 @@ a:hover {
   .frame {
     border: none;
     box-shadow: none;
+  }
+}
+
+/*
+ * A phone on its side, where there is almost no height to spend.
+ *
+ * The chrome took 172px of 390: a 52px status strip, 40px above the title and
+ * an 80px dock. Trimmed rather than hidden - the strip carries the running
+ * wait, which is the one thing worth keeping visible on every screen.
+ *
+ * Height alone, not height and a touch screen: a short desktop window is just
+ * as short.
+ */
+@media (max-height: 520px) {
+  :root {
+    --status-h: 34px;
+    /* Still clear of the status strip above it - the strip carries the running
+     * wait, and 20px put the title straight through it. */
+    --screen-pad-top: 36px;
+    --dock-h: 58px;
+    --screen-pad-bottom: 74px;
+  }
+
+  .dock-label {
+    font-size: 10px;
+  }
+}
+
+/*
+ * A phone on its side, or any short window wide enough to spare.
+ *
+ * Stacked, the clock fills the whole 390px of height and the task - the reason
+ * the wait is worth anything - sits below the fold where nobody scrolls. The
+ * width is going spare, so the two go side by side and both are on screen.
+ */
+@media (max-height: 520px) and (min-width: 700px) {
+  .screen[data-screen='wait'] {
+    /* The 560px reading column is for one column of text; two of them want
+     * the width back, or each side ends up narrower than a phone. */
+    --screen-pad-x: 18px;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    align-items: start;
+    align-content: start;
+  }
+
+  /* A grid item is min-content wide by default, so the chip row - which is
+   * meant to scroll sideways inside its own card - would push the column out
+   * and take the page with it. */
+  .screen[data-screen='wait'] > * {
+    min-width: 0;
+  }
+
+  .screen[data-screen='wait'] > .screen-head,
+  .screen[data-screen='wait'] > .company {
+    grid-column: 1 / -1;
+  }
+}
+
+/*
+ * A wide viewport on the phone shell - a tablet, or a narrow desktop window.
+ *
+ * The column is held to a readable width and centred rather than stretched
+ * across the whole display: a card eight hundred pixels wide with one
+ * sentence in it reads worse than the phone does. Done with padding rather
+ * than a width, because the carousel slides by whole viewport widths and a
+ * narrower screen would break its arithmetic.
+ */
+@media (min-width: 620px) and ((max-width: 1023px) or (pointer: coarse)) {
+  :root {
+    --screen-pad-x: max(18px, calc((100vw - 560px) / 2));
   }
 }
 
