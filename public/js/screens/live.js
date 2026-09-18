@@ -162,15 +162,17 @@ export function createLiveScreen({ store, modalRoot = null }) {
 
     el('div.pane.pane-filters', {}, [filters.element, jumpPicker.element]),
 
-    el('div.pane.pane-globe', {}, [focusPill, globeCard, personCard]),
+    // The note explaining the hollow pins sits under the pins, not at the foot
+    // of the screen - "nobody is waiting" above a globe full of them is the
+    // question, and the answer was three scrolls away from it.
+    el('div.pane.pane-globe', {}, [focusPill, globeCard, sourceNote, personCard]),
 
     el('div.pane.pane-ticker', {}, [
       el('div.ticker-head', {}, [
         el('span.label.label-wide', { text: 'Live ticker' }),
         matchCount
       ]),
-      tickerList,
-      sourceNote
+      tickerList
     ])
   ]);
 
@@ -269,13 +271,26 @@ export function createLiveScreen({ store, modalRoot = null }) {
     const matched = people.filter(matches);
 
     if (snapshot) {
+      /*
+       * Every figure here counts real people.
+       *
+       * This used to read the padded total - "845 people are stuck with you" -
+       * while the Wait screen, counting the same moment honestly, said nobody
+       * else was waiting. Both cannot be true. The sample pins are scenery so
+       * the map is never dead, and scenery is not counted.
+       */
+      const realHere = matched.filter((person) => !person.simulated).length;
+
       if (focus) {
-        headCount.textContent = `${matched.length} waiting in ${focus.name}`;
+        headCount.textContent = `${realHere} waiting in ${focus.name}`;
       } else {
+        const real = snapshot.realWaiting ?? 0;
         headCount.textContent =
           filter === 'all'
-            ? `${formatCount(snapshot.totalWaiting)} people are stuck with you`
-            : `${matched.length} of them are near you`;
+            ? real === 0
+              ? 'Nobody is waiting right now'
+              : `${formatCount(real)} ${real === 1 ? 'person is' : 'people are'} waiting right now`
+            : `${realHere} of them ${realHere === 1 ? 'is' : 'are'} near you`;
       }
     }
 
@@ -299,7 +314,8 @@ export function createLiveScreen({ store, modalRoot = null }) {
         initials: initials(person.displayName),
         avatar: person.avatar,
         tint: person.tint,
-        dim: !matches(person)
+        dim: !matches(person),
+        sample: person.simulated === true
       }))
     );
     globe.setSelected(selected);
@@ -337,9 +353,9 @@ export function createLiveScreen({ store, modalRoot = null }) {
     const youArePinned = shown.some((person) => person.isYou);
 
     const crowd = realPins
-      ? `${realPins} of these pins ${realPins === 1 ? 'is a real person' : 'are real people'} waiting right now. ` +
-        'The rest are sample pins in major cities, so a quiet hour still shows a living map.'
-      : 'Every pin here is a sample placed in a major city. Real waits appear the moment anyone starts one.';
+      ? `${realPins} filled ${realPins === 1 ? 'pin is a real person' : 'pins are real people'} waiting right now. ` +
+        'The hollow ones are samples in major cities, so a quiet hour still shows a living map.'
+      : 'Every pin here is hollow - a sample in a major city. Real waits fill in the moment anyone starts one.';
 
     // The commonest question about this screen is "where am I?".
     const you = youArePinned

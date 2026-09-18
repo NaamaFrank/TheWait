@@ -545,6 +545,25 @@ export function createGlobe({ size: initialSize = 320, onSelect, onNeedCities } 
       context.fillStyle = person.dim ? PIN_DIM_FILL : person.tint;
       context.fill();
 
+      /*
+       * A sample reads as an outline, a real person as a filled pin.
+       *
+       * The map is padded so a quiet hour still shows something alive, and
+       * for a long time the two were drawn identically - which made the
+       * caption underneath the only thing separating a person from scenery.
+       * Now the picture says which is which on its own.
+       */
+      if (person.sample) {
+        context.globalCompositeOperation = 'destination-out';
+        context.beginPath();
+        context.arc(x, y, inner - 1.6 * scale, 0, Math.PI * 2);
+        context.fill();
+        context.globalCompositeOperation = 'source-over';
+
+        context.restore();
+        continue;
+      }
+
       context.textAlign = 'center';
       context.textBaseline = 'middle';
 
