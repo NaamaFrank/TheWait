@@ -140,7 +140,7 @@ async function bootstrap() {
   wait.ready();
   setupInstallBanner(frame);
   offerLinking(frame, store, wait);
-  listenForChanges(wait);
+  listenForChanges(store, { wait, you });
 }
 
 /**
@@ -156,16 +156,47 @@ async function bootstrap() {
  * was not heard; and a tab brought back into view re-reads, since browsers
  * throttle background pages and the polling timer with them.
  */
-function listenForChanges(wait) {
-  connectLiveUpdates({
-    onOpen: () => wait.syncFromServer(),
-    onEvent: (event) => {
-      if (event?.type === 'wait') wait.syncFromServer({ logged: event.logged === true });
+function listenForChanges(store, screens) {
+  const { wait, you } = screens;
+
+  /** Whatever changed, the screen finds out the same way: by re-reading. */
+  const apply = (event) => {
+    if (event?.type === 'wait') {
+      wait.syncFromServer({ logged: event.logged === true });
+      return;
     }
+
+    // A task cleared or a wait forgotten on another device: the tiles, the XP
+    // and the boards all moved here too.
+    if (event?.type === 'numbers') {
+      wait.syncFromServer({ numbers: true });
+      return;
+    }
+
+    // A name, avatar, colour or city set on another device. The profile
+    // belongs to the account, so this one is showing something stale.
+    if (event?.type === 'profile') {
+      api.getMe()
+        .then(({ device }) => store.set({ device }))
+        .catch(() => {});
+      return;
+    }
+
+    if (event?.type === 'tasks') you?.refreshTasks?.();
+  };
+
+  connectLiveUpdates({
+    // Anything said while the stream was down was not heard, so come back by
+    // re-reading rather than assuming the gap was quiet.
+    onOpen: () => {
+      wait.syncFromServer({ numbers: true });
+      you?.refreshTasks?.();
+    },
+    onEvent: apply
   });
 
   document.addEventListener('visibilitychange', () => {
-    if (document.visibilityState === 'visible') wait.syncFromServer();
+    if (document.visibilityState === 'visible') wait.syncFromServer({ numbers: true });
   });
 }
 

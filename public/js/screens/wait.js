@@ -3,6 +3,7 @@ import { el, render } from '../core/dom.js';
 import { clockFace, formatCount, headlineDuration } from '../core/format.js';
 import { createWaitTimer } from '../core/wait-timer.js';
 import { chipRow, screenHead } from '../components/ui.js';
+import { DEFAULT_SIZE, SIZES } from '../components/own-tasks.js';
 
 /**
  * The home screen: one clock, one task, two numbers.
@@ -250,6 +251,49 @@ export function createWaitScreen({ store, onWaitLogged, onProgress, onShowLive }
   const taskActions = el('div.task-actions', {}, [doneButton, nextButton]);
 
   /*
+   * Adding your own, from the screen you are actually on.
+   *
+   * It lived only on the You screen, several swipes away and under a heading
+   * nobody had a reason to open - so the single thing that makes the queue
+   * yours was the one thing nobody knew was there. The moment you want it is
+   * the moment a suggestion is not what you needed, which is here.
+   */
+  let ownSize = DEFAULT_SIZE;
+
+  const ownInput = el('input.input', {
+    type: 'text',
+    placeholder: 'Water the plants',
+    maxlength: '80',
+    onkeydown: (event) => { if (event.key === 'Enter') saveOwnTask(); }
+  });
+
+  const ownSizes = el('div.own-sizes', {}, SIZES.map((option) =>
+    el('button.own-size', {
+      type: 'button',
+      class: option.id === DEFAULT_SIZE ? 'is-active' : '',
+      onclick: () => pickOwnSize(option.id)
+    }, [option.label])
+  ));
+
+  const ownNote = el('p.own-note');
+
+  const ownPanel = el('div.own-inline', { hidden: true }, [
+    el('span.label', { text: 'Something you would rather do' }),
+    ownInput,
+    ownSizes,
+    el('div.task-actions', {}, [
+      el('button.btn.btn-hero', { type: 'button', onclick: () => saveOwnTask() }, ['Add it']),
+      el('button.btn.btn-outline', { type: 'button', onclick: () => toggleOwn(false) }, ['Cancel'])
+    ]),
+    ownNote
+  ]);
+
+  const ownButton = el('button.task-add', {
+    type: 'button',
+    onclick: () => toggleOwn(ownPanel.hidden)
+  }, ['+ Add your own']);
+
+  /*
    * Who else is in the same boat, on the screen where you are actually sat.
    *
    * Real waiters only. The globe pads a quiet hour with sample pins and says
@@ -287,7 +331,8 @@ export function createWaitScreen({ store, onWaitLogged, onProgress, onShowLive }
       moods.element,
       el('div.task-body', {}, [taskTitle, taskSub]),
       taskActions,
-      banButton
+      el('div.task-foot', {}, [ownButton, banButton]),
+      ownPanel
     ]),
 
     el('div.grid-2', {}, [
@@ -398,6 +443,46 @@ export function createWaitScreen({ store, onWaitLogged, onProgress, onShowLive }
   const reducedMotion = () =>
     globalThis.matchMedia?.('(prefers-reduced-motion: reduce)').matches === true;
 
+  function pickOwnSize(next) {
+    ownSize = next;
+    for (const [index, button] of [...ownSizes.children].entries()) {
+      button.classList.toggle('is-active', SIZES[index].id === next);
+    }
+  }
+
+  function toggleOwn(open) {
+    ownPanel.hidden = !open;
+    ownNote.textContent = '';
+
+    if (!open) return;
+
+    // Defaulted to the size of wait you are actually in, which is nearly
+    // always the one you mean.
+    pickOwnSize(queueBucket ?? DEFAULT_SIZE);
+    ownInput.focus?.();
+  }
+
+  async function saveOwnTask() {
+    const title = ownInput.value.trim();
+    if (!title || busy) return;
+
+    busy = true;
+
+    try {
+      await api.addTask(title, ownSize);
+      ownInput.value = '';
+      toggleOwn(false);
+
+      // Yours are offered first, so if it suits this wait it is next up.
+      if (ownSize === queueBucket) loadQueue();
+    } catch (error) {
+      ownNote.textContent = error.message ?? 'That did not save.';
+    } finally {
+      busy = false;
+      paint();
+    }
+  }
+
   async function banTask() {
     // The whole routine, not the step: you are turning down the thing offered.
     const current = activity();
@@ -420,6 +505,8 @@ export function createWaitScreen({ store, onWaitLogged, onProgress, onShowLive }
       const progress = await api.completeSuggestion(current.id, timer.waitId);
       store.set({ progress });
       onProgress?.(progress);
+      // The tiles move on a cleared task too, and so do the other screens.
+      refreshNumbers();
       // Only once it is actually banked - a failed request is not a win.
       celebrate(current.xp);
     } catch {
@@ -444,6 +531,35 @@ export function createWaitScreen({ store, onWaitLogged, onProgress, onShowLive }
 
   /* --- The wait itself --------------------------------------------------- */
 
+  /**
+   * Re-reads the figures the screen shows and tells the other screens.
+   *
+   * Collapsed into one call per moment, because the same change arrives twice
+   * over: once from the button that caused it, once from the server telling
+   * every screen on the account - this one included.
+   *
+   * It used to try to tell those apart by asking whether a wait had been
+   * running when the news arrived. On a turn shorter than a round trip, both
+   * the start and the end landed before the first read came back, the clock
+   * still said idle, and the tiles were never refreshed at all.
+   */
+  let numbersDue = null;
+
+  function refreshNumbers() {
+    if (numbersDue) return;
+
+    numbersDue = setTimeout(async () => {
+      numbersDue = null;
+      onWaitLogged?.();
+
+      try {
+        store.set({ progress: await api.getProgress() });
+      } catch {
+        // Offline; the next read picks it up.
+      }
+    }, 250);
+  }
+
   async function endWait() {
     stopHeartbeat();
     api.stopPresence().catch(() => {});
@@ -454,8 +570,7 @@ export function createWaitScreen({ store, onWaitLogged, onProgress, onShowLive }
       const session = await timer.end();
       if (!session) return;
 
-      onWaitLogged?.();
-      store.set({ progress: await api.getProgress() });
+      refreshNumbers();
     } catch {
       // The wait is over either way; the number just will not be banked.
     }
@@ -732,26 +847,19 @@ export function createWaitScreen({ store, onWaitLogged, onProgress, onShowLive }
      * going: when it was this device that ended it, the numbers were already
      * refreshed on the way out and doing it again is just more requests.
      */
-    async syncFromServer({ logged = false } = {}) {
-      const wasActive = timer.phase !== 'idle';
+    async syncFromServer({ logged = false, numbers = false } = {}) {
+      const wasIdle = timer.phase === 'idle';
 
       await timer.sync();
       syncPresence();
 
       // A wait that starts elsewhere is a new one here too: the tasks on
       // screen were sized for whatever this one was doing before.
-      if (!wasActive && timer.phase === 'running') loadQueue();
+      if (wasIdle && timer.phase === 'running') loadQueue();
 
       paint();
 
-      if (logged && wasActive) {
-        onWaitLogged?.();
-        try {
-          store.set({ progress: await api.getProgress() });
-        } catch {
-          // The next read picks it up.
-        }
-      }
+      if (logged || numbers) refreshNumbers();
     },
 
     /** Called once the device and reference data are in the store. */

@@ -14,14 +14,14 @@ import { el, render } from '../core/dom.js';
  */
 
 /** The sizes, in the words someone would use about their own errand. */
-const SIZES = [
+export const SIZES = [
   { id: 'micro', label: 'A minute' },
   { id: 'short', label: 'A few minutes' },
   { id: 'medium', label: 'Ten-ish' },
   { id: 'long', label: 'A while' }
 ];
 
-const DEFAULT_SIZE = 'short';
+export const DEFAULT_SIZE = 'short';
 
 export function createOwnTasks() {
   let tasks = [];

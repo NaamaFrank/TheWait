@@ -275,6 +275,12 @@ export function createYouScreen({ store, onSaved }) {
       agents.refresh();
     },
 
+    /** Your own tasks or connections changed on another device. */
+    refreshTasks() {
+      ownTasks.refresh();
+      agents.refresh();
+    },
+
     destroy: () => pairing.destroy()
   };
 }

@@ -16,6 +16,7 @@ import { readSessionRecords } from './sessions.js';
 import { bucketForSeconds, listBuckets, listChains, pickSuggestions } from './suggestions.js';
 import { looksAbandoned } from './abandoned.js';
 import { optionalText } from './validate.js';
+import { publish } from './events.js';
 import { badRequest, HttpError, notFound } from '../http/errors.js';
 
 /**
@@ -236,13 +237,18 @@ export async function createUserTask(rawDeviceId, { title, bucket } = {}) {
     throw new HttpError(409, `That is ${MAX_OWN_TASKS} already. Clear a few first.`);
   }
 
-  return { task: await addUserTask(accountId, { id: randomUUID(), title: clean, bucket }) };
+  const task = await addUserTask(accountId, { id: randomUUID(), title: clean, bucket });
+
+  publish(accountId, { type: 'tasks' });
+  return { task };
 }
 
 export async function removeUserTask(rawDeviceId, id) {
-  const task = await archiveUserTask(await accountIdFor(rawDeviceId), id);
+  const accountId = await accountIdFor(rawDeviceId);
+  const task = await archiveUserTask(accountId, id);
 
   if (!task) throw notFound('No such task.');
 
+  publish(accountId, { type: 'tasks' });
   return { task };
 }

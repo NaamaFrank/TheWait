@@ -1,5 +1,6 @@
 import { randomUUID } from 'node:crypto';
 import { findAccounts } from '../db/accounts.repo.js';
+import { publish } from './events.js';
 import { config } from '../config.js';
 import { allSessionsFor, deleteSession as removeSession, insertSession, listSessionsFor } from '../db/sessions.repo.js';
 import { accountIdFor, ensureDevice } from './devices.js';
@@ -82,5 +83,8 @@ export async function createSessionForAccount(accountId, payload) {
 
 export async function deleteSession(rawDeviceId, sessionId) {
   const accountId = await accountIdFor(rawDeviceId);
-  return { removed: await removeSession(accountId, sessionId) };
+  const removed = await removeSession(accountId, sessionId);
+
+  if (removed) publish(accountId, { type: 'numbers' });
+  return { removed };
 }

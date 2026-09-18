@@ -1,4 +1,5 @@
 import { randomUUID } from 'node:crypto';
+import { publish } from './events.js';
 import {
   countDevices,
   createAccountForDevice,
@@ -148,5 +149,9 @@ export async function updateDevice(rawDeviceId, patch) {
   if (patch.visible !== undefined) update.visible = Boolean(patch.visible);
 
   const saved = await updateAccount(current.accountId, update);
+
+  // The profile belongs to the account, so every device showing it is stale.
+  publish(current.accountId, { type: 'profile' });
+
   return toPublicDevice(saved, { deviceCount: current.deviceCount });
 }

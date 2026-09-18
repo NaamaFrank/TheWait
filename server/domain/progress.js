@@ -7,6 +7,7 @@ import { accountIdFor } from './devices.js';
 import { readSessionRecords } from './sessions.js';
 import { getCategoryLabel, getSuggestion, listBuckets } from './suggestions.js';
 import { listUserTasks } from '../db/tasks.repo.js';
+import { publish } from './events.js';
 import { localDayKey, localDayStart, MS_PER_DAY, toLocal, weekdayInitial } from './time.js';
 import { isUuid, clampInt, optionalUuid, requireDeviceId } from './validate.js';
 
@@ -93,6 +94,10 @@ export async function recordCompletion(rawDeviceId, payload, options = {}) {
   };
 
   await insertCompletion(record, { keep: config.maxCompletionsPerDevice });
+
+  // The XP, the tiles and the board all moved, on every screen this account
+  // has open - not only the one that pressed the button.
+  publish(accountId, { type: 'numbers' });
 
   return buildProgress(deviceId, options);
 }
