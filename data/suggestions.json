@@ -1,5 +1,5 @@
 {
-  "version": 3,
+  "version": 4,
   "buckets": [
     {
       "id": "micro",
@@ -246,64 +246,64 @@
       "id": "s024",
       "bucket": "micro",
       "category": "craft",
-      "title": "Rename that one variable you keep squinting at.",
-      "sub": "The one you re-read every time because the name lies."
+      "title": "Read the last thing it wrote. The whole thing.",
+      "sub": "Not the summary of it. The thing."
     },
     {
       "id": "s025",
       "bucket": "micro",
       "category": "craft",
-      "title": "Stage the changes you already know are good.",
-      "sub": "The good half of the diff, before you forget which half that was."
+      "title": "Stage the hunks you have actually read.",
+      "sub": "The rest can wait for eyes."
     },
     {
       "id": "s026",
       "bucket": "micro",
       "category": "craft",
-      "title": "Delete a debug log you left behind.",
-      "sub": "There is one. There is always one."
+      "title": "Delete a log line neither of you meant to keep.",
+      "sub": "It was debugging. It is not any more."
     },
     {
       "id": "s027",
       "bucket": "micro",
       "category": "craft",
-      "title": "Write the commit message before you forget the why.",
-      "sub": "The what is in the diff. The why only exists in your head right now."
+      "title": "Write the commit message yourself.",
+      "sub": "You know why. It only knows what."
     },
     {
       "id": "s028",
       "bucket": "micro",
       "category": "craft",
-      "title": "Close one browser tab you will never read.",
-      "sub": "You opened it four days ago with real intentions."
+      "title": "Check the function it called actually exists.",
+      "sub": "Confident is not the same as correct."
     },
     {
       "id": "s029",
       "bucket": "micro",
       "category": "craft",
-      "title": "Add the type annotation you skipped.",
-      "sub": "Thirty seconds now, or a confused hour in November."
+      "title": "Read your last prompt back to yourself.",
+      "sub": "Half of bad output is a fair reading of a bad ask."
     },
     {
       "id": "s030",
       "bucket": "micro",
       "category": "craft",
-      "title": "Check which branch you are actually on.",
-      "sub": "Worth confirming before the answer arrives and you commit."
+      "title": "Check which branch you are on.",
+      "sub": "Both of you have been moving fast."
     },
     {
       "id": "s031",
       "bucket": "micro",
       "category": "craft",
       "title": "Save the file. Yes, that one.",
-      "sub": "The one the watcher has not picked up. That is why it is not rebuilding."
+      "sub": "The one the last five minutes were about."
     },
     {
       "id": "s032",
       "bucket": "micro",
       "category": "craft",
-      "title": "Scroll to the top of the file and read the imports.",
-      "sub": "You learn a surprising amount about a file from what it pulls in."
+      "title": "Count the files in the diff.",
+      "sub": "A one-line fix that touched nine is a conversation."
     },
     {
       "id": "s033",
@@ -582,106 +582,106 @@
       "id": "s072",
       "bucket": "short",
       "category": "craft",
-      "title": "Write the test you have been avoiding writing.",
-      "sub": "The one you have been describing as hard to test since Tuesday."
+      "title": "Check the test it wrote actually asserts something.",
+      "sub": "A green test that cannot fail is just a green light."
     },
     {
       "id": "s073",
       "bucket": "short",
       "category": "craft",
-      "title": "Read the diff you are about to commit. Actually read it.",
-      "sub": "Line by line. You will find one thing, you always do."
+      "title": "Read the diff before you commit it. Properly.",
+      "sub": "Line by line, like it came from a stranger. It did."
     },
     {
       "id": "s074",
       "bucket": "short",
       "category": "craft",
-      "title": "Rewrite one function name so it says what it does.",
-      "sub": "If you needed a comment to explain the name, rename it instead."
+      "title": "Rename one thing it named after the pattern.",
+      "sub": "`DataServiceHandler` tells you nothing and it knows."
     },
     {
       "id": "s075",
       "bucket": "short",
       "category": "craft",
-      "title": "Delete a chunk of commented-out code. Git remembers.",
-      "sub": "It has been dead since March and nobody will resurrect it."
+      "title": "Delete the try/catch that swallows the error.",
+      "sub": "It added that so the tests would pass."
     },
     {
       "id": "s076",
       "bucket": "short",
       "category": "craft",
-      "title": "Add one line to the README that would have helped you.",
-      "sub": "The thing you had to work out yourself last Thursday."
+      "title": "Break the thing on purpose and watch the test fail.",
+      "sub": "If it still passes, it was never watching."
     },
     {
       "id": "s077",
       "bucket": "short",
       "category": "craft",
       "title": "Check whether that TODO is still true.",
-      "sub": "Half of them were resolved by other changes and nobody deleted them."
+      "sub": "Some of them were fixed three prompts ago."
     },
     {
       "id": "s078",
       "bucket": "short",
       "category": "craft",
       "title": "Prune your merged local branches.",
-      "sub": "Your branch list is a museum of finished work."
+      "sub": "One per idea you had this week. There were many."
     },
     {
       "id": "s079",
       "bucket": "short",
       "category": "craft",
       "title": "Write down the bug you noticed but did not file.",
-      "sub": "The one you told yourself you would definitely remember."
+      "sub": "You will not remember it after the next prompt."
     },
     {
       "id": "s080",
       "bucket": "short",
       "category": "craft",
-      "title": "Alias the command you type wrong every day.",
-      "sub": "You have typed it wrong eleven times this week."
+      "title": "Look up the API it used, in the real documentation.",
+      "sub": "Plausible method names are the whole problem."
     },
     {
       "id": "s081",
       "bucket": "short",
       "category": "craft",
-      "title": "Sketch the data flow on paper before the answer lands.",
-      "sub": "Paper. Boxes and arrows. It is faster than the tool."
+      "title": "Say what you are building, out loud, in one sentence.",
+      "sub": "If you cannot, the next prompt will not go well either."
     },
     {
       "id": "s082",
       "bucket": "short",
       "category": "craft",
       "title": "Improve one error message so it names the fix.",
-      "sub": "The best error messages say what happened and what to do next."
+      "sub": "Future you will be reading it at speed."
     },
     {
       "id": "s083",
       "bucket": "short",
       "category": "craft",
-      "title": "Pin the dependency version you have been getting away with.",
-      "sub": "It works today because nobody has published a breaking change yet."
+      "title": "Check the dependency it added is one you want to own.",
+      "sub": "It picked the first one that fit. You keep it forever."
     },
     {
       "id": "s084",
       "bucket": "short",
       "category": "craft",
-      "title": "Add a comment explaining the thing that surprised you.",
-      "sub": "Future you will hit the same surprise and have no idea why."
+      "title": "Add the comment explaining the bit that surprised you.",
+      "sub": "Surprise is the part nobody can regenerate."
     },
     {
       "id": "s085",
       "bucket": "short",
       "category": "craft",
-      "title": "Run the linter and fix only the honest complaints.",
-      "sub": "Fix the real ones, silence the pedantic ones, move on."
+      "title": "Run it. Actually run it.",
+      "sub": "Reading is not running, however good it looks."
     },
     {
       "id": "s086",
       "bucket": "short",
       "category": "craft",
-      "title": "Reproduce the bug once more so you know it is real.",
-      "sub": "Before you fix it, confirm you can still make it happen on demand."
+      "title": "Check it changed nothing else while it was in there.",
+      "sub": "Helpful is a strong word for some of those edits."
     },
     {
       "id": "s087",
@@ -988,64 +988,64 @@
       "id": "s130",
       "bucket": "medium",
       "category": "craft",
-      "title": "Refactor one file you keep apologising for.",
-      "sub": "You know the file. You said sorry about it in review last week."
+      "title": "Read a file you have not opened since it rewrote it.",
+      "sub": "You own this now, whoever typed it."
     },
     {
       "id": "s131",
       "bucket": "medium",
       "category": "craft",
-      "title": "Write the design note for the thing you are about to build.",
-      "sub": "A page is enough. It will change what you build."
+      "title": "Write the design note before the next prompt.",
+      "sub": "Thinking first is cheaper than three rounds of fixing."
     },
     {
       "id": "s132",
       "bucket": "medium",
       "category": "craft",
-      "title": "Add tests around the code you are least confident in.",
-      "sub": "The code you would not want to be paged about at 3am."
+      "title": "Write the test for the part you could not debug alone.",
+      "sub": "That is the part that will break at the worst moment."
     },
     {
       "id": "s133",
       "bucket": "medium",
       "category": "craft",
-      "title": "Clean up your git history before you open the PR.",
-      "sub": "Squash the six commits called wip into one that explains itself."
+      "title": "Tidy the git history before you open the PR.",
+      "sub": "Nine commits called \"fix\" is a story nobody can read."
     },
     {
       "id": "s134",
       "bucket": "medium",
       "category": "craft",
-      "title": "Trace one request end to end through the system.",
-      "sub": "Click to database and back. You will find something surprising."
+      "title": "Trace one request end to end, asking nothing.",
+      "sub": "Just you and the code. It goes better than you expect."
     },
     {
       "id": "s135",
       "bucket": "medium",
       "category": "craft",
       "title": "Profile the slow endpoint you have been ignoring.",
-      "sub": "It has been slow for a month and you have been calling it fine."
+      "sub": "Nobody has ever guessed this correctly, including it."
     },
     {
       "id": "s136",
       "bucket": "medium",
       "category": "craft",
-      "title": "Write the runbook entry for the incident you handled.",
-      "sub": "While you still remember the order things happened in."
+      "title": "Delete the abstraction that has exactly one caller.",
+      "sub": "It was being helpful about a future that never came."
     },
     {
       "id": "s137",
       "bucket": "medium",
       "category": "craft",
-      "title": "Set up the local script that saves you five minutes daily.",
-      "sub": "Five minutes a day is twenty hours a year."
+      "title": "Explain the change out loud as if you wrote it.",
+      "sub": "The gaps in the explanation are the gaps in the code."
     },
     {
       "id": "s138",
       "bucket": "medium",
       "category": "craft",
-      "title": "Split the giant function into the three things it actually does.",
-      "sub": "You already know what the three things are. That is the hard part done."
+      "title": "Split the giant function into the three things it does.",
+      "sub": "It grew a limb every time you asked for one more thing."
     },
     {
       "id": "s139",
@@ -1275,36 +1275,36 @@
       "id": "s171",
       "bucket": "long",
       "category": "craft",
-      "title": "Start the side project file you keep thinking about.",
-      "sub": "Just the first file. The first file is the whole hurdle."
+      "title": "Read a module you own end to end.",
+      "sub": "Own is doing some work in that sentence."
     },
     {
       "id": "s172",
       "bucket": "long",
       "category": "craft",
       "title": "Write the architecture doc properly, with diagrams.",
-      "sub": "Boxes and arrows included. The diagram finds the holes."
+      "sub": "The one thing that does not regenerate from a prompt."
     },
     {
       "id": "s173",
       "bucket": "long",
       "category": "craft",
-      "title": "Pay down the technical debt item at the top of the list.",
-      "sub": "The top item. Not the fun item three rows down."
+      "title": "Pay down the debt item at the top of the list.",
+      "sub": "It has been at the top for a reason."
     },
     {
       "id": "s174",
       "bucket": "long",
       "category": "craft",
-      "title": "Set up the CI check that would have caught last week bug.",
-      "sub": "It would have. Write it now while you still resent the bug."
+      "title": "Set up the check that would have caught last week's bug.",
+      "sub": "Reviewing faster is not the same as catching it."
     },
     {
       "id": "s175",
       "bucket": "long",
       "category": "craft",
       "title": "Migrate one module off the deprecated API.",
-      "sub": "One module. The deprecation date is closer than you think."
+      "sub": "Before the training data catches up and insists on it."
     },
     {
       "id": "s176",
@@ -1456,12 +1456,12 @@
       "id": "c004",
       "bucket": "long",
       "category": "craft",
-      "title": "Leave the code better",
-      "sub": "Three small repayments on the debt.",
+      "title": "Read what you shipped",
+      "sub": "Three passes over work you did not type.",
       "steps": [
-        "Delete a block of commented-out code. Git remembers it.",
-        "Rename one thing so it says what it actually does.",
-        "Write the comment explaining the bit you had to think about twice."
+        "Read the whole diff, not the summary of it.",
+        "Check one test actually fails when you break the thing.",
+        "Delete the comment that only restates the line under it."
       ]
     },
     {
@@ -1495,8 +1495,8 @@
       "title": "Work out what you are doing",
       "sub": "Three questions, out loud if nobody is listening.",
       "steps": [
-        "Say what problem you are actually solving. Out loud.",
-        "Say what you would try next if this approach fails.",
+        "Say what problem you are solving. Out loud.",
+        "Say what you would try if this approach is wrong.",
         "Write the one sentence you would put in the pull request."
       ]
     },
